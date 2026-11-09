@@ -274,7 +274,7 @@ public final class TownScene {
     private func applyTime() {
         sun.content = .light(Light(type: .directional, color: time.sunColor, intensity: time.sunIntensity))
         sun.transform = LookAt(position: time.sunDirection * 40, target: .zero, up: [0, 1, 0]).cameraMatrix
-        fill.content = .light(Light(type: .directional, color: time == .night ? [0.2, 0.25, 0.5] : [0.55, 0.65, 0.9], intensity: time == .night ? 0.15 : 0.3))
+        fill.content = .light(Light(type: .directional, color: time == .night ? [0.2, 0.25, 0.5] : [0.55, 0.65, 0.9], intensity: time == .night ? 0.15 : 0.3, castsShadow: false))
         fill.transform = LookAt(position: [-20, 12, -25], target: .zero, up: [0, 1, 0]).cameraMatrix
         // A background gradient, not a sky mesh: shadows fit the scene's bounds, so the scene must stay small.
         sceneGraph.environment.background = .gradient(.init(zenith: time.skyTop, horizon: time.seaDistance, ground: time.seaDistance, exponent: 0.6))
@@ -315,7 +315,7 @@ public final class TownScene {
             chosen.append(candidates.remove(at: index))
         }
         for position in chosen {
-            let node = SceneGraph.Node(parent: lamps, label: "Lamp", content: .light(Light(type: .point, color: [1, 0.62, 0.3], intensity: time == .night ? 3 : 1.5, range: 6)))
+            let node = SceneGraph.Node(parent: lamps, label: "Lamp", content: .light(Light(type: .point, color: [1, 0.62, 0.3], intensity: time == .night ? 3 : 1.5, range: 6, castsShadow: false)))
             node.trs = Transform3D(translation: position)
         }
     }
