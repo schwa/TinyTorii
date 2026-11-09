@@ -37,7 +37,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "torii-cli",
-            dependencies: ["TinyToriiSupport"]
+            dependencies: ["TinyToriiSupport", .product(name: "SceneSprockets", package: "SceneSprockets"), .product(name: "MetalSprockets", package: "MetalSprockets")]
         ),
         .testTarget(
             name: "TinyToriiSupportTests",

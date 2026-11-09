@@ -37,7 +37,7 @@ public final class TownScene {
     private var materials: [Surface: BlinnPhongSceneMaterial] = [:]
     private var albedoTexture: MTLTexture?
 
-    static let chunkSize: Float = 7
+    static let chunkSize: Float = 14
 
     public init(town: Town, time: TimeOfDay = .day, device: MTLDevice? = nil) {
         let device = device ?? MTLCreateSystemDefaultDevice()!
