@@ -35,24 +35,34 @@ final class Atmosphere {
         petalSpots = chosen
         hasFireflies = fireflies
         node.removeAllChildren()
-        for (index, spot) in chosen.enumerated() {
-            let petals = ParticleSystem("Petals") {
-                EmitterDescription("Petals", sprite: .confetti, capacity: 120) {
-                    ShapeModule(shape: .box(size: [1.4, 0.5, 1.4]))
-                    RateModule(birthRate: 4, warmupDuration: 6)
-                    LifetimeModule(range: 5...8)
-                    VelocityModule(velocity: [0.25, -0.12, 0.08], spread: 0.6, speedVariation: 0.5)
-                    GravityModule(acceleration: [0.04, -0.06, 0])
-                    DragModule(amount: 0.6)
-                    RotationModule(angleVariation: .pi, angularSpeed: 2.5, angularSpeedVariation: 2)
-                    SizeOverLifeModule(curve: ParticleCurve([.init(0, 0), .init(0.05, 0.06), .init(0.9, 0.06), .init(1, 0)]))
-                    ColorOverLifeModule(color: .constant([1, 0.78, 0.86, 1]))
-                    SpriteModule(blendMode: .alpha, orientation: .tumbling)
+        // One system with an emitter per tree: each system is its own simulate pass and draw.
+        if !chosen.isEmpty {
+            // A point cache of jittered spots under every canopy, so one emitter covers all the trees.
+            var random = SeededRandom(seed: 31)
+            var points: [EmitterPoint] = []
+            for spot in chosen {
+                for _ in 0..<32 {
+                    points.append(EmitterPoint(spot + SIMD3(random.signed() * 0.7, random.signed() * 0.25, random.signed() * 0.7)))
                 }
             }
+            var emitter = EmitterDescription("Petals", sprite: .confetti, capacity: 120 * chosen.count) {
+                ShapeModule(shape: .points)
+                RateModule(birthRate: 4 * Float(chosen.count), warmupDuration: 6)
+                LifetimeModule(range: 5...8)
+                VelocityModule(velocity: [0.25, -0.12, 0.08], spread: 0.6, speedVariation: 0.5)
+                GravityModule(acceleration: [0.04, -0.06, 0])
+                DragModule(amount: 0.6)
+                RotationModule(angleVariation: .pi, angularSpeed: 2.5, angularSpeedVariation: 2)
+                SizeOverLifeModule(curve: ParticleCurve([.init(0, 0), .init(0.05, 0.06), .init(0.9, 0.06), .init(1, 0)]))
+                ColorOverLifeModule(color: .constant([1, 0.78, 0.86, 1]))
+                SpriteModule(blendMode: .alpha, orientation: .tumbling)
+            }
+            emitter.points = points
+            let petals = ParticleSystem("Petals") {
+                emitter
+            }
             let holder = SceneGraph.Node(parent: node, label: "Petals")
-            holder.trs = Transform3D(translation: spot)
-            holder.particleSystems = [SceneParticleSystem(petals, seed: UInt32(index + 1))]
+            holder.particleSystems = [SceneParticleSystem(petals, seed: 1)]
         }
         if fireflies {
             let radius = town.grid.radius
