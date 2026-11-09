@@ -301,13 +301,22 @@ case "bench":
     let timeName = (option("--time") ?? "day").lowercased()
     let time = TimeOfDay.allCases.first { $0.rawValue.lowercased() == timeName } ?? .day
     let still = flag("--still")
+    let view = option("--view") ?? "overview"
+    // Diagnostics: switch parts off to see what they cost.
+    let noShadows = flag("--no-shadows")
+    let noFog = flag("--no-fog")
     let town = loadTown()
     MainActor.assumeIsolated {
         let scene = TownScene(town: town, time: time)
         let renderer = try! OffscreenRenderer(size: CGSize(width: 1_600, height: 1_000), colorUsage: SceneGraphShadows.requiredColorUsage, depthUsage: SceneGraphShadows.requiredDepthUsage)
-        let shadows = TownSnapshot.shadows
-        let camera = TownCamera.orbit(yaw: 0.6, pitch: 0.62, distance: 50)
+        let shadows: SceneGraphShadows? = noShadows ? nil : TownSnapshot.shadows
+        if noFog {
+            scene.sceneGraph.fog = nil
+        }
+        let camera = cameraMatrix(view: view, scene: scene)
         var times: [Double] = []
+        var gpuTimes: [Double] = []
+        let renderers = TownSnapshot.renderers(time: time)
         for frame in 0..<frames {
             let start = ContinuousClock.now
             if !still {
@@ -315,16 +324,18 @@ case "bench":
             }
             scene.sceneGraph.advanceActions(by: 1 / 60)
             scene.sceneGraph.advanceParticles(by: 1 / 60)
-            let element = SceneGraphElement(sceneGraph: scene.sceneGraph, cameraMatrix: camera, aspectRatio: 1.6, renderers: TownSnapshot.renderers(time: time), defaultCamera: TownCamera.camera, shadows: shadows)
-            _ = try! renderer.render(element)
+            let element = SceneGraphElement(sceneGraph: scene.sceneGraph, cameraMatrix: camera, aspectRatio: 1.6, renderers: renderers, defaultCamera: TownCamera.camera, shadows: shadows)
+            let rendering = try! renderer.render(element)
+            if frame >= 10, let gpu = rendering.gpuTime { gpuTimes.append(gpu * 1_000) }
             let elapsed = ContinuousClock.now - start
             if frame >= 10 {
                 times.append(Double(elapsed.components.attoseconds) * 1e-15 + Double(elapsed.components.seconds) * 1_000)
             }
         }
         times.sort()
+        gpuTimes.sort()
         let statistics = scene.sceneGraph.statistics
-        print(String(format: "mean %.1f ms  median %.1f ms  meshes %d  triangles %d  lights %d", times.reduce(0, +) / Double(times.count), times[times.count / 2], statistics.meshCount, statistics.triangleCount, statistics.lightCount))
+        print(String(format: "mean %.2f ms  median %.2f ms  gpu %.2f ms  meshes %d  triangles %d  lights %d", times.reduce(0, +) / Double(times.count), times[times.count / 2], gpuTimes.isEmpty ? 0 : gpuTimes[gpuTimes.count / 2], statistics.meshCount, statistics.triangleCount, statistics.lightCount))
     }
 case "info":
     arguments.removeFirst()
