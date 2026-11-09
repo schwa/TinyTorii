@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/schwa/MetalSprockets", .upToNextMinor(from: "0.2.9")),
         .package(url: "https://github.com/schwa/SwiftMesh", .upToNextMinor(from: "0.0.11")),
         .package(url: "https://github.com/schwa/MetalSprocketsParticles", .upToNextMinor(from: "0.0.2")),
+        .package(url: "https://github.com/schwa/Interaction3D", branch: "main"),
     ],
     targets: [
         .target(
@@ -31,6 +32,7 @@ let package = Package(
                 .product(name: "MetalSprocketsSupport", package: "MetalSprockets"),
                 .product(name: "MetalSprocketsParticles", package: "MetalSprocketsParticles"),
                 .product(name: "SwiftMesh", package: "SwiftMesh"),
+                .product(name: "Interaction3D", package: "Interaction3D"),
             ],
             // Palette pictures, made with `torii-cli thumbnails`.
             resources: [.copy("Thumbnails")]

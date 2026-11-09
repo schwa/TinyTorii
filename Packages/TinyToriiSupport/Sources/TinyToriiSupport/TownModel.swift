@@ -1,5 +1,6 @@
 import Foundation
 import GeometryLite3D
+import Interaction3D
 import Observation
 import SceneSprockets
 import simd
@@ -59,7 +60,37 @@ public final class TownModel {
     public var time: TimeOfDay = .day {
         didSet { scene.setTime(time) }
     }
-    public var cameraMatrix: simd_float4x4? = TownCamera.orbit(yaw: 0.6, pitch: 0.7, distance: 48)
+    // The build camera: Interaction3D's RTS pose (keys and edge panning move its target), shared with SceneView's
+    // mouse orbit and zoom through `cameraMatrix`.
+    public var rtsPose = RTSCameraPose(target: .zero, yaw: 0.6, pitch: 0.7, distance: 48) {
+        didSet {
+            // Keep the camera over the island.
+            let limit = scene.town.grid.radius * 1.2
+            let flat = SIMD2<Float>(rtsPose.target.x, rtsPose.target.z)
+            if simd_length(flat) > limit {
+                let clamped = simd_normalize(flat) * limit
+                rtsPose.target = [clamped.x, rtsPose.target.y, clamped.y]
+            }
+        }
+    }
+
+    public var cameraMatrix: simd_float4x4? {
+        get { rtsPose.cameraMatrix }
+        set {
+            guard let newValue else {
+                return
+            }
+            // Read the orbit back into the pose around the same target.
+            let offset = newValue.columns.3.xyz3 - rtsPose.target
+            let distance = simd_length(offset)
+            guard distance > 1e-4 else {
+                return
+            }
+            rtsPose.distance = distance
+            rtsPose.pitch = asin(max(-1, min(1, offset.y / distance)))
+            rtsPose.yaw = atan2(offset.x, offset.z)
+        }
+    }
     public private(set) var hoverCell: Int?
     public private(set) var stretchSource: Int?
     public private(set) var status: String = ""
@@ -367,5 +398,11 @@ public final class TownModel {
             explorer.stop()
             updateHighlight()
         }
+    }
+}
+
+private extension SIMD4 where Scalar == Float {
+    var xyz3: SIMD3<Float> {
+        [x, y, z]
     }
 }

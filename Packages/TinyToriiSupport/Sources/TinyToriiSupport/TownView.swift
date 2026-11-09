@@ -1,4 +1,5 @@
 import ImageIO
+import Interaction3D
 import SceneSprockets
 import SceneSprocketsBlinnPhong
 import simd
@@ -32,6 +33,7 @@ public struct TownView: View {
         .focused($isFocused)
         .onAppear { isFocused = true }
         .onChange(of: model.mode) { isFocused = true }
+        .onChange(of: isFocused) { model.explorer.isKeyboardEnabled = isFocused }
         .onKeyPress(phases: [.down, .up]) { press in
             handleKey(press)
         }
@@ -60,7 +62,7 @@ public struct TownView: View {
             delegate: model.explorer,
             shadows: shadows,
             cameraMatrix: model.mode == .build ? $model.cameraMatrix : nil,
-            cameraTarget: [0, 0, 0],
+            cameraTarget: model.rtsPose.target,
             defaultCamera: TownCamera.camera,
             manipulator: model.mode == .build ? model.brush : nil,
             onTapAt: { point, viewport, _ in
@@ -69,6 +71,7 @@ public struct TownView: View {
             closuresID: "town"
         )
         .id(model.mode)
+        .modifier(BuildCameraKeys(isEnabled: model.mode == .build, pose: $model.rtsPose))
         .sceneCameraControl(SceneCameraControl(distanceRange: 6...110, pitchRange: 0.08...1.5))
         .onGeometryChange(for: CGSize.self) { $0.size } action: { viewSize = $0 }
         .onContinuousHover { phase in
@@ -100,7 +103,7 @@ public struct TownView: View {
                 return .ignored
             }
             switch press.characters.lowercased() {
-            case "e":
+            case "x":
                 model.mode = .explore
             case "z" where press.modifiers.contains(.command):
                 if press.modifiers.contains(.shift) { model.redo() } else { model.undo() }
@@ -119,33 +122,8 @@ public struct TownView: View {
             }
             return .handled
         }
-        let movement: Explorer.Movement? = switch press.key {
-        case .upArrow: .forward
-        case .downArrow: .backward
-        case .leftArrow: .turnLeft
-        case .rightArrow: .turnRight
-        default:
-            switch press.characters.lowercased() {
-            case "w": .forward
-            case "s": .backward
-            case "a": .left
-            case "d": .right
-            case "q": .turnLeft
-            case "e": .turnRight
-            default: nil
-            }
-        }
-        if let movement {
-            if press.phase == .up {
-                model.explorer.release(movement)
-            } else {
-                model.explorer.press(movement)
-            }
-            if press.modifiers.contains(.shift) {
-                model.explorer.press(.run)
-            } else {
-                model.explorer.release(.run)
-            }
+        // Interaction3D's WASDController reads movement keys straight from the keyboard; claim them so they don't beep.
+        if [.upArrow, .downArrow, .leftArrow, .rightArrow].contains(press.key) || "wasdqe".contains(press.characters.lowercased()) && !press.characters.isEmpty {
             return .handled
         }
         guard press.phase == .down else {
@@ -156,9 +134,15 @@ public struct TownView: View {
             model.explorer.isFlying = false
             model.explorer.isStrolling.toggle()
         case .escape:
-            model.mode = .build
+            if model.explorer.isMouseCaptured {
+                model.explorer.releaseMouse()
+            } else {
+                model.mode = .build
+            }
         default:
-            if press.characters.lowercased() == "f" {
+            if press.characters.lowercased() == "m" {
+                model.explorer.toggleMouseCapture()
+            } else if press.characters.lowercased() == "f" {
                 model.explorer.isFlying.toggle()
             } else if press.characters.lowercased() == "t" {
                 let all = TimeOfDay.allCases
@@ -238,7 +222,7 @@ public struct TownView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(Color(red: 0.75, green: 0.2, blue: 0.13))
-            .help("Walk through your town (E)")
+            .help("Walk through your town (X)")
         }
         .buttonStyle(.bordered)
         .padding(.horizontal, 16)
@@ -339,7 +323,7 @@ public struct TownView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Color(red: 0.75, green: 0.2, blue: 0.13))
                 Spacer()
-                Text("W A S D or arrows to walk · drag to look · Shift to hurry · Space to stroll · F to fly · Esc to build")
+                Text("W A S D to walk · arrows or drag to look · M to look with the mouse · Shift to hurry · Space to stroll · F to fly · Esc to build")
                     .font(.callout)
                     .foregroundStyle(.white)
                     .shadow(color: .black.opacity(0.6), radius: 4)
@@ -395,6 +379,21 @@ private struct Thumbnail: View {
         }
         cache[kind] = image
         return image
+    }
+}
+
+// Interaction3D's RTS controls in build mode: W A S D or arrows pan, Q/E rotate, R/F zoom, Shift hurries, the
+// cursor at the window edge pans, Home resets.
+private struct BuildCameraKeys: ViewModifier {
+    let isEnabled: Bool
+    @Binding var pose: RTSCameraPose
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.rtsMovement(pose: $pose, settings: RTSMovementSettings(panSpeed: 0.6, distanceRange: 6...110))
+        } else {
+            content
+        }
     }
 }
 

@@ -1,15 +1,14 @@
 import Foundation
 import GeometryLite3D
+import Interaction3D
 import SceneSprockets
 import simd
 
-// Walks a person-height camera through the town: keys or a joystick to move, drags to look, or a gentle stroll.
+// Walks a person-height camera through the town, or strolls or flies by itself. Input comes from Interaction3D:
+// WASDController (W A S D move, arrows look, Shift hurries, mouse looks while captured) and
+// GameControllerMovementController (sticks); plus an on-screen joystick and drag-to-look from the view.
 @MainActor
 public final class Explorer: SceneViewDelegate {
-    public enum Movement: Hashable, Sendable {
-        case forward, backward, left, right, turnLeft, turnRight, run
-    }
-
     public let cameraNode: SceneGraph.Node
     public var isStrolling = false
     // A slow bird's-eye circle around the island.
@@ -17,7 +16,15 @@ public final class Explorer: SceneViewDelegate {
     private var flightAngle: Float = 0
     // Joystick, -1...1 each axis: x strafes, y walks.
     public var stick: SIMD2<Float> = .zero
-    public private(set) var held: Set<Movement> = []
+    private var keyboard: WASDController?
+    private var gamepad: GameControllerMovementController?
+    private var inputTasks: [Task<Void, Never>] = []
+    private var keyMove: SIMD2<Float> = .zero
+    private var keyLook: SIMD2<Float> = .zero
+    private var isFast = false
+    private var padMove: SIMD2<Float> = .zero
+    private var padLook: SIMD2<Float> = .zero
+    static let mouseSensitivity: Float = 0.0025
     private let scene: TownScene
     private var position: SIMD2<Float> = .zero
     private var height: Float = 0.6
@@ -55,23 +62,88 @@ public final class Explorer: SceneViewDelegate {
         strollTarget = nil
         scene.root.addChild(cameraNode)
         updateCamera()
+        startInput()
     }
 
     func stop() {
         isFlying = false
         cameraNode.removeFromParent()
-        held.removeAll()
         stick = .zero
         isStrolling = false
+        stopInput()
     }
 
-    public func press(_ movement: Movement) {
-        held.insert(movement)
-        isStrolling = false
+    // MARK: - Input
+
+    // GCKeyboard is global, so the view turns this off when it loses focus.
+    public var isKeyboardEnabled = true {
+        didSet { keyboard?.isKeyboardEnabled = isKeyboardEnabled }
     }
 
-    public func release(_ movement: Movement) {
-        held.remove(movement)
+    public var isMouseCaptured: Bool {
+        keyboard?.isMouseCaptured ?? false
+    }
+
+    public func toggleMouseCapture() {
+        keyboard?.toggleMouseCapture()
+    }
+
+    public func releaseMouse() {
+        keyboard?.releaseMouse()
+    }
+
+    private func startInput() {
+        stopInput()
+        let keyboard = WASDController()
+        keyboard.isKeyboardEnabled = isKeyboardEnabled
+        let gamepad = GameControllerMovementController()
+        self.keyboard = keyboard
+        self.gamepad = gamepad
+        inputTasks = [keyboard.events, gamepad.events].map { events in
+            Task { [weak self] in
+                for await event in events {
+                    self?.handle(event)
+                }
+            }
+        }
+    }
+
+    private func stopInput() {
+        inputTasks.forEach { $0.cancel() }
+        inputTasks = []
+        keyboard?.releaseMouse()
+        keyboard = nil
+        gamepad = nil
+        keyMove = .zero
+        keyLook = .zero
+        padMove = .zero
+        padLook = .zero
+        isFast = false
+    }
+
+    private func handle(_ event: NavigationEvent) {
+        switch event {
+        case let .keyboardState(move, look, _, fast):
+            keyMove = move
+            keyLook = look
+            isFast = fast
+        case let .look(deltaX, deltaY, source):
+            // The mouse only looks while captured; otherwise it is for clicking and dragging.
+            if source == .controller || isMouseCaptured {
+                look(by: [deltaX * Self.mouseSensitivity, deltaY * Self.mouseSensitivity])
+            }
+        case let .controllerState(move, look, _):
+            padMove = move
+            padLook = look
+        case let .axes(forward, sideways, source) where source == .controller:
+            padMove = [sideways, forward]
+        default:
+            break
+        }
+        if simd_length(keyMove) + simd_length(padMove) > 0.1 {
+            isStrolling = false
+            isFlying = false
+        }
     }
 
     public func look(by delta: SIMD2<Float>) {
@@ -85,9 +157,9 @@ public final class Explorer: SceneViewDelegate {
             return
         }
         let deltaTime = min(deltaTime, 0.05)
+        let turn = keyLook + padLook
         if isFlying {
-            if held.contains(.turnLeft) || held.contains(.left) { flightAngle -= deltaTime * 0.4 }
-            if held.contains(.turnRight) || held.contains(.right) { flightAngle += deltaTime * 0.4 }
+            flightAngle += turn.x * deltaTime * 0.4
             flightAngle += deltaTime * 0.05
             let radius = scene.town.grid.radius * 0.95
             let eye = SIMD3<Float>(sin(flightAngle) * radius, 9 + sin(flightAngle * 3) * 1.5, cos(flightAngle) * radius)
@@ -95,15 +167,10 @@ public final class Explorer: SceneViewDelegate {
             cameraNode.transform = LookAt(position: eye, target: target, up: [0, 1, 0]).cameraMatrix
             return
         }
-        var move = SIMD2<Float>.zero
-        if held.contains(.forward) { move.y += 1 }
-        if held.contains(.backward) { move.y -= 1 }
-        if held.contains(.left) { move.x -= 1 }
-        if held.contains(.right) { move.x += 1 }
-        if held.contains(.turnLeft) { yaw -= 1.8 * deltaTime }
-        if held.contains(.turnRight) { yaw += 1.8 * deltaTime }
-        move += stick
-        var speed: Float = held.contains(.run) ? 3.6 : 1.7
+        yaw += turn.x * 1.8 * deltaTime
+        pitch = max(-1.2, min(1.2, pitch + turn.y * 1.2 * deltaTime))
+        var move = keyMove + padMove + stick
+        var speed: Float = isFast ? 3.6 : 1.7
         if isStrolling {
             move = stroll(deltaTime: deltaTime)
             speed = 1.1

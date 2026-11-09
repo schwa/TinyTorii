@@ -20,9 +20,9 @@ Build mode:
 | Restyle (6) | Cycle a thing's style. |
 | Remove (7) | Tap or drag to clear cells. |
 
-Drag to orbit, scroll or pinch to zoom. When a tool paints along drags, hold Option to orbit. T cycles the time of day, ⌘Z undoes, E explores.
+The build camera uses Interaction3D's RTS controls: W A S D or arrows pan, Q/E rotate, R/F zoom, Shift hurries, the cursor at the window edge pans and Home resets. Drag to orbit, scroll or pinch to zoom. When a tool paints along drags, hold Option to orbit. T cycles the time of day, ⌘Z undoes, X explores.
 
-Explore mode: W A S D or arrows to walk, drag to look, Shift to hurry, Space to stroll, F to fly, Esc to go back to building. On iOS use the joystick.
+Explore mode uses Interaction3D's `WASDController` and game controller support: W A S D to walk, arrows or drag to look, M to capture the mouse for looking, Shift to hurry, Space to stroll, F to fly, Esc to release the mouse or go back to building. A game controller works too; on iOS use the joystick.
 
 The town saves itself to `~/Library/Application Support/TinyTorii/town.json`. The map menu makes a new island, grows a sample town, and imports or exports towns as JSON.
 
