@@ -12,10 +12,23 @@ public struct TownView: View {
     @State private var viewSize: CGSize = .zero
     @State private var lastLook: CGSize = .zero
     @State private var isExporting = false
+    // Made when Export is chosen, not on every redraw.
+    @State private var exportDocument: TownDocument?
     @State private var isImporting = false
     @FocusState private var isFocused: Bool
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    #endif
 
     public init() {}
+
+    // SceneView's built-in camera control (Interaction3D's orbit camera) hangs iOS at launch, so it is off there.
+    #if os(iOS)
+    static let usesCameraControl = false
+    #else
+    static let usesCameraControl = true
+    #endif
 
     public var body: some View {
         ZStack {
@@ -28,16 +41,10 @@ public struct TownView: View {
             }
         }
         .fontDesign(.serif)
-        .focusable()
-        .focusEffectDisabled()
-        .focused($isFocused)
-        .onAppear { isFocused = true }
-        .onChange(of: model.mode) { isFocused = true }
-        .onChange(of: isFocused) { model.explorer.isKeyboardEnabled = isFocused }
-        .onKeyPress(phases: [.down, .up]) { press in
-            handleKey(press)
+        .modifier(KeyboardFocus(isFocused: $isFocused, model: model, handleKey: handleKey))
+        .fileExporter(isPresented: $isExporting, document: exportDocument, contentType: .json, defaultFilename: "Town") { _ in
+            exportDocument = nil
         }
-        .fileExporter(isPresented: $isExporting, document: TownDocument(data: (try? model.export()) ?? Data()), contentType: .json, defaultFilename: "Town") { _ in }
         .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
             if case let .success(url) = result {
                 let access = url.startAccessingSecurityScopedResource()
@@ -57,7 +64,7 @@ public struct TownView: View {
         SceneView(
             sceneGraph: model.scene.sceneGraph,
             pointOfView: model.mode == .explore ? model.explorer.cameraNode : nil,
-            options: model.mode == .build ? [.allowsCameraControl] : [],
+            options: model.mode == .build && Self.usesCameraControl ? [.allowsCameraControl] : [],
             renderers: TownSnapshot.renderers(time: model.time),
             delegate: model.explorer,
             shadows: shadows,
@@ -156,24 +163,45 @@ public struct TownView: View {
 
     // MARK: - Build overlay
 
+    // iPhone-sized: narrow (portrait) or short (landscape).
+    private var isCompact: Bool {
+        #if os(iOS)
+        horizontalSizeClass == .compact || verticalSizeClass == .compact
+        #else
+        false
+        #endif
+    }
+
+    private var isPhoneLandscape: Bool {
+        #if os(iOS)
+        verticalSizeClass == .compact
+        #else
+        false
+        #endif
+    }
+
+    private static let accent = Color(red: 0.75, green: 0.2, blue: 0.13)
+
     private var buildOverlay: some View {
         VStack(spacing: 0) {
             topBar
             Spacer()
-            HStack(alignment: .bottom) {
-                toolColumn
-                Spacer()
+            if isCompact {
+                // Tools go in the palette as a row; a column would cover the scene.
+                palette
+            } else {
+                HStack(alignment: .bottom) {
+                    toolColumn
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                palette
             }
-            .padding(.horizontal, 14)
-            palette
         }
     }
 
-    private var topBar: some View {
-        HStack(spacing: 10) {
-            Text("Tiny Torii")
-                .font(.system(size: 22, weight: .semibold, design: .serif))
-                .padding(.trailing, 6)
+    private var undoButtons: some View {
+        Group {
             Button {
                 model.undo()
             } label: {
@@ -188,25 +216,42 @@ public struct TownView: View {
             }
             .disabled(!model.canRedo)
             .help("Redo")
+        }
+    }
+
+    private var mapMenu: some View {
+        Menu {
+            Button("New Island") { model.newIsland() }
+            Button("Grow a Sample Town") { model.sampleTown() }
+            Divider()
+            Button("Export Town…") {
+                exportDocument = (try? model.export()).map(TownDocument.init(data:))
+                isExporting = exportDocument != nil
+            }
+            Button("Import Town…") { isImporting = true }
+        } label: {
+            Image(systemName: "map")
+        }
+        .menuIndicator(.hidden)
+        .fixedSize()
+    }
+
+    // A segmented picker where there is room, a menu where there isn't.
+    @ViewBuilder
+    private var timePicker: some View {
+        if isCompact {
             Menu {
-                Button("New Island") { model.newIsland() }
-                Button("Grow a Sample Town") { model.sampleTown() }
-                Divider()
-                Button("Export Town…") { isExporting = true }
-                Button("Import Town…") { isImporting = true }
+                Picker("Time", selection: $model.time) {
+                    ForEach(TimeOfDay.allCases) { time in
+                        Label(time.rawValue, systemImage: time.symbol).tag(time)
+                    }
+                }
             } label: {
-                Image(systemName: "map")
+                Image(systemName: model.time.symbol)
             }
             .menuIndicator(.hidden)
             .fixedSize()
-            Spacer()
-            if !model.status.isEmpty {
-                Text(model.status)
-                    .italic()
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            Spacer()
+        } else {
             Picker("Time", selection: $model.time) {
                 ForEach(TimeOfDay.allCases) { time in
                     Text(time.rawValue).tag(time)
@@ -215,35 +260,71 @@ public struct TownView: View {
             .pickerStyle(.segmented)
             .labelsHidden()
             .fixedSize()
-            Button {
-                model.mode = .explore
-            } label: {
+        }
+    }
+
+    private var exploreButton: some View {
+        Button {
+            model.mode = .explore
+        } label: {
+            if isCompact {
+                Image(systemName: "figure.walk")
+            } else {
                 Label("Explore", systemImage: "figure.walk")
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Color(red: 0.75, green: 0.2, blue: 0.13))
-            .help("Walk through your town (X)")
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(Self.accent)
+        .help("Walk through your town (X)")
+    }
+
+    private var topBar: some View {
+        HStack(spacing: 10) {
+            if !isCompact {
+                Text("Tiny Torii")
+                    .font(.system(size: 22, weight: .semibold, design: .serif))
+                    .padding(.trailing, 6)
+            }
+            undoButtons
+            mapMenu
+            Spacer(minLength: 4)
+            if !model.status.isEmpty {
+                Text(model.status)
+                    .italic()
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            Spacer(minLength: 4)
+            timePicker
+            exploreButton
         }
         .buttonStyle(.bordered)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.regularMaterial)
+        .padding(.horizontal, isCompact ? 10 : 16)
+        .padding(.vertical, isCompact ? 6 : 10)
+        .background(.regularMaterial, ignoresSafeAreaEdges: .top)
+    }
+
+    private func toolButton(_ tool: Tool, index: Int, size: CGFloat) -> some View {
+        Button {
+            model.choose(tool: tool)
+        } label: {
+            Image(systemName: tool.symbol)
+                .font(.system(size: size * 0.5))
+                .frame(width: size, height: size)
+                .foregroundStyle(model.tool == tool ? Color.white : Color.primary)
+                .background(model.tool == tool ? Self.accent : Color.clear, in: .rect(cornerRadius: size * 0.22))
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .help("\(tool.rawValue) (\(index + 1)) — \(tool.help)")
+        .accessibilityLabel(tool.rawValue)
     }
 
     private var toolColumn: some View {
         VStack(spacing: 6) {
             ForEach(Array(Tool.allCases.enumerated()), id: \.element) { index, tool in
-                Button {
-                    model.choose(tool: tool)
-                } label: {
-                    Image(systemName: tool.symbol)
-                        .font(.system(size: 20))
-                        .frame(width: 40, height: 40)
-                        .foregroundStyle(model.tool == tool ? Color.white : Color.primary)
-                        .background(model.tool == tool ? Color(red: 0.75, green: 0.2, blue: 0.13) : Color.clear, in: .rect(cornerRadius: 9))
-                }
-                .buttonStyle(.plain)
-                .help("\(tool.rawValue) (\(index + 1)) — \(tool.help)")
+                toolButton(tool, index: index, size: 40)
             }
         }
         .padding(6)
@@ -251,59 +332,111 @@ public struct TownView: View {
         .padding(.bottom, 10)
     }
 
-    private var palette: some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private var toolRow: some View {
+        HStack(spacing: 2) {
+            ForEach(Array(Tool.allCases.enumerated()), id: \.element) { index, tool in
+                toolButton(tool, index: index, size: 38)
+            }
+        }
+    }
+
+    private var categoryTabs: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 ForEach(Category.allCases) { category in
                     Button(category.rawValue) {
                         model.category = category
                     }
                     .buttonStyle(.plain)
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, isCompact ? 10 : 12)
                     .padding(.vertical, 5)
                     .background(model.category == category ? Color.primary.opacity(0.12) : Color.clear, in: .capsule)
                 }
-                Spacer()
-                Text(model.tool == .place ? model.kind.title : model.tool.help)
-                    .italic()
-                    .foregroundStyle(.secondary)
-                if model.tool == .place, model.kind.styles.count > 1 {
-                    Picker("Style", selection: $model.style) {
-                        ForEach(Array(model.kind.styles.enumerated()), id: \.offset) { index, name in
-                            Text(name).tag(index)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .fixedSize()
-                }
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(Kind.kinds(in: model.category)) { kind in
-                        Button {
-                            model.choose(kind)
-                        } label: {
-                            VStack(spacing: 3) {
-                                Thumbnail(kind: kind)
-                                    .frame(width: 88, height: 66)
-                                    .clipShape(.rect(cornerRadius: 7))
-                                Text(kind.title)
-                                    .font(.system(size: 12, design: .serif))
-                                    .lineLimit(1)
-                            }
-                            .padding(4)
-                            .foregroundStyle(isChosen(kind) ? Color.white : Color.primary)
-                            .background(isChosen(kind) ? Color(red: 0.75, green: 0.2, blue: 0.13) : Color.primary.opacity(0.06), in: .rect(cornerRadius: 10))
-                        }
-                        .buttonStyle(.plain)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+    }
+
+    @ViewBuilder
+    private var stylePicker: some View {
+        if model.tool == .place, model.kind.styles.count > 1 {
+            if isCompact {
+                Picker("Style", selection: $model.style) {
+                    ForEach(Array(model.kind.styles.enumerated()), id: \.offset) { index, name in
+                        Text(name).tag(index)
                     }
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .fixedSize()
+            } else {
+                Picker("Style", selection: $model.style) {
+                    ForEach(Array(model.kind.styles.enumerated()), id: \.offset) { index, name in
+                        Text(name).tag(index)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
+        }
+    }
+
+    private var kindStrip: some View {
+        let width: CGFloat = isPhoneLandscape ? 60 : (isCompact ? 68 : 88)
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: isCompact ? 6 : 8) {
+                ForEach(Kind.kinds(in: model.category)) { kind in
+                    Button {
+                        model.choose(kind)
+                    } label: {
+                        VStack(spacing: 3) {
+                            Thumbnail(kind: kind)
+                                .frame(width: width, height: width * 0.75)
+                                .clipShape(.rect(cornerRadius: 7))
+                            Text(kind.title)
+                                .font(.system(size: isCompact ? 11 : 12, design: .serif))
+                                .lineLimit(1)
+                                .frame(width: width)
+                        }
+                        .padding(4)
+                        .foregroundStyle(isChosen(kind) ? Color.white : Color.primary)
+                        .background(isChosen(kind) ? Self.accent : Color.primary.opacity(0.06), in: .rect(cornerRadius: 10))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(.regularMaterial)
+    }
+
+    private var palette: some View {
+        VStack(alignment: .leading, spacing: isCompact ? 6 : 8) {
+            if isCompact {
+                HStack(spacing: 8) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        toolRow
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                    stylePicker
+                }
+                categoryTabs
+            } else {
+                HStack(spacing: 6) {
+                    categoryTabs
+                        .fixedSize(horizontal: true, vertical: false)
+                    Spacer()
+                    Text(model.tool == .place ? model.kind.title : model.tool.help)
+                        .italic()
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    stylePicker
+                }
+            }
+            kindStrip
+        }
+        .padding(.horizontal, isCompact ? 10 : 16)
+        .padding(.vertical, isCompact ? 6 : 10)
+        .background(.regularMaterial, ignoresSafeAreaEdges: .bottom)
     }
 
     private func isChosen(_ kind: Kind) -> Bool {
@@ -321,30 +454,27 @@ public struct TownView: View {
                     Label("Build", systemImage: "hammer")
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color(red: 0.75, green: 0.2, blue: 0.13))
+                .tint(Self.accent)
                 Spacer()
-                Text("W A S D to walk · arrows or drag to look · M to look with the mouse · Shift to hurry · Space to stroll · F to fly · Esc to build")
-                    .font(.callout)
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.6), radius: 4)
-                Spacer()
-                Picker("Time", selection: $model.time) {
-                    ForEach(TimeOfDay.allCases) { time in
-                        Text(time.rawValue).tag(time)
-                    }
+                if !isCompact {
+                    Text("W A S D to walk · arrows or drag to look · M to look with the mouse · Shift to hurry · Space to stroll · F to fly · Esc to build")
+                        .font(.callout)
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.6), radius: 4)
+                        .lineLimit(2)
+                    Spacer()
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .fixedSize()
+                timePicker
+                    .buttonStyle(.bordered)
             }
-            .padding(14)
+            .padding(isCompact ? 10 : 14)
             Spacer()
             HStack(alignment: .bottom) {
                 Joystick { model.explorer.stick = $0 }
                 Spacer()
-                StrollButton(explorer: model.explorer)
+                StrollButton(explorer: model.explorer, isCompact: isCompact)
             }
-            .padding(24)
+            .padding(isCompact ? 14 : 24)
         }
     }
 }
@@ -382,6 +512,26 @@ private struct Thumbnail: View {
     }
 }
 
+// Focus and key handling for the whole view.
+private struct KeyboardFocus: ViewModifier {
+    var isFocused: FocusState<Bool>.Binding
+    let model: TownModel
+    let handleKey: (KeyPress) -> KeyPress.Result
+
+    func body(content: Content) -> some View {
+        content
+            .focusable()
+            .focusEffectDisabled()
+            .focused(isFocused)
+            .onAppear { isFocused.wrappedValue = true }
+            .onChange(of: model.mode) { isFocused.wrappedValue = true }
+            .onChange(of: isFocused.wrappedValue) { model.explorer.isKeyboardEnabled = isFocused.wrappedValue }
+            .onKeyPress(phases: [.down, .up]) { press in
+                handleKey(press)
+            }
+    }
+}
+
 // Interaction3D's RTS controls in build mode: W A S D or arrows pan, Q/E rotate, R/F zoom, Shift hurries, the
 // cursor at the window edge pans, Home resets.
 private struct BuildCameraKeys: ViewModifier {
@@ -399,6 +549,7 @@ private struct BuildCameraKeys: ViewModifier {
 
 private struct StrollButton: View {
     let explorer: Explorer
+    var isCompact = false
     @State private var isStrolling = false
     @State private var isFlying = false
 
@@ -410,7 +561,8 @@ private struct StrollButton: View {
                 refresh()
             } label: {
                 Label(isStrolling ? "Stop" : "Stroll", systemImage: isStrolling ? "pause.fill" : "figure.walk.motion")
-                    .padding(.horizontal, 10)
+                    .labelStyle(.adaptive(iconOnly: isCompact))
+                    .padding(.horizontal, isCompact ? 4 : 10)
                     .padding(.vertical, 6)
             }
             Button {
@@ -418,7 +570,8 @@ private struct StrollButton: View {
                 refresh()
             } label: {
                 Label(isFlying ? "Land" : "Fly", systemImage: isFlying ? "arrow.down.to.line" : "bird")
-                    .padding(.horizontal, 10)
+                    .labelStyle(.adaptive(iconOnly: isCompact))
+                    .padding(.horizontal, isCompact ? 4 : 10)
                     .padding(.vertical, 6)
             }
         }
@@ -488,5 +641,23 @@ struct TownDocument: FileDocument {
 
     func fileWrapper(configuration _: WriteConfiguration) throws -> FileWrapper {
         FileWrapper(regularFileWithContents: data)
+    }
+}
+
+private struct AdaptiveLabelStyle: LabelStyle {
+    let iconOnly: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        if iconOnly {
+            configuration.icon
+        } else {
+            Label(configuration)
+        }
+    }
+}
+
+private extension LabelStyle where Self == AdaptiveLabelStyle {
+    static func adaptive(iconOnly: Bool) -> AdaptiveLabelStyle {
+        AdaptiveLabelStyle(iconOnly: iconOnly)
     }
 }

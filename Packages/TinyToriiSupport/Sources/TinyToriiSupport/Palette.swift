@@ -11,6 +11,15 @@ public enum TimeOfDay: String, CaseIterable, Sendable, Identifiable {
 
     public var id: String { rawValue }
 
+    public var symbol: String {
+        switch self {
+        case .morning: "sunrise"
+        case .day: "sun.max"
+        case .dusk: "sunset"
+        case .night: "moon.stars"
+        }
+    }
+
     // How much lamps, windows and lanterns glow.
     var glow: Float {
         switch self {
