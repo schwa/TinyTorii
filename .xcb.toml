@@ -1,0 +1,8 @@
+[defaults]
+destination = "mac"
+container = "TinyTorii.xcodeproj"
+target = "TinyTorii"
+
+[defaults.test]
+container = "TinyToriiSupport"
+scheme = "TinyToriiSupport"

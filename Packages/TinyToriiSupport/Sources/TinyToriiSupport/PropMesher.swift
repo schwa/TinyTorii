@@ -1,0 +1,328 @@
+import simd
+
+// Small things, built in local space: origin on the ground at the cell center, rotated by the item's rotation.
+// `polygon` is the cell outline in the same local space; `joined[i]` says whether edge i borders the same kind.
+enum PropMesher {
+    static func build(_ builder: MeshBuilder, item: Item, polygon: [SIMD2<Float>], joined: [Bool]) {
+        var random = SeededRandom(seed: item.seed)
+        switch item.kind {
+        case .torii:
+            let paints = toriiPaints(style: item.style)
+            let count = item.level
+            let spacing: Float = 0.36
+            for index in 0..<count {
+                let z = (Float(index) - Float(count - 1) / 2) * spacing
+                torii(builder, at: [0, 0, z], width: 0.75, height: 1.0, thickness: 0.06, paints: paints, random: &random)
+            }
+        case .greatTorii:
+            let paints = toriiPaints(style: item.style == 2 ? 0 : item.style)
+            torii(builder, at: .zero, width: 1.7, height: 2.4, thickness: 0.13, paints: paints, random: &random)
+            if item.style == 2 {
+                // Itsukushima: braced legs.
+                for side: Float in [-1, 1] {
+                    for offset: Float in [-0.3, 0.3] {
+                        builder.cylinder(paints.post, from: [side * 0.85, 0, offset], to: [side * 0.85, 1.5, offset], radius: 0.06)
+                    }
+                    builder.beam(paints.post, from: [side * 0.85, 1.2, -0.3], to: [side * 0.85, 1.2, 0.3], width: 0.06, height: 0.06)
+                }
+            }
+            builder.box(.rope, center: [0, 1.95, 0], size: [1.3, 0.05, 0.05])
+        case .foxStatue:
+            let paint: Paint = [.foxWhite, .foxStone, .bronze][item.style]
+            let count = item.level
+            for index in 0..<count {
+                let angle = Float(index) / Float(count) * 2 * .pi
+                let position: SIMD3<Float> = count == 1 ? .zero : [cos(angle) * 0.45, 0, sin(angle) * 0.45]
+                fox(builder, at: position, facing: angle + .pi, paint: paint, random: &random)
+            }
+        case .stoneLantern:
+            let count = item.level
+            for index in 0..<count {
+                let angle = Float(index) / Float(count) * 2 * .pi + 0.4
+                let position: SIMD3<Float> = count == 1 ? .zero : [cos(angle) * 0.5, 0, sin(angle) * 0.5]
+                stoneLantern(builder, at: position, style: item.style)
+            }
+        case .paperLantern:
+            let paint: [Paint] = switch item.style {
+            case 1: [.lanternWhite]
+            case 2: [.lanternRed, .lanternWhite, .lanternYellow]
+            default: [.lanternRed]
+            }
+            // Two poles with a rope of lanterns between them.
+            let half: Float = 0.6
+            let height: Float = 1.2 + Float(item.level) * 0.15
+            for side: Float in [-1, 1] {
+                builder.cylinder(.darkWood, from: [side * half, 0, 0], to: [side * half, height, 0], radius: 0.035)
+            }
+            let count = 2 + item.level
+            for index in 0..<count {
+                let t = (Float(index) + 0.5) / Float(count)
+                let x = -half + t * half * 2
+                let sag = 0.15 * (1 - pow(2 * t - 1, 2))
+                let y = height - 0.05 - sag
+                builder.cylinder(.twine, from: [x, y, 0], to: [x, y - 0.08, 0], radius: 0.006, sides: 3)
+                builder.blob(paint[index % paint.count], center: [x, y - 0.2, 0], scale: [0.09, 0.13, 0.09])
+                builder.cylinder(.blackWood, from: [x, y - 0.33, 0], to: [x, y - 0.31, 0], radius: 0.05)
+            }
+            for index in 0..<16 {
+                let t0 = Float(index) / 16, t1 = Float(index + 1) / 16
+                let a = SIMD3<Float>(-half + t0 * half * 2, height - 0.05 - 0.15 * (1 - pow(2 * t0 - 1, 2)), 0)
+                let b = SIMD3<Float>(-half + t1 * half * 2, height - 0.05 - 0.15 * (1 - pow(2 * t1 - 1, 2)), 0)
+                builder.beam(.twine, from: a, to: b, width: 0.012, height: 0.012)
+            }
+        case .bellTower:
+            let paint: Paint = item.style == 0 ? .vermilion : .darkWood
+            builder.box(.stone, center: [0, 0.1, 0], size: [1.1, 0.2, 1.1])
+            for x: Float in [-0.4, 0.4] {
+                for z: Float in [-0.4, 0.4] {
+                    builder.box(paint, center: [x, 0.95, z], size: [0.08, 1.5, 0.08])
+                }
+            }
+            builder.box(.darkWood, center: [0, 1.65, 0], size: [0.95, 0.06, 0.95])
+            hipRoof(builder, center: [0, 1.7, 0], size: 1.4, rise: 0.55, paint: item.style == 0 ? .tileGrey : .shingle)
+            builder.frustum(.bronze, from: [0, 0.75, 0], to: [0, 1.45, 0], radiusA: 0.24, radiusB: 0.17, sides: 10, caps: true)
+            builder.blob(.bronze, center: [0, 1.48, 0], scale: [0.17, 0.08, 0.17])
+            builder.beam(.lightWood, from: [-0.38, 1.1, 0.3], to: [0.38, 1.1, 0.3], width: 0.07, height: 0.07)
+        case .zenGarden:
+            // Raked circles around a few rocks.
+            let rocks = item.level + 1
+            for index in 0..<rocks {
+                let angle = random.range(0, 2 * .pi)
+                let distance = index == 0 ? 0 : random.range(0.3, 0.55)
+                let center = SIMD3<Float>(cos(angle) * distance, 0, sin(angle) * distance)
+                let size = random.range(0.12, 0.26) * (index == 0 ? 1.4 : 1)
+                for ring in 1...3 {
+                    let radius = size * 0.9 + Float(ring) * 0.07
+                    ringLine(builder, center: center + [0, 0.01, 0], radius: radius, paint: .gravelLine)
+                }
+                builder.blob(item.style == 2 ? .moss : .stone, center: center + [0, 0.02, 0], scale: [size * 1.4, size * 0.4, size * 1.4])
+                builder.blob(.stoneDark, center: center + [0, size * 0.45, 0], scale: [size, size * 1.1, size * 0.85], rotation: simd_quatf(angle: random.range(0, 6), axis: simd_normalize([random.signed(), 3, random.signed()])))
+            }
+        case .koiPond:
+            for point in GroundMesher.scatter(points: polygon, center: .zero, count: 8, margin: 0.95, random: &random) {
+                builder.blob(.stone, center: point.lifted(0.02), scale: [0.14, 0.1, 0.12] * random.range(0.8, 1.3), rotation: simd_quatf(angle: random.range(0, 6), axis: [0, 1, 0]))
+            }
+            for _ in 0..<(3 + random.int(3)) {
+                let angle = random.range(0, 2 * .pi)
+                let distance = random.range(0, 0.45)
+                let position = SIMD3<Float>(cos(angle) * distance, -0.215, sin(angle) * distance)
+                let heading = random.range(0, 2 * .pi)
+                let rotation = simd_quatf(angle: heading, axis: [0, 1, 0])
+                builder.blob(random.chance(0.6) ? .koiOrange : .koiWhite, center: position, scale: [0.12, 0.03, 0.045], rotation: rotation)
+                builder.blob(.koiOrange, center: position + rotation.act([-0.12, 0, 0]), scale: [0.04, 0.02, 0.04])
+            }
+            switch item.style {
+            case 0:
+                for point in GroundMesher.scatter(points: polygon, center: .zero, count: 4, margin: 0.6, random: &random) {
+                    builder.disc(.lily, center: point.lifted(-0.2), radius: 0.11, sides: 7)
+                    if random.chance(0.5) {
+                        builder.blob(.lotus, center: point.lifted(-0.16), scale: [0.05, 0.04, 0.05])
+                    }
+                }
+            case 2:
+                for point in GroundMesher.scatter(points: polygon, center: .zero, count: 6, margin: 0.85, random: &random) {
+                    for _ in 0..<3 {
+                        builder.cone(.lily, base: point.lifted(-0.2), tip: point.lifted(0.25) + [random.signed() * 0.08, 0, random.signed() * 0.08], radius: 0.025, sides: 3)
+                    }
+                    builder.blob(.iris, center: point.lifted(0.22), scale: SIMD3(repeating: 0.04))
+                }
+            default:
+                builder.blob(.stoneDark, center: [0.1, -0.1, 0], scale: [0.25, 0.3, 0.2])
+            }
+        case .bridge:
+            let paint: Paint = [.vermilion, .cedar, .stone][item.style]
+            let deck: Paint = item.style == 2 ? .stoneLight : .lightWood
+            let length: Float = 1.9
+            let steps = 12
+            func arch(_ t: Float) -> Float { 0.42 * sin(t * .pi) + 0.04 }
+            for step in 0..<steps {
+                let t0 = Float(step) / Float(steps), t1 = Float(step + 1) / Float(steps)
+                let x0 = -length / 2 + t0 * length, x1 = -length / 2 + t1 * length
+                let y0 = arch(t0), y1 = arch(t1)
+                builder.quad(deck, [x0, y0, -0.3], [x1, y1, -0.3], [x1, y1, 0.3], [x0, y0, 0.3], outwardFrom: [(x0 + x1) / 2, (y0 + y1) / 2 - 1, 0])
+                builder.quad(paint, [x0, y0, -0.3], [x1, y1, -0.3], [x1, y1 - 0.06, -0.3], [x0, y0 - 0.06, -0.3], outwardFrom: [(x0 + x1) / 2, (y0 + y1) / 2, 0])
+                builder.quad(paint, [x0, y0, 0.3], [x1, y1, 0.3], [x1, y1 - 0.06, 0.3], [x0, y0 - 0.06, 0.3], outwardFrom: [(x0 + x1) / 2, (y0 + y1) / 2, 0])
+                for z: Float in [-0.28, 0.28] {
+                    builder.beam(paint, from: [x0, y0 + 0.26, z], to: [x1, y1 + 0.26, z], width: 0.04, height: 0.04)
+                    if step % 3 == 0 {
+                        builder.box(paint, center: [x0, y0 + 0.13, z], size: [0.05, 0.26, 0.05])
+                    }
+                }
+            }
+            for z: Float in [-0.28, 0.28] {
+                for x: Float in [-length / 2, length / 2] {
+                    builder.box(paint, center: [x, 0.17, z], size: [0.06, 0.3, 0.06])
+                    if item.style == 0 {
+                        builder.blob(.gold, center: [x, 0.36, z], scale: SIMD3(repeating: 0.04))
+                    }
+                }
+            }
+        case .well:
+            builder.frustum(item.style == 0 ? .stone : .cedar, from: [0, 0, 0], to: [0, 0.35, 0], radiusA: 0.3, radiusB: 0.28, sides: 10)
+            builder.frustum(item.style == 0 ? .stone : .cedar, from: [0, 0, 0], to: [0, 0.35, 0], radiusA: 0.22, radiusB: 0.2, sides: 10)
+            builder.disc(.water, center: [0, 0.25, 0], radius: 0.22)
+            builder.cap(item.style == 0 ? .stoneLight : .lightWood, ring(radius: 0.3, y: 0.35, sides: 10))
+            for side: Float in [-1, 1] {
+                builder.box(.darkWood, center: [side * 0.3, 0.55, 0], size: [0.05, 0.7, 0.05])
+            }
+            builder.beam(.darkWood, from: [-0.33, 0.85, 0], to: [0.33, 0.85, 0], width: 0.05, height: 0.05)
+            hipRoof(builder, center: [0, 0.88, 0], size: 0.8, rise: 0.3, paint: .shingle)
+            builder.cylinder(.cedar, from: [0, 0.45, 0], to: [0, 0.6, 0], radius: 0.06)
+        case .bambooFence:
+            let paint: Paint = [.bamboo, .bambooDry, .bambooDry][item.style]
+            let tie: Paint = item.style == 2 ? .twine : .darkWood
+            for index in polygon.indices where !joined[index] {
+                let a = polygon[index] * 0.94, b = polygon[(index + 1) % polygon.count] * 0.94
+                let length = simd_distance(a, b)
+                let posts = max(2, Int(length / 0.12))
+                for post in 0...posts {
+                    let point = a + (b - a) * (Float(post) / Float(posts))
+                    builder.cylinder(paint, from: point.lifted(0), to: point.lifted(0.55 + (post % 2 == 0 ? 0.04 : 0)), radius: 0.022, sides: 5)
+                }
+                for y: Float in [0.15, 0.42] {
+                    builder.beam(tie, from: a.lifted(y), to: b.lifted(y), width: 0.04, height: 0.03)
+                }
+            }
+        case .azalea:
+            let paint: Paint = [.azaleaMagenta, .azaleaPink, .azaleaWhite, .hydrangea][item.style]
+            let count = 1 + item.level
+            for point in GroundMesher.scatter(points: polygon, center: .zero, count: count, margin: 0.55, random: &random) {
+                let size = random.range(0.28, 0.4)
+                builder.blob(.leafDark, center: point.lifted(size * 0.5), scale: [size, size * 0.7, size])
+                for _ in 0..<10 {
+                    let direction = simd_normalize(SIMD3<Float>(random.signed(), random.range(0.1, 1), random.signed()))
+                    builder.blob(paint, center: point.lifted(size * 0.5) + direction * [size, size * 0.7, size] * 0.95, scale: SIMD3(repeating: 0.06))
+                }
+            }
+        case .tanuki where item.style == 1:
+            Creatures.tanukiStatue(builder)
+        case .stones:
+            if item.style == 2 {
+                // Stacked stones.
+                var y: Float = 0
+                for index in 0..<(2 + item.level) {
+                    let size = 0.22 - Float(index) * 0.03
+                    builder.blob(.stone, center: [0, y + size * 0.4, 0], scale: [size, size * 0.45, size], rotation: simd_quatf(angle: random.range(0, 6), axis: [0, 1, 0]))
+                    y += size * 0.8
+                }
+            } else {
+                for point in GroundMesher.scatter(points: polygon, center: .zero, count: item.level + 1, margin: 0.6, random: &random) {
+                    let size = random.range(0.28, 0.5)
+                    builder.blob(item.style == 0 ? .stone : .stoneLight, center: point.lifted(size * 0.3), scale: [size, size * 0.7, size * 0.85], rotation: simd_quatf(angle: random.range(0, 6), axis: simd_normalize([random.signed(), 2, random.signed()])))
+                    if item.style == 0 {
+                        builder.blob(.moss, center: point.lifted(size * 0.62), scale: [size * 0.7, size * 0.18, size * 0.6])
+                    }
+                }
+            }
+        default:
+            break
+        }
+    }
+
+    struct ToriiPaints {
+        var post: Paint
+        var top: Paint
+        var plaque: Paint
+    }
+
+    static func toriiPaints(style: Int) -> ToriiPaints {
+        switch style {
+        case 1: ToriiPaints(post: .stone, top: .stone, plaque: .stoneDark)
+        case 2: ToriiPaints(post: .blackWood, top: .blackWood, plaque: .gold)
+        case 3: ToriiPaints(post: .vermilion, top: .blackWood, plaque: .blackWood)
+        default: ToriiPaints(post: .vermilion, top: .blackWood, plaque: .blackWood)
+        }
+    }
+
+    static func torii(_ builder: MeshBuilder, at origin: SIMD3<Float>, width: Float, height: Float, thickness: Float, paints: ToriiPaints, random: inout SeededRandom) {
+        let half = width / 2
+        for side: Float in [-1, 1] {
+            builder.frustum(paints.post, from: origin + [side * half * 1.04, 0, 0], to: origin + [side * half, height * 0.9, 0], radiusA: thickness * 0.75, radiusB: thickness * 0.62, sides: 8)
+            builder.cylinder(.blackWood, from: origin + [side * half * 1.04, 0, 0], to: origin + [side * half * 1.04, height * 0.08, 0], radius: thickness * 0.8)
+        }
+        // Nuki (tie beam), kasagi (top lintel, curving up at the ends) and shimaki under it.
+        builder.box(paints.post, center: origin + [0, height * 0.72, 0], size: [width * 1.25, thickness * 0.8, thickness * 0.6])
+        let topY = height * 0.92
+        builder.box(paints.post, center: origin + [0, topY, 0], size: [width * 1.3, thickness * 0.75, thickness * 1.1])
+        let segments = 6
+        let topHalf = width * 0.82
+        for index in 0..<segments {
+            let t0 = Float(index) / Float(segments), t1 = Float(index + 1) / Float(segments)
+            let x0 = -topHalf + t0 * topHalf * 2, x1 = -topHalf + t1 * topHalf * 2
+            let curve: (Float) -> Float = { x in pow(abs(x) / topHalf, 2.2) * height * 0.08 }
+            builder.beam(paints.top, from: origin + [x0, topY + thickness * 0.8 + curve(x0), 0], to: origin + [x1, topY + thickness * 0.8 + curve(x1), 0], width: thickness * 1.3, height: thickness * 0.8)
+        }
+        // Gakuzuka plaque.
+        builder.box(paints.plaque, center: origin + [0, (height * 0.72 + topY) / 2, 0], size: [thickness * 1.4, height * 0.14, thickness * 0.5])
+    }
+
+    static func fox(_ builder: MeshBuilder, at origin: SIMD3<Float>, facing angle: Float, paint: Paint, random: inout SeededRandom) {
+        let previous = builder.transform
+        var transform = matrix_identity_float4x4
+        transform.columns.3 = SIMD4(origin, 1)
+        let rotation = simd_float4x4(simd_quatf(angle: -angle, axis: [0, 1, 0]))
+        builder.setTransform(previous * transform * rotation)
+        builder.box(.stone, center: [0, 0.15, 0], size: [0.3, 0.3, 0.3])
+        builder.box(.stoneLight, center: [0, 0.31, 0], size: [0.34, 0.03, 0.34])
+        builder.blob(paint, center: [0, 0.5, 0], scale: [0.1, 0.17, 0.12])
+        builder.blob(paint, center: [0.05, 0.7, 0], scale: [0.08, 0.075, 0.07])
+        builder.cone(paint, base: [0.1, 0.69, 0], tip: [0.2, 0.67, 0], radius: 0.035, sides: 5)
+        for side: Float in [-1, 1] {
+            builder.cone(paint, base: [0.03, 0.75, side * 0.035], tip: [0.02, 0.85, side * 0.05], radius: 0.025, sides: 4)
+        }
+        builder.blob(paint, center: [-0.12, 0.5, 0], scale: [0.06, 0.16, 0.06], rotation: simd_quatf(angle: 0.5, axis: [0, 0, 1]))
+        builder.blob(.bib, center: [0.06, 0.6, 0], scale: [0.04, 0.06, 0.09])
+        builder.setTransform(previous)
+    }
+
+    static func stoneLantern(_ builder: MeshBuilder, at origin: SIMD3<Float>, style: Int) {
+        let stone: Paint = style == 2 ? .bronze : .stone
+        if style == 1 {
+            // Yukimi: wide roof on short curved legs.
+            for index in 0..<3 {
+                let angle = Float(index) / 3 * 2 * .pi
+                let foot = origin + [cos(angle) * 0.24, 0, sin(angle) * 0.24]
+                builder.beam(stone, from: foot, to: origin + [cos(angle) * 0.12, 0.3, sin(angle) * 0.12], width: 0.05, height: 0.05)
+            }
+            builder.box(stone, center: origin + [0, 0.32, 0], size: [0.24, 0.05, 0.24])
+            builder.box(.lanternFire, center: origin + [0, 0.42, 0], size: [0.16, 0.14, 0.16])
+            builder.cone(stone, base: origin + [0, 0.5, 0], tip: origin + [0, 0.66, 0], radius: 0.38, sides: 6, capped: true)
+            builder.blob(stone, center: origin + [0, 0.68, 0], scale: SIMD3(repeating: 0.05))
+            return
+        }
+        builder.frustum(stone, from: origin, to: origin + [0, 0.08, 0], radiusA: 0.17, radiusB: 0.14, sides: 6, caps: true)
+        builder.cylinder(stone, from: origin + [0, 0.08, 0], to: origin + [0, 0.5, 0], radius: 0.055, sides: 8)
+        builder.frustum(stone, from: origin + [0, 0.5, 0], to: origin + [0, 0.58, 0], radiusA: 0.1, radiusB: 0.17, sides: 6, caps: true)
+        builder.box(stone, center: origin + [0, 0.67, 0], size: [0.19, 0.18, 0.19])
+        builder.box(.lanternFire, center: origin + [0, 0.67, 0], size: [0.2, 0.1, 0.12])
+        builder.box(.lanternFire, center: origin + [0, 0.67, 0], size: [0.12, 0.1, 0.2])
+        builder.cone(stone, base: origin + [0, 0.76, 0], tip: origin + [0, 0.92, 0], radius: 0.24, sides: 6, capped: true)
+        builder.blob(stone, center: origin + [0, 0.95, 0], scale: [0.045, 0.06, 0.045])
+    }
+
+    static func hipRoof(_ builder: MeshBuilder, center: SIMD3<Float>, size: Float, rise: Float, paint: Paint) {
+        let half = size / 2
+        let corners: [SIMD3<Float>] = [[-half, 0, -half], [half, 0, -half], [half, 0, half], [-half, 0, half]].map { center + $0 }
+        let top = center + [0, rise, 0]
+        for index in 0..<4 {
+            let a = corners[index] + [0, 0.06, 0], b = corners[(index + 1) % 4] + [0, 0.06, 0]
+            BuildingMesher.sweep(builder, paint, bottom: (a, b), top: (top, top), curve: 1.7, steps: 3)
+            builder.quad(.darkWood, a, b, b - [0, 0.06, 0], a - [0, 0.06, 0], outwardFrom: center)
+        }
+        builder.blob(paint, center: top, scale: SIMD3(repeating: 0.06))
+    }
+
+    static func ring(radius: Float, y: Float, sides: Int) -> [SIMD3<Float>] {
+        (0..<sides).map { index in
+            let angle = Float(index) / Float(sides) * 2 * .pi
+            return [cos(angle) * radius, y, sin(angle) * radius]
+        }
+    }
+
+    static func ringLine(_ builder: MeshBuilder, center: SIMD3<Float>, radius: Float, paint: Paint) {
+        let points = ring(radius: radius, y: 0, sides: 14).map { $0 + center }
+        for index in points.indices {
+            builder.beam(paint, from: points[index], to: points[(index + 1) % points.count], width: 0.025, height: 0.01)
+        }
+    }
+}

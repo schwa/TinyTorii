@@ -1,0 +1,82 @@
+{
+  "default-configuration": "Release",
+  "configurations": [
+    { "name": "Debug", "file": { "anchor": "Configuration", "relative-path": "Project-Debug.xcconfig" } },
+    { "name": "Release", "file": { "anchor": "Configuration", "relative-path": "Project-Release.xcconfig" } },
+  ],
+  "localizations": {
+    "development": "en",
+    "supported": [
+      "Base",
+    ],
+  },
+  "files": [
+    {
+      "kind": "folder",
+      "path": "Configuration",
+      "target-membership": [
+        "TinyTorii",
+      ],
+      "membership-exceptions": [
+        {
+          "target": "TinyTorii",
+          "exclusions": [
+            "Project-Debug.xcconfig",
+            "Project-Release.xcconfig",
+            "Project-Shared.xcconfig",
+            "TinyTorii-Debug.xcconfig",
+            "TinyTorii-Release.xcconfig",
+            "TinyTorii-Shared.xcconfig",
+          ],
+        },
+      ],
+    }, {
+      "kind": "folder",
+      "path": "Packages",
+      "target-membership": [
+        "TinyTorii",
+      ],
+      "membership-exceptions": [
+        {
+          "target": "TinyTorii",
+          "exclusions": [
+            "TinyToriiSupport",
+          ],
+        },
+      ],
+    },
+    { "kind": "folder", "path": "TinyTorii", "target-membership": [ "TinyTorii" ] },
+    {
+      "kind": "group",
+      "name": "Products",
+      "children": [
+        { "path": "<PRODUCTS>/.app", "id": "451594472F64A8DC005F944D", "type": "wrapper.application", "index": false },
+      ],
+    },
+  ],
+  "targets": [
+    {
+      "name": "TinyTorii",
+      "id": "451594462F64A8DC005F944D",
+      "product": "Products/.app",
+      "product-type": "application",
+      "specialized-configurations": [
+        { "name": "Debug", "file": { "anchor": "Configuration", "relative-path": "TinyTorii-Debug.xcconfig" } },
+        { "name": "Release", "file": { "anchor": "Configuration", "relative-path": "TinyTorii-Release.xcconfig" } },
+      ],
+      "build-phases": [
+        "compile-sources",
+        "frameworks",
+        "resources",
+      ],
+      "package-product-members": [
+        {
+          "product-name": "TinyToriiSupport",
+          "build-phase": { "build-phase": "frameworks" },
+        },
+      ],
+    },
+  ],
+  "last-upgrade": "26.4",
+  "last-swift-update": "26.4",
+}
