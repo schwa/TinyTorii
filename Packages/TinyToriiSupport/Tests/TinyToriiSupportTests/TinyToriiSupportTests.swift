@@ -230,6 +230,18 @@ import Testing
         #expect(scene.cellCount == count)
     }
 
+    @Test func writingBackTheCameraMatrixSettles() {
+        let model = TownModel(town: Town(gridSeed: 6), persists: false)
+        let pose = model.rtsPose
+        // What SceneView does: write back the matrix it was given.
+        model.cameraMatrix = model.cameraMatrix
+        #expect(model.rtsPose == pose)
+        // A real orbit still moves the camera.
+        model.cameraMatrix = TownCamera.orbit(yaw: 1.2, pitch: 0.5, distance: 30)
+        #expect(abs(model.rtsPose.distance - 30) < 0.01)
+        #expect(abs(model.rtsPose.yaw - 1.2) < 0.01)
+    }
+
     @Test func walkerStaysOutOfBuildings() {
         let scene = TownScene(town: Town.sample(seed: 3))
         let explorer = Explorer(scene: scene)

@@ -77,7 +77,9 @@ public final class TownModel {
     public var cameraMatrix: simd_float4x4? {
         get { rtsPose.cameraMatrix }
         set {
-            guard let newValue else {
+            // SceneView writes back the matrix we gave it. Converting it to a pose and back is not exact, so without
+            // this check every write makes a slightly different matrix and SceneView writes again, forever.
+            guard let newValue, !Self.isClose(newValue, rtsPose.cameraMatrix) else {
                 return
             }
             // Read the orbit back into the pose around the same target.
@@ -91,6 +93,10 @@ public final class TownModel {
             rtsPose.yaw = atan2(offset.x, offset.z)
         }
     }
+    private static func isClose(_ a: simd_float4x4, _ b: simd_float4x4) -> Bool {
+        (0..<4).allSatisfy { simd_distance(a[$0], b[$0]) < 1e-3 }
+    }
+
     public private(set) var hoverCell: Int?
     public private(set) var stretchSource: Int?
     public private(set) var status: String = ""
