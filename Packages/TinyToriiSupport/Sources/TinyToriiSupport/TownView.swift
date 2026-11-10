@@ -9,6 +9,7 @@ import UniformTypeIdentifiers
 public struct TownView: View {
     @State private var model = TownModel()
     @State private var shadows = TownSnapshot.shadows
+    @AppStorage("showsFrameTiming") private var showsFrameTiming = false
     @State private var viewSize: CGSize = .zero
     @State private var lastLook: CGSize = .zero
     @State private var isExporting = false
@@ -55,11 +56,22 @@ public struct TownView: View {
         }
     }
 
+    private var sceneViewOptions: SceneView.Options {
+        var options: SceneView.Options = []
+        if model.mode == .build && Self.usesCameraControl {
+            options.insert(.allowsCameraControl)
+        }
+        if showsFrameTiming {
+            options.insert(.showsFrameTiming)
+        }
+        return options
+    }
+
     private var sceneView: some View {
         SceneView(
             sceneGraph: model.scene.sceneGraph,
             pointOfView: model.mode == .explore ? model.explorer.cameraNode : nil,
-            options: model.mode == .build && Self.usesCameraControl ? [.allowsCameraControl] : [],
+            options: sceneViewOptions,
             renderers: TownSnapshot.renderers(time: model.time),
             delegate: model.explorer,
             shadows: shadows,
@@ -224,6 +236,8 @@ public struct TownView: View {
                 isExporting = exportDocument != nil
             }
             Button("Import Town…") { isImporting = true }
+            Divider()
+            Toggle("Show Frame Rate", isOn: $showsFrameTiming)
         } label: {
             Image(systemName: "map")
         }
