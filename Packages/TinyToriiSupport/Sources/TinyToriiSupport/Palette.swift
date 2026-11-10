@@ -169,7 +169,7 @@ enum Paint: String, CaseIterable {
         linearColor(hex)
     }
 
-    private var hex: UInt32 {
+    var hex: UInt32 {
         switch self {
         case .grass: 0x7FA65A
         case .grassLight: 0x93B866

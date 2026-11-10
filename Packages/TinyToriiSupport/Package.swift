@@ -14,6 +14,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../../../MetalSprockets/SceneSprockets"),
+        .package(path: "../../../ModelScript"),
         .package(url: "https://github.com/schwa/GeometryLite3D", .upToNextMinor(from: "0.2.7")),
         .package(url: "https://github.com/schwa/MetalSprockets", .upToNextMinor(from: "0.2.9")),
         .package(url: "https://github.com/schwa/SwiftMesh", .upToNextMinor(from: "0.0.11")),
@@ -33,9 +34,10 @@ let package = Package(
                 .product(name: "MetalSprocketsParticles", package: "MetalSprocketsParticles"),
                 .product(name: "SwiftMesh", package: "SwiftMesh"),
                 .product(name: "Interaction3D", package: "Interaction3D"),
+                .product(name: "ModelScript", package: "ModelScript"),
             ],
-            // Palette pictures, made with `torii-cli thumbnails`.
-            resources: [.copy("Thumbnails")]
+            // Thumbnails: palette pictures, made with `torii-cli thumbnails`. Models: ModelScript files.
+            resources: [.copy("Thumbnails"), .copy("Models")]
         ),
         .executableTarget(
             name: "torii-cli",

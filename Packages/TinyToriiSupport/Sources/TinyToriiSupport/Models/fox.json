@@ -1,0 +1,22 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  "name": "Fox",
+  "parameters": { "FUR": "#E2752A" },
+  "palette": { "fur": "$FUR", "foxWhite": "#F4F1EA", "blackWood": "#262321" },
+  "body": [
+    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.05, 0.05, 0.15], "at": [0, 0.16, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "foxWhite", "scale": [0.035, 0.035, 0.105], "at": [0, 0.14, 0.02] },
+    { "mirror": [
+      { "repeat": { "count": 2, "step": [0, 0, -0.18], "parts": [
+        { "cylinder": { "top": 0.012, "bottom": 0.012, "height": 0.15, "segments": 4 }, "color": "fur", "at": [0.028, 0.075, 0.09] },
+        { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.013, 0.008, 0.015], "at": [0.028, 0.006, 0.094] }
+      ] } },
+      { "cylinder": { "top": 0, "bottom": 0.015, "height": 0.065, "segments": 4 }, "color": "fur", "at": [0.0285, 0.2575, 0.135], "rotate": [-9, 0, -6] }
+    ] },
+    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.045, 0.04, 0.05], "at": [0, 0.2, 0.15] },
+    { "cylinder": { "top": 0.022, "bottom": 0, "height": 0.07, "segments": 5, "axis": "z" }, "color": "foxWhite", "at": [0, 0.1875, 0.215] },
+    { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.008, 0.008, 0.008], "at": [0, 0.188, 0.25] },
+    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.04, 0.045, 0.1], "at": [0, 0.16, -0.17], "rotate": [-28.6, 0, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "foxWhite", "scale": [0.025, 0.025, 0.025], "at": [0, 0.2, -0.25] }
+  ]
+}

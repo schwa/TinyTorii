@@ -47,6 +47,20 @@ final class MeshBuilder {
         if simd_dot(normal, (a + b + c) / 3 - center) < 0 {
             normal = -normal
         }
+        add(paint, a, b, c, normal: normal)
+    }
+
+    // Counterclockwise winding faces the normal.
+    func triangle(_ paint: Paint, _ a: SIMD3<Float>, _ b: SIMD3<Float>, _ c: SIMD3<Float>) {
+        let a = apply(a), b = apply(b), c = apply(c)
+        let normal = simd_cross(b - a, c - a)
+        guard simd_length_squared(normal) > 1e-14 else {
+            return
+        }
+        add(paint, a, b, c, normal: simd_normalize(normal))
+    }
+
+    private func add(_ paint: Paint, _ a: SIMD3<Float>, _ b: SIMD3<Float>, _ c: SIMD3<Float>, normal: SIMD3<Float>) {
         let surface = paint.surface
         if groups[surface] == nil {
             groups[surface] = []

@@ -190,15 +190,11 @@ final class Creatures {
             }
         case .fox:
             let fur: Paint = style == 0 ? .momijiOrange : .stoneLight
-            quadruped(b, fur: fur, belly: .foxWhite, height: 0.13, length: 0.15)
-            b.blob(fur, center: [0, 0.2, 0.15], scale: [0.045, 0.04, 0.05])
-            b.cone(.foxWhite, base: [0, 0.19, 0.18], tip: [0, 0.185, 0.25], radius: 0.022, sides: 5)
-            b.blob(.blackWood, center: [0, 0.188, 0.25], scale: SIMD3(repeating: 0.008))
-            for side: Float in [-1, 1] {
-                b.cone(fur, base: [side * 0.025, 0.225, 0.14], tip: [side * 0.032, 0.29, 0.13], radius: 0.015, sides: 4)
+            do {
+                b.append(try ModelLibrary.compile("fox", parameters: ["FUR": ModelLibrary.hex(fur)]))
+            } catch {
+                assertionFailure("fox.json: \(error)")
             }
-            b.blob(fur, center: [0, 0.16, -0.17], scale: [0.04, 0.045, 0.1], rotation: simd_quatf(angle: -0.5, axis: [1, 0, 0]))
-            b.blob(.foxWhite, center: [0, 0.2, -0.25], scale: SIMD3(repeating: 0.025))
         case .cat:
             let fur: Paint = [.foxWhite, .blackWood, .plaster][style]
             quadruped(b, fur: fur, belly: fur, height: 0.08, length: 0.1)
