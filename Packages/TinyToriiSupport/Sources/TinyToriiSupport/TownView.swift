@@ -23,12 +23,7 @@ public struct TownView: View {
 
     public init() {}
 
-    // SceneView's built-in camera control (Interaction3D's orbit camera) hangs iOS at launch, so it is off there.
-    #if os(iOS)
-    static let usesCameraControl = false
-    #else
     static let usesCameraControl = true
-    #endif
 
     public var body: some View {
         ZStack {
