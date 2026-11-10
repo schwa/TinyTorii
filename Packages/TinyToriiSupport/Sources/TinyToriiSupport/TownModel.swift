@@ -235,6 +235,15 @@ public final class TownModel {
 
     // MARK: - Pointer
 
+    // True when a drag starting here should paint with the brush rather than move the camera.
+    func brushClaimsDrag(at point: SIMD2<Float>, viewSize: SIMD2<Float>) -> Bool {
+        guard mode == .build, let cameraMatrix else {
+            return false
+        }
+        let viewport = SceneViewport(cameraMatrix: cameraMatrix, camera: TownCamera.camera, viewSize: viewSize, drawableSize: viewSize)
+        return brush.hitTest(point, viewport: viewport)
+    }
+
     public func hover(at point: SIMD2<Float>, viewSize: SIMD2<Float>) {
         guard mode == .build, let cameraMatrix else {
             return

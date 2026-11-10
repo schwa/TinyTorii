@@ -24,14 +24,6 @@ public struct TownView: View {
 
     public init() {}
 
-    // SceneView's orbit camera. Off on iOS: its gestures sit inside SceneView and would win over the RTS touch
-    // controls (pan, pinch, twist).
-    #if os(iOS)
-    static let usesCameraControl = false
-    #else
-    static let usesCameraControl = true
-    #endif
-
     public var body: some View {
         ZStack {
             sceneView
@@ -63,10 +55,8 @@ public struct TownView: View {
     }
 
     private var sceneViewOptions: SceneView.Options {
+        // No SceneView camera control: Interaction3D's RTS controls are the build camera (see BuildCameraKeys).
         var options: SceneView.Options = []
-        if model.mode == .build && Self.usesCameraControl {
-            options.insert(.allowsCameraControl)
-        }
         if showsFrameTiming {
             options.insert(.showsFrameTiming)
         }
@@ -91,7 +81,7 @@ public struct TownView: View {
             closuresID: "town"
         )
         .id(model.mode)
-        .modifier(BuildCameraKeys(isEnabled: model.mode == .build, pose: $model.rtsPose))
+        .modifier(BuildCameraKeys(isEnabled: model.mode == .build, pose: $model.rtsPose, brushFilter: BrushDragFilter(model: model, viewSize: viewSize)))
         .modifier(ExploreMovement(navigator: model.mode == .explore ? model.explorer.navigator : nil))
         .sceneCameraControl(SceneCameraControl(distanceRange: 6...110, pitchRange: 0.08...1.5))
         .onGeometryChange(for: CGSize.self) { $0.size } action: { viewSize = $0 }
@@ -545,6 +535,16 @@ private struct KeyboardFocus: ViewModifier {
     }
 }
 
+// Leaves drags that the brush paints with (they start on the island while a painting tool is chosen) to the brush.
+private struct BrushDragFilter: InteractionLocationFilter {
+    let model: TownModel
+    let viewSize: CGSize
+
+    func accepts(_ location: CGPoint) -> Bool {
+        !model.brushClaimsDrag(at: [Float(location.x), Float(location.y)], viewSize: [Float(viewSize.width), Float(viewSize.height)])
+    }
+}
+
 // Interaction3D's FPV walking in explore mode, driven from the scene view's frame loop.
 private struct ExploreMovement: ViewModifier {
     let navigator: FPVNavigator?
@@ -558,15 +558,18 @@ private struct ExploreMovement: ViewModifier {
     }
 }
 
-// Interaction3D's RTS controls in build mode: W A S D or arrows pan, Q/E rotate, R/F zoom, Shift hurries, the
-// cursor at the window edge pans, Home resets.
+// Interaction3D's RTS controls in build mode: drag pans, Option-drag orbits, scroll or pinch zooms; W A S D or arrows
+// pan, Q/E rotate, R/F zoom, Shift hurries, the cursor at the window edge pans, Home resets.
 private struct BuildCameraKeys: ViewModifier {
     let isEnabled: Bool
     @Binding var pose: RTSCameraPose
+    let brushFilter: BrushDragFilter
 
     func body(content: Content) -> some View {
         if isEnabled {
-            content.rtsMovement(pose: $pose, settings: RTSMovementSettings(panSpeed: 0.6, distanceRange: 6...110))
+            content
+                .rtsMovement(pose: $pose, settings: RTSMovementSettings(panSpeed: 0.6, distanceRange: 6...110))
+                .interactionDragFilter(brushFilter)
         } else {
             content
         }
