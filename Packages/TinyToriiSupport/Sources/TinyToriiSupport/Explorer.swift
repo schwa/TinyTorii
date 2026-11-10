@@ -7,6 +7,8 @@ import simd
 // Walks a person-height camera through the town, or strolls or flies by itself. Input comes from Interaction3D:
 // WASDController (W A S D move, arrows look, Shift hurries, mouse looks while captured) and
 // GameControllerMovementController (sticks); plus an on-screen joystick and drag-to-look from the view.
+// Walking by hand uses Interaction3D's FPVMovementController in walk mode, with hooks for the town's ground and
+// obstacles. Strolling and flying move the camera themselves.
 @MainActor
 public final class Explorer: SceneViewDelegate {
     public let cameraNode: SceneGraph.Node
@@ -21,10 +23,12 @@ public final class Explorer: SceneViewDelegate {
     private var inputTasks: [Task<Void, Never>] = []
     private var keyMove: SIMD2<Float> = .zero
     private var keyLook: SIMD2<Float> = .zero
-    private var isFast = false
     private var padMove: SIMD2<Float> = .zero
     private var padLook: SIMD2<Float> = .zero
     static let mouseSensitivity: Float = 0.0025
+    private var fpv = FPVMovementController()
+    // Set when strolling, flying or start() moved the camera, so the FPV pose must be reset from it.
+    private var needsFPVPose = true
     private let scene: TownScene
     private var position: SIMD2<Float> = .zero
     private var height: Float = 0.6
@@ -43,6 +47,42 @@ public final class Explorer: SceneViewDelegate {
     init(scene: TownScene) {
         self.scene = scene
         cameraNode = SceneGraph.Node(label: "Walker", content: .camera(TownCamera.camera))
+        fpv.speed = 1.7
+        fpv.fastSpeedMultiplier = 3.6 / 1.7
+        fpv.mouseSensitivity = Self.mouseSensitivity
+        fpv.keyboardTurnSpeed = 1.8
+        fpv.walkSettings = FPVWalkSettings(gravity: 3.5, eyeHeight: Self.eyeHeight, groundFollowRate: 8)
+        fpv.hooks = Self.hooks(scene: scene)
+    }
+
+    // Captures the scene, not self: the controller is stored in self.
+    private static func hooks(scene: TownScene) -> FPVMovementHooks {
+        FPVMovementHooks(
+            groundHeight: { eye in
+                let point = SIMD2<Float>(eye.x, eye.z)
+                return scene.walkHeight(at: point).map { $0 + bridgeLift(at: point, scene: scene) }
+            },
+            canMove: { from, to in
+                let start = SIMD2<Float>(from.x, from.z)
+                let next = SIMD2<Float>(to.x, to.z)
+                let step = next - start
+                guard simd_length(step) > 0 else {
+                    return true
+                }
+                let current = scene.walkHeight(at: start) ?? 0
+                // Keep a little distance from blocked cells.
+                let probe = next + simd_normalize(step) * 0.32
+                return scene.isWalkable(next, from: current) && scene.isWalkable(probe, from: current)
+            },
+            adjustCamera: { matrix, state in
+                guard state.isOnGround else {
+                    return matrix
+                }
+                var matrix = matrix
+                matrix.columns.3.y += sin(state.distanceWalked * 5.5) * 0.018
+                return matrix
+            }
+        )
     }
 
     func start() {
@@ -62,6 +102,8 @@ public final class Explorer: SceneViewDelegate {
         strollTarget = nil
         scene.root.addChild(cameraNode)
         updateCamera()
+        fpv.reset()
+        needsFPVPose = true
         startInput()
     }
 
@@ -118,7 +160,6 @@ public final class Explorer: SceneViewDelegate {
         keyLook = .zero
         padMove = .zero
         padLook = .zero
-        isFast = false
     }
 
     private func handle(_ event: NavigationEvent) {
@@ -126,7 +167,8 @@ public final class Explorer: SceneViewDelegate {
         case let .keyboardState(move, look, _, fast):
             keyMove = move
             keyLook = look
-            isFast = fast
+            // No flying up or down by keys.
+            fpv.process(event: .keyboardState(move: move, look: look, altitude: 0, isFast: fast))
         case let .look(deltaX, deltaY, source):
             // The mouse only looks while captured; otherwise it is for clicking and dragging.
             if source == .controller || isMouseCaptured {
@@ -149,6 +191,8 @@ public final class Explorer: SceneViewDelegate {
     public func look(by delta: SIMD2<Float>) {
         yaw += delta.x
         pitch = max(-1.2, min(1.2, pitch + delta.y))
+        // FPV mouse look multiplies by its sensitivity, so undo that.
+        fpv.process(event: .look(deltaX: delta.x / Self.mouseSensitivity, deltaY: delta.y / Self.mouseSensitivity, source: .mouse))
     }
 
     public func sceneView(updateAtTime _: Float, deltaTime: Float) {
@@ -165,26 +209,28 @@ public final class Explorer: SceneViewDelegate {
             let eye = SIMD3<Float>(sin(flightAngle) * radius, 9 + sin(flightAngle * 3) * 1.5, cos(flightAngle) * radius)
             let target = SIMD3<Float>(sin(flightAngle + 0.9) * radius * 0.25, 1, cos(flightAngle + 0.9) * radius * 0.25)
             cameraNode.transform = LookAt(position: eye, target: target, up: [0, 1, 0]).cameraMatrix
+            needsFPVPose = true
             return
         }
+        if !isStrolling {
+            walkByHand(deltaTime: deltaTime)
+            return
+        }
+        needsFPVPose = true
         yaw += turn.x * 1.8 * deltaTime
         pitch = max(-1.2, min(1.2, pitch + turn.y * 1.2 * deltaTime))
-        var move = keyMove + padMove + stick
-        var speed: Float = isFast ? 3.6 : 1.7
-        if isStrolling {
-            move = stroll(deltaTime: deltaTime)
-            speed = 1.1
-            // Stuck for a while: turn around and forget where we've been.
-            stuckTime += deltaTime
-            if simd_distance(position, lastProgress) > 0.5 {
-                lastProgress = position
-                stuckTime = 0
-            } else if stuckTime > 2.5 {
-                yaw += .pi
-                recentCells.removeAll()
-                strollTarget = nil
-                stuckTime = 0
-            }
+        var move = stroll(deltaTime: deltaTime)
+        let speed: Float = 1.1
+        // Stuck for a while: turn around and forget where we've been.
+        stuckTime += deltaTime
+        if simd_distance(position, lastProgress) > 0.5 {
+            lastProgress = position
+            stuckTime = 0
+        } else if stuckTime > 2.5 {
+            yaw += .pi
+            recentCells.removeAll()
+            strollTarget = nil
+            stuckTime = 0
         }
         if simd_length(move) > 0.01 {
             if simd_length(move) > 1 {
@@ -201,11 +247,32 @@ public final class Explorer: SceneViewDelegate {
         updateCamera()
     }
 
+    private func walkByHand(deltaTime: Float) {
+        if needsFPVPose {
+            fpv.setPose(cameraNode.transform)
+            needsFPVPose = false
+        }
+        fpv.process(event: .controllerState(move: padMove + stick, look: padLook, altitude: 0))
+        fpv.update(deltaTime: deltaTime)
+        let transform = fpv.movementController.transform
+        cameraNode.transform = transform
+        // Keep our pose in step, so strolling and flying start from here.
+        let forward = -SIMD3<Float>(transform.columns.2.x, transform.columns.2.y, transform.columns.2.z)
+        position = [transform.columns.3.x, transform.columns.3.z]
+        height = transform.columns.3.y
+        yaw = atan2(forward.x, -forward.z)
+        pitch = asin(max(-1, min(1, forward.y)))
+    }
+
     private func bridgeLift() -> Float {
-        guard let cell = scene.town.grid.cell(at: position), scene.town.cells[cell].item?.kind == .bridge else {
+        Self.bridgeLift(at: position, scene: scene)
+    }
+
+    private static func bridgeLift(at point: SIMD2<Float>, scene: TownScene) -> Float {
+        guard let cell = scene.town.grid.cell(at: point), scene.town.cells[cell].item?.kind == .bridge else {
             return 0
         }
-        let distance = simd_distance(position, scene.town.grid.cells[cell].center)
+        let distance = simd_distance(point, scene.town.grid.cells[cell].center)
         return 0.42 * max(0, 1 - distance / 0.95)
     }
 

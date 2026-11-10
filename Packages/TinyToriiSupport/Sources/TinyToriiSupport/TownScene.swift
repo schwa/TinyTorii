@@ -421,7 +421,7 @@ public final class TownScene {
         if let item = state.item, item.kind.blocksWalking {
             return false
         }
-        if state.ground == .water && state.item?.kind != .bridge || state.ground == .paddy {
+        if state.ground == .water && state.item?.kind != .bridge {
             return false
         }
         // Trunks, lanterns and statues stand at the cell center.
