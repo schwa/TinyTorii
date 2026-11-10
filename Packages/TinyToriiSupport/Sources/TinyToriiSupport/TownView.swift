@@ -24,7 +24,13 @@ public struct TownView: View {
 
     public init() {}
 
+    // SceneView's orbit camera. Off on iOS: its gestures sit inside SceneView and would win over the RTS touch
+    // controls (pan, pinch, twist).
+    #if os(iOS)
+    static let usesCameraControl = false
+    #else
     static let usesCameraControl = true
+    #endif
 
     public var body: some View {
         ZStack {
