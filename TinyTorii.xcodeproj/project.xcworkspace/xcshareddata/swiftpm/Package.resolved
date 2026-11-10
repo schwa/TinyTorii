@@ -1,5 +1,5 @@
 {
-  "originHash" : "c81ca258de3f4e7ac9d146afcda73b850f06cf522c0dd7cac9e5e0348fd4a69d",
+  "originHash" : "cbce75569eb360ac4433be98b1a0c45c3a9513199abf4c9b8cd16b416a0b62fc",
   "pins" : [
     {
       "identity" : "basisuniversalmetal",
@@ -34,7 +34,7 @@
       "location" : "https://github.com/schwa/Interaction3D",
       "state" : {
         "branch" : "main",
-        "revision" : "e829f0f4185248cfe39e933935ed8e0465e0b500"
+        "revision" : "df78cb4311f6f6273f67d6bb0b4dd58e01649d88"
       }
     },
     {

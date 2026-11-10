@@ -92,6 +92,7 @@ public struct TownView: View {
         )
         .id(model.mode)
         .modifier(BuildCameraKeys(isEnabled: model.mode == .build, pose: $model.rtsPose))
+        .modifier(ExploreMovement(navigator: model.mode == .explore ? model.explorer.navigator : nil))
         .sceneCameraControl(SceneCameraControl(distanceRange: 6...110, pitchRange: 0.08...1.5))
         .onGeometryChange(for: CGSize.self) { $0.size } action: { viewSize = $0 }
         .onContinuousHover { phase in
@@ -140,10 +141,6 @@ public struct TownView: View {
             default:
                 return .ignored
             }
-            return .handled
-        }
-        // Interaction3D's WASDController reads movement keys straight from the keyboard; claim them so they don't beep.
-        if [.upArrow, .downArrow, .leftArrow, .rightArrow].contains(press.key) || "wasdqe".contains(press.characters.lowercased()) && !press.characters.isEmpty {
             return .handled
         }
         guard press.phase == .down else {
@@ -534,16 +531,30 @@ private struct KeyboardFocus: ViewModifier {
     let handleKey: (KeyPress) -> KeyPress.Result
 
     func body(content: Content) -> some View {
+        // In explore mode Interaction3D's .fpvMovement takes focus and claims the movement keys; other keys still
+        // reach this handler.
         content
-            .focusable()
+            .focusable(model.mode == .build)
             .focusEffectDisabled()
             .focused(isFocused)
-            .onAppear { isFocused.wrappedValue = true }
-            .onChange(of: model.mode) { isFocused.wrappedValue = true }
-            .onChange(of: isFocused.wrappedValue) { model.explorer.isKeyboardEnabled = isFocused.wrappedValue }
+            .onAppear { isFocused.wrappedValue = model.mode == .build }
+            .onChange(of: model.mode) { isFocused.wrappedValue = model.mode == .build }
             .onKeyPress(phases: [.down, .up]) { press in
                 handleKey(press)
             }
+    }
+}
+
+// Interaction3D's FPV walking in explore mode, driven from the scene view's frame loop.
+private struct ExploreMovement: ViewModifier {
+    let navigator: FPVNavigator?
+
+    func body(content: Content) -> some View {
+        if let navigator {
+            content.fpvMovement(navigator, updatesAutomatically: false)
+        } else {
+            content
+        }
     }
 }
 

@@ -4,11 +4,10 @@ import Interaction3D
 import SceneSprockets
 import simd
 
-// Walks a person-height camera through the town, or strolls or flies by itself. Input comes from Interaction3D:
-// WASDController (W A S D move, arrows look, Shift hurries, mouse looks while captured) and
-// GameControllerMovementController (sticks); plus an on-screen joystick and drag-to-look from the view.
-// Walking by hand uses Interaction3D's FPVMovementController in walk mode, with hooks for the town's ground and
-// obstacles. Strolling and flying move the camera themselves.
+// Walks a person-height camera through the town, or strolls or flies by itself. Walking by hand uses Interaction3D's
+// FPVNavigator in walk mode (the view adds `.fpvMovement(navigator)` for keys, mouse and game controllers), with
+// hooks for the town's ground and obstacles, plus an on-screen joystick and drag-to-look. Strolling and flying move
+// the camera themselves.
 @MainActor
 public final class Explorer: SceneViewDelegate {
     public let cameraNode: SceneGraph.Node
@@ -17,17 +16,11 @@ public final class Explorer: SceneViewDelegate {
     public var isFlying = false
     private var flightAngle: Float = 0
     // Joystick, -1...1 each axis: x strafes, y walks.
-    public var stick: SIMD2<Float> = .zero
-    private var keyboard: WASDController?
-    private var gamepad: GameControllerMovementController?
-    private var inputTasks: [Task<Void, Never>] = []
-    private var keyMove: SIMD2<Float> = .zero
-    private var keyLook: SIMD2<Float> = .zero
-    private var padMove: SIMD2<Float> = .zero
-    private var padLook: SIMD2<Float> = .zero
-    static let mouseSensitivity: Float = 0.0025
-    private var fpv = FPVMovementController()
-    // Set when strolling, flying or start() moved the camera, so the FPV pose must be reset from it.
+    public var stick: SIMD2<Float> = .zero {
+        didSet { navigator.moveInput = stick }
+    }
+    public let navigator = FPVNavigator()
+    // Set when strolling, flying or start() moved the camera, so the navigator's pose must be reset from it.
     private var needsFPVPose = true
     private let scene: TownScene
     private var position: SIMD2<Float> = .zero
@@ -47,15 +40,19 @@ public final class Explorer: SceneViewDelegate {
     init(scene: TownScene) {
         self.scene = scene
         cameraNode = SceneGraph.Node(label: "Walker", content: .camera(TownCamera.camera))
-        fpv.speed = 1.7
-        fpv.fastSpeedMultiplier = 3.6 / 1.7
-        fpv.mouseSensitivity = Self.mouseSensitivity
-        fpv.keyboardTurnSpeed = 1.8
-        fpv.walkSettings = FPVWalkSettings(gravity: 3.5, eyeHeight: Self.eyeHeight, groundFollowRate: 8)
-        fpv.hooks = Self.hooks(scene: scene)
+        navigator.settings = FPVMovementSettings(
+            speed: 1.7,
+            fastSpeedMultiplier: 3.6 / 1.7,
+            mouseSensitivity: 0.0025,
+            keyboardTurnSpeed: 1.8,
+            walk: FPVWalkSettings(gravity: 3.5, eyeHeight: Self.eyeHeight, groundFollowRate: 8)
+        )
+        navigator.hooks = Self.hooks(scene: scene)
+        // The mouse looks only while captured; otherwise it is for clicking and dragging.
+        navigator.isMouseLookEnabled = false
     }
 
-    // Captures the scene, not self: the controller is stored in self.
+    // Captures the scene, not self: the navigator is stored in self.
     private static func hooks(scene: TownScene) -> FPVMovementHooks {
         FPVMovementHooks(
             groundHeight: { eye in
@@ -102,9 +99,8 @@ public final class Explorer: SceneViewDelegate {
         strollTarget = nil
         scene.root.addChild(cameraNode)
         updateCamera()
-        fpv.reset()
+        navigator.reset()
         needsFPVPose = true
-        startInput()
     }
 
     func stop() {
@@ -112,87 +108,34 @@ public final class Explorer: SceneViewDelegate {
         cameraNode.removeFromParent()
         stick = .zero
         isStrolling = false
-        stopInput()
+        releaseMouse()
     }
 
     // MARK: - Input
 
-    // GCKeyboard is global, so the view turns this off when it loses focus.
-    public var isKeyboardEnabled = true {
-        didSet { keyboard?.isKeyboardEnabled = isKeyboardEnabled }
-    }
-
     public var isMouseCaptured: Bool {
-        keyboard?.isMouseCaptured ?? false
+        navigator.isMouseCaptured
     }
 
     public func toggleMouseCapture() {
-        keyboard?.toggleMouseCapture()
+        if isMouseCaptured {
+            releaseMouse()
+        } else {
+            navigator.isMouseLookEnabled = true
+            navigator.captureMouse()
+        }
     }
 
     public func releaseMouse() {
-        keyboard?.releaseMouse()
+        // Also releases the capture.
+        navigator.isMouseLookEnabled = false
     }
 
-    private func startInput() {
-        stopInput()
-        let keyboard = WASDController()
-        keyboard.isKeyboardEnabled = isKeyboardEnabled
-        let gamepad = GameControllerMovementController()
-        self.keyboard = keyboard
-        self.gamepad = gamepad
-        inputTasks = [keyboard.events, gamepad.events].map { events in
-            Task { [weak self] in
-                for await event in events {
-                    self?.handle(event)
-                }
-            }
-        }
-    }
-
-    private func stopInput() {
-        inputTasks.forEach { $0.cancel() }
-        inputTasks = []
-        keyboard?.releaseMouse()
-        keyboard = nil
-        gamepad = nil
-        keyMove = .zero
-        keyLook = .zero
-        padMove = .zero
-        padLook = .zero
-    }
-
-    private func handle(_ event: NavigationEvent) {
-        switch event {
-        case let .keyboardState(move, look, _, fast):
-            keyMove = move
-            keyLook = look
-            // No flying up or down by keys.
-            fpv.process(event: .keyboardState(move: move, look: look, altitude: 0, isFast: fast))
-        case let .look(deltaX, deltaY, source):
-            // The mouse only looks while captured; otherwise it is for clicking and dragging.
-            if source == .controller || isMouseCaptured {
-                look(by: [deltaX * Self.mouseSensitivity, deltaY * Self.mouseSensitivity])
-            }
-        case let .controllerState(move, look, _):
-            padMove = move
-            padLook = look
-        case let .axes(forward, sideways, source) where source == .controller:
-            padMove = [sideways, forward]
-        default:
-            break
-        }
-        if simd_length(keyMove) + simd_length(padMove) > 0.1 {
-            isStrolling = false
-            isFlying = false
-        }
-    }
-
+    // Radians; positive yaw turns right, positive pitch looks up.
     public func look(by delta: SIMD2<Float>) {
         yaw += delta.x
         pitch = max(-1.2, min(1.2, pitch + delta.y))
-        // FPV mouse look multiplies by its sensitivity, so undo that.
-        fpv.process(event: .look(deltaX: delta.x / Self.mouseSensitivity, deltaY: delta.y / Self.mouseSensitivity, source: .mouse))
+        navigator.look(yaw: delta.x, pitch: delta.y)
     }
 
     public func sceneView(updateAtTime _: Float, deltaTime: Float) {
@@ -201,9 +144,11 @@ public final class Explorer: SceneViewDelegate {
             return
         }
         let deltaTime = min(deltaTime, 0.05)
-        let turn = keyLook + padLook
+        if navigator.hasMovementInput {
+            isStrolling = false
+            isFlying = false
+        }
         if isFlying {
-            flightAngle += turn.x * deltaTime * 0.4
             flightAngle += deltaTime * 0.05
             let radius = scene.town.grid.radius * 0.95
             let eye = SIMD3<Float>(sin(flightAngle) * radius, 9 + sin(flightAngle * 3) * 1.5, cos(flightAngle) * radius)
@@ -217,8 +162,6 @@ public final class Explorer: SceneViewDelegate {
             return
         }
         needsFPVPose = true
-        yaw += turn.x * 1.8 * deltaTime
-        pitch = max(-1.2, min(1.2, pitch + turn.y * 1.2 * deltaTime))
         var move = stroll(deltaTime: deltaTime)
         let speed: Float = 1.1
         // Stuck for a while: turn around and forget where we've been.
@@ -249,12 +192,11 @@ public final class Explorer: SceneViewDelegate {
 
     private func walkByHand(deltaTime: Float) {
         if needsFPVPose {
-            fpv.setPose(cameraNode.transform)
+            navigator.setPose(cameraNode.transform)
             needsFPVPose = false
         }
-        fpv.process(event: .controllerState(move: padMove + stick, look: padLook, altitude: 0))
-        fpv.update(deltaTime: deltaTime)
-        let transform = fpv.movementController.transform
+        navigator.update(deltaTime: deltaTime)
+        let transform = navigator.transform
         cameraNode.transform = transform
         // Keep our pose in step, so strolling and flying start from here.
         let forward = -SIMD3<Float>(transform.columns.2.x, transform.columns.2.y, transform.columns.2.z)
