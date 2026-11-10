@@ -13,13 +13,13 @@ let package = Package(
         .executable(name: "torii-cli", targets: ["torii-cli"]),
     ],
     dependencies: [
-        .package(path: "../../../../MetalSprockets/SceneSprockets"),
-        .package(path: "../../../ModelScript"),
+        .package(url: "https://github.com/schwa/SceneSprockets", .upToNextMinor(from: "0.0.1")),
+        .package(url: "https://github.com/schwa/ModelScript", .upToNextMinor(from: "0.0.1")),
         .package(url: "https://github.com/schwa/GeometryLite3D", .upToNextMinor(from: "0.2.7")),
         .package(url: "https://github.com/schwa/MetalSprockets", .upToNextMinor(from: "0.2.9")),
         .package(url: "https://github.com/schwa/SwiftMesh", .upToNextMinor(from: "0.0.11")),
         .package(url: "https://github.com/schwa/MetalSprocketsParticles", .upToNextMinor(from: "0.0.2")),
-        .package(url: "https://github.com/schwa/Interaction3D", branch: "main"),
+        .package(url: "https://github.com/schwa/Interaction3D", .upToNextMinor(from: "0.2.0")),
     ],
     targets: [
         .target(
