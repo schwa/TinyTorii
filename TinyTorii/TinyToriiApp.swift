@@ -1,7 +1,16 @@
 import SwiftUI
+import TipKit
 
 @main
 struct TinyToriiApp: App {
+    init() {
+        #if DEBUG
+        // Show tips again on every launch while developing.
+        try? Tips.resetDatastore()
+        #endif
+        try? Tips.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             #if os(macOS)

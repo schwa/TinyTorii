@@ -4,6 +4,7 @@ import SceneSprockets
 import SceneSprocketsBlinnPhong
 import simd
 import SwiftUI
+import TipKit
 import UniformTypeIdentifiers
 
 public struct TownView: View {
@@ -185,6 +186,10 @@ public struct TownView: View {
     private var buildOverlay: some View {
         VStack(spacing: 0) {
             topBar
+            TipView(BuildNavigationTip())
+                .tipBackground(.regularMaterial)
+                .frame(maxWidth: 460)
+                .padding(10)
             Spacer()
             if isCompact {
                 // Tools go in the palette as a row; a column would cover the scene.
@@ -458,18 +463,14 @@ public struct TownView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Self.accent)
                 Spacer()
-                if !isCompact {
-                    Text("W A S D to walk · arrows or drag to look · M to look with the mouse · Shift to hurry · Space to stroll · F to fly · Esc to build")
-                        .font(.callout)
-                        .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(0.6), radius: 4)
-                        .lineLimit(2)
-                    Spacer()
-                }
                 timePicker
                     .buttonStyle(.bordered)
             }
             .padding(isCompact ? 10 : 14)
+            TipView(ExploreNavigationTip())
+                .tipBackground(.regularMaterial)
+                .frame(maxWidth: 460)
+                .padding(.horizontal, 10)
             Spacer()
             HStack(alignment: .bottom) {
                 Joystick { model.explorer.stick = $0 }
