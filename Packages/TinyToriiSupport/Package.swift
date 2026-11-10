@@ -18,7 +18,7 @@ let package = Package(
         .package(url: "https://github.com/schwa/MetalSprockets", .upToNextMinor(from: "0.2.9")),
         .package(url: "https://github.com/schwa/SwiftMesh", .upToNextMinor(from: "0.0.11")),
         .package(url: "https://github.com/schwa/MetalSprocketsParticles", .upToNextMinor(from: "0.0.2")),
-        .package(path: "../../../../Current/Interaction3D"),
+        .package(url: "https://github.com/schwa/Interaction3D", branch: "main"),
     ],
     targets: [
         .target(
