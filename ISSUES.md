@@ -28,6 +28,10 @@ On an iPhone (portrait and landscape):
 
 Expected: the build and explore UI are usable on iPhone in portrait and landscape, every action is reachable by touch, and nothing is clipped or overlapping.
 
+- `2026-11-12T22:11:06Z`: Most of this looks already done by wvtknvqk (Nov 9, 'iPhone-sized build and explore UI'): compact top bar without title, time picker as a menu, tools moved into the palette as a scrolling row (no left column), style picker as a menu, smaller thumbnails in landscape, materials respect safe areas, explore has a joystick plus Stroll/Fly buttons (touch for space/F), ContentView no longer sets a min frame. Not done: build-mode camera control is off on iOS (noted in that commit: it hangs at launch).
+
+Punting the close: I could not verify on a phone. The iOS Simulator build fails because MetalSprockets/MetalSupport need Metal 4 (MTL4CommandBuffer etc. are missing from the simulator SDK), and no device is attached. Unblocker: run it on an iPhone (portrait + landscape) and report anything clipped, overlapping or unreachable; or close #1 if it looks right.
+
 ---
 
 ## 2: Villagers should look like sōsaku kokeshi dolls
@@ -67,6 +71,7 @@ Once villagers look like sōsaku kokeshi dolls (#2), the animals (creatures) wil
 How to do this is open: kokeshi are human figures, so there's no direct animal equivalent. Japanese wooden folk toys and animal-shaped kokeshi exist and may help as references.
 
 - `2026-11-12T19:17:00Z`: Looked at restyling the animals after #2. Punting: the issue says the approach is open, and it's a design call (e.g. kokeshi-style turned bodies with painted markings vs. Japanese wooden folk-toy shapes per animal). It also overlaps #6-#10, which move the crane, frog, cat, koi and tanuki to ModelScript files, so restyling the Swift geometry now may be redone there. Unblocker: pick a direction (turned/lathed bodies + painted patterns like the villagers, or a reference toy per animal) and whether to do it before or as part of the ModelScript ports.
+- `2026-11-12T22:08:40Z`: Re-checked in the second autonomous run. The ModelScript ports (#6-#10) are done, so the overlap is gone: a restyle now means editing crane/frog/cat/koi/tanuki/fox .json files. Still punting: the style direction is still unanswered. Unblocker: pick one, e.g. (a) lathed kokeshi-like bodies with painted markings, as the villagers have, or (b) a specific Japanese wooden folk toy as the reference for each animal.
 
 ---
 
