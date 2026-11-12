@@ -105,13 +105,14 @@ This matters for ModelScript models (sizes are documented in meters), walking sp
 ## 5: Not all models are ModelScript files
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: aspirational, effort:xl, area:modelscript
 depends: 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
 created: 2026-11-10T05:03:40Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T21:07:56Z
+closed: 2026-11-12T21:07:56Z
 +++
 
 Only the fox (`Models/fox.json`) is a ModelScript file. Every other model is hand-written Swift geometry in `Creatures.swift`, `Villagers.swift`, `PropMesher.swift`, `TreeMesher.swift`, `BuildingMesher.swift` and `GroundMesher.swift`.
@@ -119,6 +120,8 @@ Only the fox (`Models/fox.json`) is a ModelScript file. Every other model is han
 Aspirational goal: every model is generated from ModelScript files. Fixed-shape models (animals, villagers, simple props) can move now. Procedural models (buildings that stretch and join neighbors, trees with per-instance variation, cell-shaped props, ground) need features ModelScript doesn't have yet; those are tracked in the ModelScript repo.
 
 Per-model issues are labelled `modelscript`. Related: #4 (meter scale).
+
+- `2026-11-12T21:07:56Z`: All fourteen sub-issues (#6-#19) are done. The remaining Swift-built models are filed individually: #24 zen garden, #25 koi pond, #26 bridge, #27 bamboo fence, #28 azalea, #29 stones, #30 buildings, #31 trees, #32 ground. Closing this tracking issue.
 
 ---
 
@@ -484,5 +487,159 @@ Observed: the camera drops and keeps falling forever.
 Expected: the camera lands on the ground (or is put back on the island) and walking resumes.
 
 Not confirmed: whether it only happens when flying ended outside the island / over water.
+
+---
+
+## 24: Zen garden is hand-written geometry, not a ModelScript file
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:s
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:41Z
++++
+
+The zen garden (PropMesher, .zenGarden) is built in Swift: rocks with raked gravel rings around them. Rock count, placement and sizes vary per item seed and level. Formerly tracked by #5.
+
+---
+
+## 25: Koi pond is hand-written geometry, not a ModelScript file
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:s
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:41Z
++++
+
+The koi pond (PropMesher, .koiPond) is built in Swift: edge stones scattered around the cell outline, koi, lily pads, lotus, reeds and irises. Placement depends on the cell polygon and the item seed. Formerly tracked by #5.
+
+---
+
+## 26: Bridge is hand-written geometry, not a ModelScript file
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:s
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:41Z
++++
+
+The arched bridge (PropMesher, .bridge) is built in Swift: an arched deck in 12 steps with side boards, railings, posts and gold caps on style 0. Formerly tracked by #5.
+
+---
+
+## 27: Bamboo fence is hand-written geometry, not a ModelScript file
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:m
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:41Z
++++
+
+The bamboo fence (PropMesher, .bambooFence) is built in Swift along the cell edges that don't join another fence, with post count from each edge's length. It depends on the cell polygon and its neighbors. Formerly tracked by #5.
+
+---
+
+## 28: Azalea is hand-written geometry, not a ModelScript file
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:s
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:41Z
++++
+
+The azalea bushes (PropMesher, .azalea) are built in Swift: leaf blobs with flower blobs, count and placement from the cell polygon and item seed. Formerly tracked by #5.
+
+---
+
+## 29: Stones are hand-written geometry, not a ModelScript file
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:s
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:42Z
++++
+
+The stones (PropMesher, .stones) are built in Swift: stacked stones on style 2, otherwise mossy rocks scattered in the cell; sizes and rotations from the item seed. Formerly tracked by #5.
+
+---
+
+## 30: Buildings are hand-written geometry, not ModelScript files
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:xl
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:42Z
++++
+
+All buildings (BuildingMesher) are built in Swift. They stretch across cells, join neighboring cells of the same building, inset walls along exterior edges, and build roofs over the combined footprint. Formerly tracked by #5, which noted this needs ModelScript features that don't exist yet.
+
+---
+
+## 31: Trees are hand-written geometry, not ModelScript files
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:l
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:42Z
++++
+
+All trees (TreeMesher) are built in Swift with recursive random branching per item seed and level. Formerly tracked by #5, which noted per-instance variation needs ModelScript features that don't exist yet.
+
+- `2026-11-12T21:10:18Z`: Correction to #5's note: ModelScript does support recursion. A component can use itself; parts with a false `if` are skipped before they are built, and use is limited to 32 levels (ModelCompiler.componentTooDeep). Seeded random() also exists. So trees are not blocked on missing features.
+
+---
+
+## 32: Ground is hand-written geometry, not ModelScript files
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:l
+created: 2026-11-12T21:07:52Z
+updated: 2026-11-12T21:25:42Z
++++
+
+Ground cells (GroundMesher) are built in Swift from each cell's polygon: beveled tops, sides down to lower neighbors, stone courses, and scattered decoration. Formerly tracked by #5, which noted cell-shaped geometry needs ModelScript features that don't exist yet.
+
+---
+
+## 33: ModelScript colors are matched to Paint by nearest color, not by palette name
+
++++
+status: open
+priority: low
+kind: task
+labels: area:modelscript, effort:s
+created: 2026-11-12T21:10:18Z
+updated: 2026-11-12T21:25:42Z
++++
+
+ModelLibrary turns each compiled triangle into a Paint by finding the Paint with the nearest color (`Paint.nearest`, `MeshBuilder.append(_ model:)` in Models.swift). So every palette color in a model file must exactly match a Paint hex value, and no two Paints may share a color (the gold koi came out grey before #9 gave each Paint a unique hex; `everyPaintRoundTripsThroughItsColor` guards this).
+
+ModelScript compiled models now report which palette entry each triangle came from (`CompiledModel.paletteName(of:)`, ModelScript issue #3), and the model files already use Paint names as palette names. The color matching is no longer the only option.
 
 ---
