@@ -1,12 +1,12 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.4
 
 import PackageDescription
 
 let package = Package(
     name: "TinyToriiSupport",
     platforms: [
-        .iOS(.v26),
-        .macOS(.v26),
+        .iOS(.v27),
+        .macOS(.v27),
     ],
     products: [
         .library(name: "TinyToriiSupport", targets: ["TinyToriiSupport"]),
