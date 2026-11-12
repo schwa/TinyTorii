@@ -549,12 +549,13 @@ The arched bridge (PropMesher, .bridge) is built in Swift: an arched deck in 12 
 ## 27: Bamboo fence is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:m
 created: 2026-11-12T21:07:52Z
-updated: 2026-11-12T21:25:41Z
+updated: 2026-11-12T23:10:18Z
+closed: 2026-11-12T23:10:18Z
 +++
 
 The bamboo fence (PropMesher, .bambooFence) is built in Swift along the cell edges that don't join another fence, with post count from each edge's length. It depends on the cell polygon and its neighbors. Formerly tracked by #5.

@@ -1,0 +1,28 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // One fence run per open cell edge. Run I starts at (AX, AZ), is LENGTH long and turned TURN degrees about y
+  // (so its local +x runs along the edge). It has POSTS + 1 posts, evenly spaced; even posts are taller.
+  // EVEN and ODD are how many of each (the app passes them, as expressions have no rounding).
+  // CANE is the bamboo paint, TIE the cross-ties'.
+  "name": "Bamboo fence",
+  "parameters": {
+    "CANE": "#7FA34A", "TIE": "#4A3324",
+    "AX": [0], "AZ": [0], "LENGTH": [3], "TURN": [0], "POSTS": [6], "EVEN": [4], "ODD": [3]
+  },
+  "palette": { "cane": "$CANE", "tie": "$TIE" },
+  "body": [
+    { "repeat": { "count": "count($LENGTH)", "step": [0, 0, 0], "parts": [
+      { "group": [
+        { "repeat": { "count": "$EVEN[$I]", "step": ["2 * $LENGTH[$I] / $POSTS[$I]", 0, 0], "index": "J", "parts": [
+          { "cylinder": { "top": 0.077, "bottom": 0.077, "height": 2.065, "segments": 5 }, "at": [0, 1.0325, 0] }
+        ] }, "color": "cane" },
+        { "repeat": { "count": "$ODD[$I]", "step": ["2 * $LENGTH[$I] / $POSTS[$I]", 0, 0], "index": "J", "parts": [
+          { "cylinder": { "top": 0.077, "bottom": 0.077, "height": 1.925, "segments": 5 },
+            "at": ["$LENGTH[$I] / $POSTS[$I]", 0.9625, 0] }
+        ] }, "color": "cane" },
+        { "box": ["$LENGTH[$I]", 0.105, 0.14], "at": ["$LENGTH[$I] / 2", 0.525, 0], "color": "tie" },
+        { "box": ["$LENGTH[$I]", 0.105, 0.14], "at": ["$LENGTH[$I] / 2", 1.47, 0], "color": "tie" }
+      ], "at": ["$AX[$I]", 0, "$AZ[$I]"], "rotate": [0, "$TURN[$I]", 0] }
+    ] } }
+  ]
+}

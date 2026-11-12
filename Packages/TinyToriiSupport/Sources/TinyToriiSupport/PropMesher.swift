@@ -70,17 +70,28 @@ enum PropMesher {
         case .bambooFence:
             let paint: Paint = [.bamboo, .bambooDry, .bambooDry][item.style]
             let tie: Paint = item.style == 2 ? .twine : .darkWood
+            // One run per edge that doesn't border another fence; bamboo-fence.json draws them.
+            var lists: [String: [Double]] = ["AX": [], "AZ": [], "LENGTH": [], "TURN": [], "POSTS": [], "EVEN": [], "ODD": []]
             for index in polygon.indices where !joined[index] {
                 let a = polygon[index] * 0.94, b = polygon[(index + 1) % polygon.count] * 0.94
                 let length = simd_distance(a, b)
                 let posts = max(2, Int(length / 0.42))
-                for post in 0...posts {
-                    let point = a + (b - a) * (Float(post) / Float(posts))
-                    builder.cylinder(paint, from: point.lifted(0), to: point.lifted(1.925 + (post % 2 == 0 ? 0.14 : 0)), radius: 0.077, sides: 5)
-                }
-                for y: Float in [0.525, 1.47] {
-                    builder.beam(tie, from: a.lifted(y), to: b.lifted(y), width: 0.14, height: 0.105)
-                }
+                lists["AX"]!.append(Double(a.x))
+                lists["AZ"]!.append(Double(a.y))
+                lists["LENGTH"]!.append(Double(length))
+                lists["TURN"]!.append(Double(atan2(-(b.y - a.y), b.x - a.x) * 180 / .pi))
+                lists["POSTS"]!.append(Double(posts))
+                lists["EVEN"]!.append(Double(posts / 2 + 1))
+                lists["ODD"]!.append(Double((posts + 1) / 2))
+            }
+            var parameters: [String: ModelParameter] = ["CANE": ModelLibrary.hex(paint), "TIE": ModelLibrary.hex(tie)]
+            for (name, values) in lists {
+                parameters[name] = .numbers(values)
+            }
+            do {
+                builder.append(try ModelLibrary.compile("bamboo-fence", parameters: parameters))
+            } catch {
+                assertionFailure("bamboo-fence.json: \(error)")
             }
         case .azalea:
             let paint: Paint = [.azaleaMagenta, .azaleaPink, .azaleaWhite, .hydrangea][item.style]

@@ -57,9 +57,9 @@ import ModelScript
     }
 
     // Builds a placed prop through PropMesher and checks each paint's bounds (in meters).
-    static func expectProp(_ item: Item, polygon: [SIMD2<Float>] = [], matches expected: [Paint: Bounds], sourceLocation: SourceLocation = #_sourceLocation) {
+    static func expectProp(_ item: Item, polygon: [SIMD2<Float>] = [], joined: [Bool] = [], matches expected: [Paint: Bounds], sourceLocation: SourceLocation = #_sourceLocation) {
         let builder = MeshBuilder()
-        PropMesher.build(builder, item: item, polygon: polygon, joined: [])
+        PropMesher.build(builder, item: item, polygon: polygon, joined: joined)
         let actual = paintBounds(builder)
         #expect(Set(actual.keys) == Set(expected.keys), "\(item) paints", sourceLocation: sourceLocation)
         for (paint, bounds) in expected {
@@ -435,6 +435,23 @@ import ModelScript
         [2, 1]: [.gravelLine: Bounds(min: [-1.7411, 0.0175, -1.6997], max: [2.3897, 0.0525, 2.2774]), .moss: Bounds(min: [-1.2749, -0.2943, -1.2749], max: [1.8486, 0.4343, 1.7720]), .stoneDark: Bounds(min: [-0.9458, -0.6355, -0.8940], max: [1.5531, 1.5990, 1.5341])],
         [2, 4]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .moss: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
     ]
+
+    // Recorded in meters from the Swift bamboo fence in `hexagon`, keyed by [style, joins]: joins 0 has every edge
+    // open, joins 1 only edges 1 and 4.
+    static let fenceJoins: [[Bool]] = [[false, false, false, false, false, false], [true, false, true, true, false, true]]
+    static let fences: [[Int]: [Paint: Bounds]] = [
+        [0, 0]: [.bamboo: Bounds(min: [-3.5277, 0.0000, -3.0687], max: [3.5277, 2.0650, 3.0540]), .darkWood: Bounds(min: [-3.5151, 0.4725, -3.0617], max: [3.5151, 1.5225, 3.0617])],
+        [0, 1]: [.bamboo: Bounds(min: [-1.8005, 0.0000, -3.0687], max: [1.8005, 2.0650, 3.0540]), .darkWood: Bounds(min: [-1.7273, 0.4725, -3.0617], max: [1.7272, 1.5225, 3.0617])],
+        [1, 0]: [.bambooDry: Bounds(min: [-3.5277, 0.0000, -3.0687], max: [3.5277, 2.0650, 3.0540]), .darkWood: Bounds(min: [-3.5151, 0.4725, -3.0617], max: [3.5151, 1.5225, 3.0617])],
+        [1, 1]: [.bambooDry: Bounds(min: [-1.8005, 0.0000, -3.0687], max: [1.8005, 2.0650, 3.0540]), .darkWood: Bounds(min: [-1.7273, 0.4725, -3.0617], max: [1.7272, 1.5225, 3.0617])],
+        [2, 0]: [.bambooDry: Bounds(min: [-3.5277, 0.0000, -3.0687], max: [3.5277, 2.0650, 3.0540]), .twine: Bounds(min: [-3.5151, 0.4725, -3.0617], max: [3.5151, 1.5225, 3.0617])],
+        [2, 1]: [.bambooDry: Bounds(min: [-1.8005, 0.0000, -3.0687], max: [1.8005, 2.0650, 3.0540]), .twine: Bounds(min: [-1.7273, 0.4725, -3.0617], max: [1.7272, 1.5225, 3.0617])],
+    ]
+
+    @Test(arguments: Array(fences.keys)) func bambooFence(key: [Int]) {
+        let item = Item(kind: .bambooFence, style: key[0], level: 1, group: 0, seed: 1, rotation: 0)
+        Self.expectProp(item, polygon: Self.hexagon, joined: Self.fenceJoins[key[1]], matches: Self.fences[key]!)
+    }
 
     // Recorded in meters from the Swift stones in `hexagon`, seed 1234, keyed by [style, level]. Most of each
     // moss cap is inside its rock; ModelScript's union keeps only the part that shows, so moss bounds are smaller
