@@ -213,12 +213,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 11: Tanuki statue is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:49Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:29:41Z
+closed: 2026-11-12T19:29:41Z
 +++
 
 The shigaraki tanuki statue (tanuki style 1) is built in Swift (`Creatures.tanukiStatue`).

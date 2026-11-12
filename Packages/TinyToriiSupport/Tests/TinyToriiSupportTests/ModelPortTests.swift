@@ -60,6 +60,20 @@ import ModelScript
         }
     }
 
+    @Test func tanukiStatue() throws {
+        try Self.expect("tanuki-statue", parameters: [:], matches: [
+            .blackWood: Self.bounds([-0.0402, 0.4698, 0.0648], [0.0402, 0.4902, 0.0852]),
+            .lattice: Self.bounds([0.1300, 0.1750, 0.1025], [0.1700, 0.2250, 0.1075]),
+            .plaster: Self.bounds([0.1117, 0.1490, 0.0217], [0.1883, 0.2900, 0.0983]),
+            // The union drops the back of the belly, hidden inside the body (Swift's went back to z 0.0019).
+            .plasterCream: Self.bounds([-0.0936, 0.1379, 0.0479], [0.0936, 0.4798, 0.1381]),
+            // The union drops the top of the head, hidden under the hat (Swift's went up to 0.5381).
+            .shingle: Self.bounds([-0.1640, 0.1254, -0.1106], [0.1640, 0.5300, 0.1106]),
+            .stone: Self.bounds([-0.1600, 0.0000, -0.1600], [0.1600, 0.1000, 0.1600]),
+            .thatch: Self.bounds([-0.1236, 0.5300, -0.1300], [0.1236, 0.6200, 0.1300]),
+        ])
+    }
+
     @Test func tanuki() throws {
         try Self.expect("tanuki", parameters: [:], matches: [
             .bark: Self.bounds([-0.0425, 0.0000, -0.1895], [0.0425, 0.1840, 0.1583]),

@@ -1,0 +1,24 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // The shigaraki tanuki statue: big belly, straw hat and sake flask, on a stone plinth.
+  "name": "Tanuki statue",
+  "palette": {
+    "stone": "#9C978E", "shingle": "#6B4A35", "plasterCream": "#E9DCC0", "blackWood": "#262321",
+    "thatch": "#B79A63", "plaster": "#F2EEE4", "lattice": "#3B2A1E"
+  },
+  "body": [
+    { "box": [0.32, 0.1, 0.32], "color": "stone", "at": [0, 0.05, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "shingle", "scale": [0.14, 0.17, 0.13], "at": [0, 0.27, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "plasterCream", "scale": [0.11, 0.12, 0.08], "at": [0, 0.24, 0.07] },
+    { "icosahedron": { "radius": 1 }, "color": "shingle", "scale": [0.08, 0.08, 0.08], "at": [0, 0.47, 0.01] },
+    { "icosahedron": { "radius": 1 }, "color": "plasterCream", "scale": [0.05, 0.035, 0.03], "at": [0, 0.45, 0.07] },
+    { "mirror": [
+      { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.012, 0.012, 0.012], "at": [0.03, 0.48, 0.075] },
+      { "icosahedron": { "radius": 1 }, "color": "shingle", "scale": [0.04, 0.09, 0.04], "at": [0.13, 0.28, 0.04] }
+    ] },
+    { "cylinder": { "top": 0, "bottom": 0.13, "height": 0.09, "segments": 10 }, "color": "thatch", "at": [0, 0.575, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "plaster", "scale": [0.045, 0.06, 0.045], "at": [0.15, 0.2, 0.06] },
+    { "cylinder": { "top": 0.015, "bottom": 0.015, "height": 0.04, "segments": 8 }, "color": "plaster", "at": [0.15, 0.27, 0.06] },
+    { "box": [0.04, 0.05, 0.005], "color": "lattice", "at": [0.15, 0.2, 0.105] }
+  ]
+}

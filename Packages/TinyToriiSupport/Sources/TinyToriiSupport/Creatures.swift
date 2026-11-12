@@ -222,18 +222,10 @@ final class Creatures {
 
     // The shigaraki tanuki statue: big belly, straw hat and sake flask.
     nonisolated static func tanukiStatue(_ b: MeshBuilder) {
-        b.box(.stone, center: [0, 0.05, 0], size: [0.32, 0.1, 0.32])
-        b.blob(.shingle, center: [0, 0.27, 0], scale: [0.14, 0.17, 0.13])
-        b.blob(.plasterCream, center: [0, 0.24, 0.07], scale: [0.11, 0.12, 0.08])
-        b.blob(.shingle, center: [0, 0.47, 0.01], scale: SIMD3(repeating: 0.08))
-        b.blob(.plasterCream, center: [0, 0.45, 0.07], scale: [0.05, 0.035, 0.03])
-        for side: Float in [-1, 1] {
-            b.blob(.blackWood, center: [side * 0.03, 0.48, 0.075], scale: SIMD3(repeating: 0.012))
-            b.blob(.shingle, center: [side * 0.13, 0.28, 0.04], scale: [0.04, 0.09, 0.04])
+        do {
+            b.append(try ModelLibrary.compile("tanuki-statue"))
+        } catch {
+            assertionFailure("tanuki-statue.json: \(error)")
         }
-        b.cone(.thatch, base: [0, 0.53, 0], tip: [0, 0.62, 0], radius: 0.13, sides: 10, capped: true)
-        b.blob(.plaster, center: [0.15, 0.2, 0.06], scale: [0.045, 0.06, 0.045])
-        b.cylinder(.plaster, from: [0.15, 0.25, 0.06], to: [0.15, 0.29, 0.06], radius: 0.015)
-        b.box(.lattice, center: [0.15, 0.2, 0.105], size: [0.04, 0.05, 0.005])
     }
 }
