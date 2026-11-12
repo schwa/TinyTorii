@@ -97,6 +97,7 @@ Real-world reference: a person is about 1.6 m, a fox about 1 m long, a great tor
 This matters for ModelScript models (sizes are documented in meters), walking speed, gravity, camera ranges, fog and shadow distances, and anything shared with other projects.
 
 - `2026-11-12T19:12:21Z`: Tried scoping a rescale to meters. Punting: this is a cross-cutting change (100+ size/distance constants across grid, meshers, models, camera ranges, explore gravity/speed, fog and shadow distances), and the target sizes are a design decision, not a uniform factor. Scaling villagers 0.32 -> 1.6 m is x5, which would make the fox 2.5 m and the small torii 5 m, so objects need individual targets too. Unblocker: confirm (a) a uniform world scale factor (e.g. x5, so a grid cell is ~10.5 m and the island radius ~130 m) and (b) target sizes for the outliers (fox ~1 m long, eye height ~1.5 m, small/great torii heights), and I'll do it as a mechanical pass.
+- `2026-11-12T20:04:15Z`: Correction to my earlier comment: villagers are scaled by 1.7 when placed (Villagers.place), and the kokeshi model is ~0.29 tall, so a villager is ~0.49 units on screen, not 0.32. A 1.7 m villager means a world scale of ~x3.5, not x5. At x3.5: grid cell ~7.4 m, island radius ~91 m, fox (0.5 long) ~1.75 m (still too big; real ~1 m), explore eye height (0.55) ~1.9 m (a bit above a 1.7 m person's eyes, ~1.6 m).
 
 ---
 
