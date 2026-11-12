@@ -1,5 +1,6 @@
 import GeometryLite3D
 import Metal
+import ModelScript
 import SceneSprockets
 import simd
 
@@ -190,17 +191,17 @@ final class Creatures {
             }
         case .cat:
             let fur: Paint = [.foxWhite, .blackWood, .plaster][style]
-            quadruped(b, fur: fur, belly: fur, height: 0.08, length: 0.1)
-            if style == 0 {
-                b.blob(.momijiOrange, center: [0.02, 0.12, -0.03], scale: [0.035, 0.025, 0.05])
-                b.blob(.blackWood, center: [-0.025, 0.12, 0.04], scale: [0.03, 0.022, 0.03])
+            let parameters: [String: ModelParameter] = [
+                "FUR": ModelLibrary.hex(fur),
+                "EAR": ModelLibrary.hex(style == 0 ? .momijiOrange : fur),
+                "EYE": ModelLibrary.hex(style == 1 ? .ginkgoYellow : .bamboo),
+                "PATCHES": .number(style == 0 ? 1 : 0),
+            ]
+            do {
+                b.append(try ModelLibrary.compile("cat", parameters: parameters))
+            } catch {
+                assertionFailure("cat.json: \(error)")
             }
-            b.blob(fur, center: [0, 0.15, 0.1], scale: SIMD3(repeating: 0.04))
-            for side: Float in [-1, 1] {
-                b.cone(style == 0 ? .momijiOrange : fur, base: [side * 0.022, 0.175, 0.1], tip: [side * 0.028, 0.215, 0.1], radius: 0.014, sides: 3)
-                b.blob(style == 1 ? .ginkgoYellow : .bamboo, center: [side * 0.016, 0.155, 0.135], scale: SIMD3(repeating: 0.007))
-            }
-            b.beam(fur, from: [0, 0.1, -0.1], to: [0, 0.22, -0.15], width: 0.016, height: 0.016)
         case .koi:
             let colors: (Paint, Paint) = [(.koiWhite, .koiOrange), (.gold, .gold), (.blackWood, .koiOrange)][style]
             b.blob(colors.0, center: .zero, scale: [0.035, 0.018, 0.09])

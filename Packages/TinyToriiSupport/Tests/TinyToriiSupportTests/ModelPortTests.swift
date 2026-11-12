@@ -53,6 +53,26 @@ import ModelScript
         Bounds(min: min, max: max)
     }
 
+    @Test func cat() throws {
+        let eyes = Self.bounds([-0.0220, 0.1490, 0.1290], [0.0220, 0.1610, 0.1410])
+        let body = Self.bounds([-0.0425, 0.0000, -0.1574], [0.0425, 0.2231, 0.1340])
+        try Self.expect("cat", parameters: ["FUR": ModelLibrary.hex(.foxWhite), "EAR": ModelLibrary.hex(.momijiOrange), "EYE": ModelLibrary.hex(.bamboo), "PATCHES": .number(1)], matches: [
+            .bamboo: eyes,
+            .blackWood: Self.bounds([-0.0505, -0.0008, -0.0688], [0.0391, 0.1387, 0.0768]),
+            .foxWhite: body,
+            .momijiOrange: Self.bounds([-0.0340, 0.0987, -0.0725], [0.0498, 0.2150, 0.1070]),
+        ])
+        try Self.expect("cat", parameters: ["FUR": ModelLibrary.hex(.blackWood), "EAR": ModelLibrary.hex(.blackWood), "EYE": ModelLibrary.hex(.ginkgoYellow), "PATCHES": .number(0)], matches: [
+            .blackWood: Self.bounds([-0.0425, -0.0008, -0.1574], [0.0425, 0.2231, 0.1340]),
+            .ginkgoYellow: eyes,
+        ])
+        try Self.expect("cat", parameters: ["FUR": ModelLibrary.hex(.plaster), "EAR": ModelLibrary.hex(.plaster), "EYE": ModelLibrary.hex(.bamboo), "PATCHES": .number(0)], matches: [
+            .bamboo: eyes,
+            .blackWood: Self.bounds([-0.0391, -0.0008, -0.0688], [0.0391, 0.0128, 0.0768]),
+            .plaster: body,
+        ])
+    }
+
     @Test func frog() throws {
         for skin: Paint in [.momijiGreen, .cedar] {
             try Self.expect("frog", parameters: ["SKIN": ModelLibrary.hex(skin)], matches: [

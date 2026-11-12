@@ -159,12 +159,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 8: Cat is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:49Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:23:04Z
+closed: 2026-11-12T19:23:04Z
 +++
 
 The cat animal is built in Swift (`Creatures.mesh`, `.cat`, plus `quadruped`). Three styles differ by fur color; style 0 (calico) has extra patches.
