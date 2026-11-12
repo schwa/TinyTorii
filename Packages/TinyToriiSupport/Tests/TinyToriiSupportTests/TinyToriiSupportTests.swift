@@ -242,6 +242,29 @@ import Testing
         #expect(abs(model.rtsPose.yaw - 1.2) < 0.01)
     }
 
+    // A NaN camera pose crashed shadow setup in SceneSprockets (#22).
+    @Test func cameraPoseStaysFinite() {
+        let model = TownModel(town: Town(gridSeed: 6), persists: false)
+        var infinite = TownCamera.orbit(yaw: 1.2, pitch: 0.5, distance: 30)
+        infinite.columns.3 = [.infinity, 10, 0, 1]
+        model.cameraMatrix = infinite
+        var notANumber = infinite
+        notANumber.columns.3 = [.nan, .nan, .nan, 1]
+        model.cameraMatrix = notANumber
+        var pose = model.rtsPose
+        pose.target = [.nan, 0, .infinity]
+        pose.distance = .infinity
+        model.rtsPose = pose
+        let result = model.rtsPose
+        #expect(result.target.x.isFinite && result.target.y.isFinite && result.target.z.isFinite)
+        #expect(result.yaw.isFinite && result.pitch.isFinite && result.distance.isFinite)
+        let matrix = model.cameraMatrix!
+        #expect((0..<4).allSatisfy { index in
+            let column = matrix[index]
+            return column.x.isFinite && column.y.isFinite && column.z.isFinite && column.w.isFinite
+        })
+    }
+
     @Test func walkerStaysOutOfBuildings() {
         let scene = TownScene(town: Town.sample(seed: 3))
         let explorer = Explorer(scene: scene)

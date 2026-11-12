@@ -72,6 +72,11 @@ public final class TownModel {
         set {
             let oldValue = storedPose
             var pose = newValue
+            // A non-finite pose crashes shadow setup in the renderer (#22); keep the last good one.
+            guard Self.isFinite(pose) else {
+                cameraLogger.fault("rejected non-finite rtsPose: \(Self.describe(oldValue), privacy: .public) -> \(Self.describe(pose), privacy: .public)\n\(Thread.callStackSymbols.joined(separator: "\n"), privacy: .public)")
+                return
+            }
             // Keep the camera over the island.
             let limit = scene.town.grid.radius * 1.2
             let flat = SIMD2<Float>(pose.target.x, pose.target.z)
@@ -81,9 +86,6 @@ public final class TownModel {
             }
             storedPose = pose
             cameraLogger.debug("rtsPose \(Self.describe(oldValue), privacy: .public) -> \(Self.describe(pose), privacy: .public)")
-            if !Self.isFinite(pose) {
-                cameraLogger.fault("rtsPose became non-finite: \(Self.describe(oldValue), privacy: .public) -> \(Self.describe(pose), privacy: .public)\n\(Thread.callStackSymbols.joined(separator: "\n"), privacy: .public)")
-            }
         }
     }
     private var storedPose = RTSCameraPose(target: .zero, yaw: 0.6, pitch: 0.7, distance: 168)
@@ -93,7 +95,8 @@ public final class TownModel {
         set {
             cameraLogger.debug("cameraMatrix set: \(newValue.map(Self.describe) ?? "nil", privacy: .public) pose: \(Self.describe(self.rtsPose), privacy: .public)")
             if let newValue, !Self.isFinite(newValue) {
-                cameraLogger.fault("cameraMatrix set to non-finite matrix: \(Self.describe(newValue), privacy: .public)\n\(Thread.callStackSymbols.joined(separator: "\n"), privacy: .public)")
+                cameraLogger.fault("rejected non-finite cameraMatrix: \(Self.describe(newValue), privacy: .public)\n\(Thread.callStackSymbols.joined(separator: "\n"), privacy: .public)")
+                return
             }
             // SceneView writes back the matrix we gave it. Converting it to a pose and back is not exact, so without
             // this check every write makes a slightly different matrix and SceneView writes again, forever.
@@ -103,7 +106,7 @@ public final class TownModel {
             // Read the orbit back into the pose around the same target.
             let offset = newValue.columns.3.xyz3 - rtsPose.target
             let distance = simd_length(offset)
-            guard distance > 1e-4 else {
+            guard distance > 1e-4, distance.isFinite else {
                 return
             }
             cameraLogger.debug("cameraMatrix setter: offset \(String(describing: offset), privacy: .public) distance \(distance, privacy: .public)")

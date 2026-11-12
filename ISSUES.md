@@ -426,12 +426,13 @@ No crash log or backtrace for the original crash yet.
 ## 22: Crash: 'Range requires lowerBound <= upperBound' in SceneGraphShadows when camera pose becomes NaN
 
 +++
-status: open
+status: closed
 priority: high
 kind: bug
 labels: effort:m, area:camera
 created: 2026-11-12T19:02:36Z
-updated: 2026-11-12T19:10:20Z
+updated: 2026-11-12T21:29:22Z
+closed: 2026-11-12T21:29:22Z
 +++
 
 The app crashes during rendering with a fatal error in SceneSprockets shadow setup. Seen on iPad (UIKit run loop), build-mode camera. Repro steps unknown.
@@ -462,6 +463,7 @@ Shadows.swift:246 is the directional light `OrthographicProjection(... depthMode
 No crash; the camera pose never becomes non-finite.
 
 - `2026-11-12T19:10:20Z`: Possibly the same crash as #21 (camera crash not reproduced).
+- `2026-11-12T21:29:22Z`: Fixed by guarding: TownModel now rejects non-finite rtsPose and cameraMatrix writes (keeps the last good pose and logs a fault with the stack). Which writer produced the NaN is still unknown; if the fault log fires, it names the caller.
 
 ---
 
