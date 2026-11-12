@@ -265,6 +265,28 @@ import Testing
         })
     }
 
+    // The flight path runs out over the shore, where there is no ground to land on (#23).
+    @Test func walkerLandsAfterFlying() {
+        let scene = TownScene(town: Town.sample(seed: 3))
+        let explorer = Explorer(scene: scene)
+        explorer.start()
+        // A full circle takes about 126 s; stop flying at 16 places around it.
+        for stop in 0..<16 {
+            explorer.isFlying = true
+            for _ in 0..<240 {
+                explorer.sceneView(updateAtTime: 0, deltaTime: 1 / 30)
+            }
+            explorer.isFlying = false
+            for _ in 0..<150 {
+                explorer.sceneView(updateAtTime: 0, deltaTime: 1 / 30)
+            }
+            let position = explorer.cameraNode.transform.columns.3
+            let ground = scene.walkHeight(at: [position.x, position.z])
+            #expect(ground != nil, "stop \(stop) at \(position)")
+            #expect(abs(position.y - (ground ?? 0) - Explorer.eyeHeight) < 0.5, "stop \(stop) at \(position)")
+        }
+    }
+
     @Test func walkerStaysOutOfBuildings() {
         let scene = TownScene(town: Town.sample(seed: 3))
         let explorer = Explorer(scene: scene)

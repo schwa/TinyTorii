@@ -470,12 +470,13 @@ No crash; the camera pose never becomes non-finite.
 ## 23: Camera falls forever after turning off flying in explore mode
 
 +++
-status: open
+status: closed
 priority: medium
 kind: bug
 labels: effort:s, area:camera
 created: 2026-11-12T19:06:03Z
-updated: 2026-11-12T19:10:20Z
+updated: 2026-11-12T22:08:22Z
+closed: 2026-11-12T22:08:22Z
 +++
 
 In explore mode, turning flying on and then off can leave the camera falling with no ground under it. It never lands and keeps falling.

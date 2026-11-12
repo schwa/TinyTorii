@@ -13,7 +13,13 @@ public final class Explorer: SceneViewDelegate {
     public let cameraNode: SceneGraph.Node
     public var isStrolling = false
     // A slow bird's-eye circle around the island.
-    public var isFlying = false
+    public var isFlying = false {
+        didSet {
+            if oldValue, !isFlying, cameraNode.parent != nil {
+                land()
+            }
+        }
+    }
     private var flightAngle: Float = 0
     // Joystick, -1...1 each axis: x strafes, y walks.
     public var stick: SIMD2<Float> = .zero {
@@ -99,6 +105,31 @@ public final class Explorer: SceneViewDelegate {
         recentCells = []
         strollTarget = nil
         scene.root.addChild(cameraNode)
+        updateCamera()
+        navigator.reset()
+        needsFPVPose = true
+    }
+
+    // The flight path runs out over the sea, where walking would fall forever (#23): come down on the nearest
+    // walkable cell, facing the way the flight looked.
+    private func land() {
+        let transform = cameraNode.transform
+        let point = SIMD2<Float>(transform.columns.3.x, transform.columns.3.z)
+        let forward = -SIMD3<Float>(transform.columns.2.x, transform.columns.2.y, transform.columns.2.z)
+        let town = scene.town
+        let nearest = town.grid.cells.indices
+            .filter { scene.isWalkable(town.grid.cells[$0].center, from: town.standingHeight($0)) }
+            .min { simd_distance(town.grid.cells[$0].center, point) < simd_distance(town.grid.cells[$1].center, point) }
+        if scene.walkHeight(at: point) != nil {
+            position = point
+        } else if let nearest {
+            position = town.grid.cells[nearest].center
+        } else {
+            return
+        }
+        height = (scene.walkHeight(at: position) ?? 0) + Self.eyeHeight + bridgeLift()
+        yaw = atan2(forward.x, -forward.z)
+        pitch = 0.08
         updateCamera()
         navigator.reset()
         needsFPVPose = true
