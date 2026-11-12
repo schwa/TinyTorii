@@ -344,10 +344,12 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 20: Stack overflow when camera target reaches the island edge
 
 +++
-status: new
+status: closed
 priority: high
 kind: bug
 created: 2026-11-12T19:01:57Z
+updated: 2026-11-12T19:05:27Z
+closed: 2026-11-12T19:05:27Z
 +++
 
 Panning the build camera to the edge of the island crashes with EXC_BAD_ACCESS (stack overflow).

@@ -62,17 +62,23 @@ public final class TownModel {
     }
     // The build camera: Interaction3D's RTS pose (keys and edge panning move its target), shared with SceneView's
     // mouse orbit and zoom through `cameraMatrix`.
-    public var rtsPose = RTSCameraPose(target: .zero, yaw: 0.6, pitch: 0.7, distance: 48) {
-        didSet {
+    // Clamp in the setter, not in a didSet: with @Observable, writing the property from its own didSet re-enters
+    // didSet, and Float rounding can keep the clamped target just past the limit forever (#20).
+    public var rtsPose: RTSCameraPose {
+        get { storedPose }
+        set {
+            var pose = newValue
             // Keep the camera over the island.
             let limit = scene.town.grid.radius * 1.2
-            let flat = SIMD2<Float>(rtsPose.target.x, rtsPose.target.z)
+            let flat = SIMD2<Float>(pose.target.x, pose.target.z)
             if simd_length(flat) > limit {
                 let clamped = simd_normalize(flat) * limit
-                rtsPose.target = [clamped.x, rtsPose.target.y, clamped.y]
+                pose.target = [clamped.x, pose.target.y, clamped.y]
             }
+            storedPose = pose
         }
     }
+    private var storedPose = RTSCameraPose(target: .zero, yaw: 0.6, pitch: 0.7, distance: 48)
 
     public var cameraMatrix: simd_float4x4? {
         get { rtsPose.cameraMatrix }
