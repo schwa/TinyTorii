@@ -580,12 +580,13 @@ The azalea bushes (PropMesher, .azalea) are built in Swift: leaf blobs with flow
 ## 29: Stones are hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-12T21:07:52Z
-updated: 2026-11-12T21:25:42Z
+updated: 2026-11-12T22:54:54Z
+closed: 2026-11-12T22:54:54Z
 +++
 
 The stones (PropMesher, .stones) are built in Swift: stacked stones on style 2, otherwise mossy rocks scattered in the cell; sizes and rotations from the item seed. Formerly tracked by #5.

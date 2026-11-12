@@ -422,6 +422,22 @@ import ModelScript
         [2, 4]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .moss: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
     ]
 
+    // Recorded in meters from the Swift stones in `hexagon`, seed 1234, keyed by [style, level]. Most of each
+    // moss cap is inside its rock; ModelScript's union keeps only the part that shows, so moss bounds are smaller
+    // (Swift [0, 1]: [-0.5283, 0.5157, -0.7923]...[1.4188, 1.0817, 0.7493]).
+    static let stoneSets: [[Int]: [Paint: Bounds]] = [
+        [0, 1]: [.moss: Bounds(min: [-0.5283, 0.6638, -0.5762], max: [1.4188, 1.0589, 0.6359]), .stone: Bounds(min: [-0.8260, -0.6102, -1.2638], max: [1.6512, 1.4497, 1.1897])],
+        [0, 4]: [.moss: Bounds(min: [-0.6768, 0.6584, -1.4374], max: [2.4106, 1.0565, 1.7414]), .stone: Bounds(min: [-0.9074, -0.9253, -1.9373], max: [2.8386, 1.9145, 2.1169])],
+        [1, 2]: [.stoneLight: Bounds(min: [-0.7449, -0.4874, -1.2713], max: [2.1058, 1.3114, 1.9816])],
+        [2, 1]: [.stone: Bounds(min: [-0.7650, 0.0132, -0.6637], max: [0.7650, 1.5864, 0.6637])],
+        [2, 4]: [.stone: Bounds(min: [-0.7650, 0.0132, -0.6637], max: [0.7650, 2.4318, 0.6637])],
+    ]
+
+    @Test(arguments: Array(stoneSets.keys)) func stones(key: [Int]) {
+        let item = Item(kind: .stones, style: key[0], level: key[1], group: 0, seed: 1234, rotation: 0)
+        Self.expectProp(item, polygon: Self.hexagon, matches: Self.stoneSets[key]!)
+    }
+
     // Recorded in meters from the Swift azaleas in `hexagon`, seed 1234, keyed by [style, level]. Flowers buried
     // in a neighboring bush are dropped by ModelScript's union (Swift: [2, 2] min y 0.4727, [3, 3] min z -0.8051).
     static let azaleas: [[Int]: [Paint: Bounds]] = [

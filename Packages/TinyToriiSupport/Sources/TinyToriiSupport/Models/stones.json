@@ -1,0 +1,28 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // STYLE 2: a stack of count($RY) stones, each 0.105 smaller than the one below, turned RY degrees about y.
+  // Otherwise: rocks at (X, Z) with size S, turned by Euler angles (RX, RY, RZ) in degrees; STYLE 0 adds moss
+  // on top. The app picks positions and turns from the item's seed. ROCK is the stone paint.
+  "name": "Stones",
+  "parameters": {
+    "STYLE": 0, "ROCK": "#9C978E",
+    "X": [0], "Z": [0], "S": [1],
+    "RX": [0], "RY": [0], "RZ": [0]
+  },
+  "palette": { "rock": "$ROCK", "moss": "#5E8040" },
+  "body": [
+    { "repeat": { "count": "count($RY)", "step": [0, 0, 0], "parts": [
+      // Stone I has size 0.77 - 0.105 I and sits on the ones below, each 0.8 of its size tall.
+      { "icosahedron": { "radius": 1 }, "color": "rock",
+        "at": [0, "0.8 * (0.77 * $I - 0.105 * $I * ($I - 1) / 2) + 0.4 * (0.77 - 0.105 * $I)", 0],
+        "rotate": [0, "$RY[$I]", 0],
+        "scale": ["0.77 - 0.105 * $I", "0.45 * (0.77 - 0.105 * $I)", "0.77 - 0.105 * $I"] }
+    ] }, "if": "$STYLE == 2" },
+    { "repeat": { "count": "count($S)", "step": [0, 0, 0], "parts": [
+      { "icosahedron": { "radius": 1 }, "color": "rock", "at": ["$X[$I]", "$S[$I] * 0.3", "$Z[$I]"],
+        "rotate": ["$RX[$I]", "$RY[$I]", "$RZ[$I]"], "scale": ["$S[$I]", "$S[$I] * 0.7", "$S[$I] * 0.85"] },
+      { "icosahedron": { "radius": 1 }, "color": "moss", "at": ["$X[$I]", "$S[$I] * 0.62", "$Z[$I]"],
+        "scale": ["$S[$I] * 0.7", "$S[$I] * 0.18", "$S[$I] * 0.6"], "if": "$STYLE == 0" }
+    ] }, "if": "$STYLE != 2" }
+  ]
+}

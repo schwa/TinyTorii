@@ -113,23 +113,7 @@ enum PropMesher {
         case .tanuki where item.style == 1:
             Creatures.tanukiStatue(builder)
         case .stones:
-            if item.style == 2 {
-                // Stacked stones.
-                var y: Float = 0
-                for index in 0..<(2 + item.level) {
-                    let size = 0.77 - Float(index) * 0.105
-                    builder.blob(.stone, center: [0, y + size * 0.4, 0], scale: [size, size * 0.45, size], rotation: simd_quatf(angle: random.range(0, 6), axis: [0, 1, 0]))
-                    y += size * 0.8
-                }
-            } else {
-                for point in GroundMesher.scatter(points: polygon, center: .zero, count: item.level + 1, margin: 0.6, random: &random) {
-                    let size = random.range(0.98, 1.75)
-                    builder.blob(item.style == 0 ? .stone : .stoneLight, center: point.lifted(size * 0.3), scale: [size, size * 0.7, size * 0.85], rotation: simd_quatf(angle: random.range(0, 6), axis: simd_normalize([random.signed(), 2, random.signed()])))
-                    if item.style == 0 {
-                        builder.blob(.moss, center: point.lifted(size * 0.62), scale: [size * 0.7, size * 0.18, size * 0.6])
-                    }
-                }
-            }
+            stones(builder, item: item, polygon: polygon, random: &random)
         default:
             break
         }
@@ -332,6 +316,37 @@ enum PropMesher {
             builder.append(try ModelLibrary.compile("koi-pond", parameters: parameters))
         } catch {
             assertionFailure("koi-pond.json: \(error)")
+        }
+    }
+
+    // A stack of stones (style 2) or scattered rocks; the seed places them and stones.json draws them.
+    static func stones(_ builder: MeshBuilder, item: Item, polygon: [SIMD2<Float>], random: inout SeededRandom) {
+        let degree: Float = 180 / .pi
+        var x: [Double] = [], z: [Double] = [], sizes: [Double] = []
+        var turns: [SIMD3<Float>] = []
+        if item.style == 2 {
+            for _ in 0..<(2 + item.level) {
+                turns.append([0, random.range(0, 6) * degree, 0])
+            }
+        } else {
+            for point in GroundMesher.scatter(points: polygon, center: .zero, count: item.level + 1, margin: 0.6, random: &random) {
+                x.append(Double(point.x))
+                z.append(Double(point.y))
+                sizes.append(Double(random.range(0.98, 1.75)))
+                let turn = simd_quatf(angle: random.range(0, 6), axis: simd_normalize([random.signed(), 2, random.signed()]))
+                turns.append(eulerXYZ(turn) * degree)
+            }
+        }
+        let parameters: [String: ModelParameter] = [
+            "STYLE": .number(Double(item.style)),
+            "ROCK": ModelLibrary.hex(item.style == 1 ? .stoneLight : .stone),
+            "X": .numbers(x), "Z": .numbers(z), "S": .numbers(sizes),
+            "RX": .numbers(turns.map { Double($0.x) }), "RY": .numbers(turns.map { Double($0.y) }), "RZ": .numbers(turns.map { Double($0.z) }),
+        ]
+        do {
+            builder.append(try ModelLibrary.compile("stones", parameters: parameters))
+        } catch {
+            assertionFailure("stones.json: \(error)")
         }
     }
 
