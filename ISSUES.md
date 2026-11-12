@@ -321,12 +321,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 17: Paper lantern is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:50Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:49:06Z
+closed: 2026-11-12T19:49:06Z
 +++
 
 The paper lantern string is built in Swift (`PropMesher`, `.paperLantern`): two poles and a row of lanterns. Level sets pole height and lantern count; styles set lantern colors.

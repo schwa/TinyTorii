@@ -33,33 +33,7 @@ enum PropMesher {
                 stoneLantern(builder, at: position, style: item.style)
             }
         case .paperLantern:
-            let paint: [Paint] = switch item.style {
-            case 1: [.lanternWhite]
-            case 2: [.lanternRed, .lanternWhite, .lanternYellow]
-            default: [.lanternRed]
-            }
-            // Two poles with a rope of lanterns between them.
-            let half: Float = 0.6
-            let height: Float = 1.2 + Float(item.level) * 0.15
-            for side: Float in [-1, 1] {
-                builder.cylinder(.darkWood, from: [side * half, 0, 0], to: [side * half, height, 0], radius: 0.035)
-            }
-            let count = 2 + item.level
-            for index in 0..<count {
-                let t = (Float(index) + 0.5) / Float(count)
-                let x = -half + t * half * 2
-                let sag = 0.15 * (1 - pow(2 * t - 1, 2))
-                let y = height - 0.05 - sag
-                builder.cylinder(.twine, from: [x, y, 0], to: [x, y - 0.08, 0], radius: 0.006, sides: 3)
-                builder.blob(paint[index % paint.count], center: [x, y - 0.2, 0], scale: [0.09, 0.13, 0.09])
-                builder.cylinder(.blackWood, from: [x, y - 0.33, 0], to: [x, y - 0.31, 0], radius: 0.05)
-            }
-            for index in 0..<16 {
-                let t0 = Float(index) / 16, t1 = Float(index + 1) / 16
-                let a = SIMD3<Float>(-half + t0 * half * 2, height - 0.05 - 0.15 * (1 - pow(2 * t0 - 1, 2)), 0)
-                let b = SIMD3<Float>(-half + t1 * half * 2, height - 0.05 - 0.15 * (1 - pow(2 * t1 - 1, 2)), 0)
-                builder.beam(.twine, from: a, to: b, width: 0.012, height: 0.012)
-            }
+            paperLanterns(builder, style: item.style, level: item.level)
         case .bellTower:
             let paint: Paint = item.style == 0 ? .vermilion : .darkWood
             builder.box(.stone, center: [0, 0.1, 0], size: [1.1, 0.2, 1.1])
@@ -233,6 +207,31 @@ enum PropMesher {
     }
 
     // Parameters for Models/great-torii.json. Style 2 is Itsukushima's: vermilion with braced legs.
+    // Parameters for Models/paper-lantern.json: 2 + level lanterns, colored in turn from the style's paints.
+    static func paperLanternParameters(style: Int, level: Int) -> [String: ModelParameter] {
+        let paint: [Paint] = switch style {
+        case 1: [.lanternWhite]
+        case 2: [.lanternRed, .lanternWhite, .lanternYellow]
+        default: [.lanternRed]
+        }
+        let count = 2 + level
+        var parameters: [String: ModelParameter] = ["HEIGHT": .number(1.2 + Double(level) * 0.15), "COUNT": .number(Double(count))]
+        for row in 0..<3 {
+            parameters["ROW\(row)"] = .number(Double(max(0, (count - row + 2) / 3)))
+            parameters["LANTERN\(row)"] = ModelLibrary.hex(paint[row % paint.count])
+        }
+        return parameters
+    }
+
+    // Two poles with a rope of lanterns between them.
+    static func paperLanterns(_ builder: MeshBuilder, style: Int, level: Int) {
+        do {
+            builder.append(try ModelLibrary.compile("paper-lantern", parameters: paperLanternParameters(style: style, level: level)))
+        } catch {
+            assertionFailure("paper-lantern.json: \(error)")
+        }
+    }
+
     static func greatToriiParameters(style: Int) -> [String: ModelParameter] {
         let paints = toriiPaints(style: style == 2 ? 0 : style)
         return [

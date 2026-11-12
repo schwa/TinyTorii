@@ -1,0 +1,52 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // Two poles 1.2 apart with a sagging rope of COUNT paper lanterns between them, HEIGHT tall. Lantern N's paint is
+  // LANTERN0, LANTERN1 or LANTERN2 by N mod 3; ROW0-2 say how many lanterns each of those gets (expressions have no
+  // modulo, so the caller counts them).
+  "name": "Paper lanterns",
+  "parameters": {
+    "HEIGHT": 1.2, "COUNT": 2, "ROW0": 1, "ROW1": 1, "ROW2": 0,
+    "LANTERN0": "#D03A2A", "LANTERN1": "#D03A2A", "LANTERN2": "#D03A2A",
+    "HALF": 0.6,
+    "ROPE": "$HEIGHT - 0.05"
+  },
+  "palette": {
+    "lantern0": "$LANTERN0", "lantern1": "$LANTERN1", "lantern2": "$LANTERN2",
+    "darkWood": "#4A3324", "twine": "#2A2420", "blackWood": "#262321"
+  },
+  "components": {
+    "lantern": {
+      "description": "Lantern number N hanging from the rope, in the color of the part that uses it.",
+      "parameters": {
+        "N": 0,
+        "T": "($N + 0.5) / $COUNT",
+        "X": "-$HALF + $T * $HALF * 2",
+        "Y": "$ROPE - 0.15 * (1 - (2 * $T - 1) * (2 * $T - 1))"
+      },
+      "parts": [
+        { "cylinder": { "bottom": 0.006, "top": 0.006, "height": 0.08, "segments": 3 }, "color": "twine", "at": ["$X", "$Y - 0.04", 0] },
+        { "icosahedron": { "radius": 1 }, "scale": [0.09, 0.13, 0.09], "at": ["$X", "$Y - 0.2", 0] },
+        { "cylinder": { "bottom": 0.05, "top": 0.05, "height": 0.02, "segments": 8 }, "color": "blackWood", "at": ["$X", "$Y - 0.32", 0] }
+      ]
+    }
+  },
+  "body": [
+    { "mirror": [
+      { "cylinder": { "bottom": 0.035, "top": 0.035, "height": "$HEIGHT", "segments": 8 }, "color": "darkWood", "at": ["$HALF", "$HEIGHT / 2", 0] }
+    ] },
+    { "repeat": { "count": "$ROW0", "step": [0, 0, 0], "parts": [{ "use": "lantern", "with": { "N": "3 * $I" } }] }, "color": "lantern0" },
+    { "repeat": { "count": "$ROW1", "step": [0, 0, 0], "parts": [{ "use": "lantern", "with": { "N": "1 + 3 * $I" } }] }, "color": "lantern1" },
+    { "repeat": { "count": "$ROW2", "step": [0, 0, 0], "parts": [{ "use": "lantern", "with": { "N": "2 + 3 * $I" } }] }, "color": "lantern2" },
+    { "repeat": { "count": 16, "step": [0, 0, 0], "parts": [
+      { "deform": {
+        "parts": [
+          { "box": ["$HALF / 8", 0.012, 0.012], "at": ["-$HALF + ($I + 0.5) * $HALF / 8", "$ROPE - 0.15", 0] }
+        ],
+        "ops": [
+          { "raise": { "amount": 0.15, "axis": "x", "from": 0, "to": "$HALF", "power": 2 } },
+          { "raise": { "amount": 0.15, "axis": "x", "from": 0, "to": "-$HALF", "power": 2 } }
+        ]
+      } }
+    ] }, "color": "twine" }
+  ]
+}
