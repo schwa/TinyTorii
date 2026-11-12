@@ -123,12 +123,13 @@ Per-model issues are labelled `modelscript`. Related: #4 (meter scale).
 ## 6: Crane is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:49Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:20:04Z
+closed: 2026-11-12T19:20:04Z
 +++
 
 The crane animal is built in Swift (`Creatures.mesh`, `.crane`). Two styles differ by body and neck color and a red crown on style 0.

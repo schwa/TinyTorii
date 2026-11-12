@@ -45,7 +45,7 @@ let package = Package(
         ),
         .testTarget(
             name: "TinyToriiSupportTests",
-            dependencies: ["TinyToriiSupport"]
+            dependencies: ["TinyToriiSupport", .product(name: "ModelScript", package: "ModelScript")]
         ),
     ],
     swiftLanguageModes: [.v6]

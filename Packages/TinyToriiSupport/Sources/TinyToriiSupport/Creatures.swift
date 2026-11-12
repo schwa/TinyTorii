@@ -169,16 +169,10 @@ final class Creatures {
         switch kind {
         case .crane:
             let body: Paint = style == 0 ? .foxWhite : .stoneLight
-            b.blob(body, center: [0, 0.32, 0], scale: [0.07, 0.07, 0.13])
-            b.blob(.blackWood, center: [0, 0.32, -0.12], scale: [0.06, 0.05, 0.07])
-            b.frustum(style == 0 ? .blackWood : .stoneLight, from: [0, 0.36, 0.08], to: [0, 0.55, 0.13], radiusA: 0.02, radiusB: 0.013, sides: 5)
-            b.blob(body, center: [0, 0.56, 0.14], scale: SIMD3(repeating: 0.025))
-            if style == 0 {
-                b.blob(.bib, center: [0, 0.58, 0.14], scale: SIMD3(repeating: 0.013))
-            }
-            b.cone(.bamboo, base: [0, 0.56, 0.155], tip: [0, 0.55, 0.23], radius: 0.008, sides: 4)
-            for side: Float in [-1, 1] {
-                b.cylinder(.blackWood, from: [side * 0.025, 0, 0], to: [side * 0.025, 0.28, 0], radius: 0.006, sides: 4)
+            do {
+                b.append(try ModelLibrary.compile("crane", parameters: ["STYLE": .number(Double(style)), "BODY": ModelLibrary.hex(body)]))
+            } catch {
+                assertionFailure("crane.json: \(error)")
             }
         case .frog:
             let skin: Paint = style == 0 ? .momijiGreen : .cedar

@@ -7,7 +7,7 @@ import SwiftMesh
 final class MeshBuilder {
     private(set) var positions: [SIMD3<Float>] = []
     private var normals: [SIMD3<Float>] = []
-    private var coordinates: [SIMD2<Float>] = []
+    private(set) var coordinates: [SIMD2<Float>] = []
     // One submesh per surface; the paint is a palette texture coordinate, so a whole chunk is one or two draws.
     private var groups: [Surface: [UInt32]] = [:]
     private var order: [Surface] = []
