@@ -60,6 +60,30 @@ import ModelScript
         }
     }
 
+    @Test func torii() throws {
+        let sizes: [(width: Float, height: Float, thickness: Float)] = [(0.75, 1.0, 0.06), (1.7, 2.4, 0.13)]
+        let expected: [[[Paint: Bounds]]] = [
+            [
+                [.blackWood: Self.bounds([-0.6204, 0.0000, -0.0480], [0.6204, 1.0714, 0.0480]), .vermilion: Self.bounds([-0.4875, -0.0007, -0.0450], [0.4875, 0.9425, 0.0450])],
+                [.blackWood: Self.bounds([-0.4380, 0.0000, -0.0480], [0.4380, 0.0800, 0.0480]), .stone: Self.bounds([-0.6204, -0.0007, -0.0450], [0.6204, 1.0714, 0.0450]), .stoneDark: Self.bounds([-0.0420, 0.7500, -0.0150], [0.0420, 0.8900, 0.0150])],
+                [.blackWood: Self.bounds([-0.6204, -0.0007, -0.0480], [0.6204, 1.0714, 0.0480]), .gold: Self.bounds([-0.0420, 0.7500, -0.0150], [0.0420, 0.8900, 0.0150])],
+            ],
+            // The kasagi's end segments are sheared, not rotated, so their ends stay vertical: x reaches 1.394 where
+            // Swift's tilted beam corners reached 1.4063.
+            [
+                [.blackWood: Self.bounds([-1.3940, 0.0000, -0.1040], [1.3940, 2.5545, 0.1040]), .vermilion: Self.bounds([-1.1050, -0.0015, -0.0975], [1.1050, 2.2568, 0.0975])],
+                [.blackWood: Self.bounds([-0.9880, 0.0000, -0.1040], [0.9880, 0.1920, 0.1040]), .stone: Self.bounds([-1.3940, -0.0015, -0.0975], [1.3940, 2.5545, 0.0975]), .stoneDark: Self.bounds([-0.0910, 1.8000, -0.0325], [0.0910, 2.1360, 0.0325])],
+                [.blackWood: Self.bounds([-1.3940, -0.0015, -0.1040], [1.3940, 2.5545, 0.1040]), .gold: Self.bounds([-0.0910, 1.8000, -0.0325], [0.0910, 2.1360, 0.0325])],
+            ],
+        ]
+        for (size, styles) in zip(sizes, expected) {
+            for (style, bounds) in styles.enumerated() {
+                let parameters = PropMesher.toriiParameters(width: size.width, height: size.height, thickness: size.thickness, paints: PropMesher.toriiPaints(style: style))
+                try Self.expect("torii", parameters: parameters, matches: bounds)
+            }
+        }
+    }
+
     @Test(arguments: [Paint.foxWhite, .foxStone, .bronze]) func foxStatue(paint: Paint) throws {
         try Self.expect("fox-statue", parameters: ["STATUE": ModelLibrary.hex(paint)], matches: [
             .bib: Self.bounds([0.0260, 0.5490, -0.0766], [0.0940, 0.6510, 0.0766]),

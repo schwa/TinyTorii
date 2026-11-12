@@ -1,3 +1,4 @@
+import ModelScript
 import simd
 
 // Small things, built in local space: origin on the ground at the cell center, rotated by the item's rotation.
@@ -234,26 +235,25 @@ enum PropMesher {
         }
     }
 
+    // Parameters for Models/torii.json.
+    static func toriiParameters(width: Float, height: Float, thickness: Float, paints: ToriiPaints) -> [String: ModelParameter] {
+        [
+            "WIDTH": .number(Double(width)), "HEIGHT": .number(Double(height)), "THICKNESS": .number(Double(thickness)),
+            "POST": ModelLibrary.hex(paints.post), "TOP": ModelLibrary.hex(paints.top), "PLAQUE": ModelLibrary.hex(paints.plaque),
+        ]
+    }
+
     static func torii(_ builder: MeshBuilder, at origin: SIMD3<Float>, width: Float, height: Float, thickness: Float, paints: ToriiPaints, random: inout SeededRandom) {
-        let half = width / 2
-        for side: Float in [-1, 1] {
-            builder.frustum(paints.post, from: origin + [side * half * 1.04, 0, 0], to: origin + [side * half, height * 0.9, 0], radiusA: thickness * 0.75, radiusB: thickness * 0.62, sides: 8)
-            builder.cylinder(.blackWood, from: origin + [side * half * 1.04, 0, 0], to: origin + [side * half * 1.04, height * 0.08, 0], radius: thickness * 0.8)
+        let previous = builder.transform
+        var translation = matrix_identity_float4x4
+        translation.columns.3 = SIMD4(origin, 1)
+        builder.setTransform(previous * translation)
+        do {
+            builder.append(try ModelLibrary.compile("torii", parameters: toriiParameters(width: width, height: height, thickness: thickness, paints: paints)))
+        } catch {
+            assertionFailure("torii.json: \(error)")
         }
-        // Nuki (tie beam), kasagi (top lintel, curving up at the ends) and shimaki under it.
-        builder.box(paints.post, center: origin + [0, height * 0.72, 0], size: [width * 1.25, thickness * 0.8, thickness * 0.6])
-        let topY = height * 0.92
-        builder.box(paints.post, center: origin + [0, topY, 0], size: [width * 1.3, thickness * 0.75, thickness * 1.1])
-        let segments = 6
-        let topHalf = width * 0.82
-        for index in 0..<segments {
-            let t0 = Float(index) / Float(segments), t1 = Float(index + 1) / Float(segments)
-            let x0 = -topHalf + t0 * topHalf * 2, x1 = -topHalf + t1 * topHalf * 2
-            let curve: (Float) -> Float = { x in pow(abs(x) / topHalf, 2.2) * height * 0.08 }
-            builder.beam(paints.top, from: origin + [x0, topY + thickness * 0.8 + curve(x0), 0], to: origin + [x1, topY + thickness * 0.8 + curve(x1), 0], width: thickness * 1.3, height: thickness * 0.8)
-        }
-        // Gakuzuka plaque.
-        builder.box(paints.plaque, center: origin + [0, (height * 0.72 + topY) / 2, 0], size: [thickness * 1.4, height * 0.14, thickness * 0.5])
+        builder.setTransform(previous)
     }
 
     static func fox(_ builder: MeshBuilder, at origin: SIMD3<Float>, facing angle: Float, paint: Paint, random: inout SeededRandom) {
