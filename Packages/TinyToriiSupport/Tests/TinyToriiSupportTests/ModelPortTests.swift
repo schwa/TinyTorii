@@ -60,6 +60,22 @@ import ModelScript
         }
     }
 
+    @Test func bellTower() throws {
+        let bronze = Self.bounds([-0.2283, 0.7500, -0.2400], [0.2283, 1.5481, 0.2400])
+        let beam = Self.bounds([-0.3800, 1.0650, 0.2650], [0.3800, 1.1350, 0.3350])
+        let stone = Self.bounds([-0.5500, 0.0000, -0.5500], [0.5500, 0.2000, 0.5500])
+        let roof = Self.bounds([-0.7000, 1.7600, -0.7000], [0.7000, 2.3010, 0.7000])
+        try Self.expect("bell-tower", parameters: ["POSTS": ModelLibrary.hex(.vermilion), "ROOF": ModelLibrary.hex(.tileGrey)], matches: [
+            .bronze: bronze, .lightWood: beam, .stone: stone, .tileGrey: roof,
+            .darkWood: Self.bounds([-0.7000, 1.6200, -0.7000], [0.7000, 1.7600, 0.7000]),
+            .vermilion: Self.bounds([-0.4400, 0.2000, -0.4400], [0.4400, 1.7000, 0.4400]),
+        ])
+        try Self.expect("bell-tower", parameters: ["POSTS": ModelLibrary.hex(.darkWood), "ROOF": ModelLibrary.hex(.shingle)], matches: [
+            .bronze: bronze, .lightWood: beam, .stone: stone, .shingle: roof,
+            .darkWood: Self.bounds([-0.7000, 0.2000, -0.7000], [0.7000, 1.7600, 0.7000]),
+        ])
+    }
+
     // The Swift well's lid was a full disc over the top, so its water and inner wall were never visible; the model
     // leaves them out. The lid's corners on x sit inside the posts, which the union drops (x 0.3 -> 0.2919).
     @Test func well() throws {

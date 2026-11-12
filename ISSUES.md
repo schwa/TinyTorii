@@ -357,12 +357,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 19: Bell tower is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:51Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:54:51Z
+closed: 2026-11-12T19:54:51Z
 +++
 
 The bell tower is built in Swift (`PropMesher`, `.bellTower`). Two styles differ by post and roof color.

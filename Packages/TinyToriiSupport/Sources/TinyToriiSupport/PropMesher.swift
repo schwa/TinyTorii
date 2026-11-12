@@ -35,18 +35,15 @@ enum PropMesher {
         case .paperLantern:
             paperLanterns(builder, style: item.style, level: item.level)
         case .bellTower:
-            let paint: Paint = item.style == 0 ? .vermilion : .darkWood
-            builder.box(.stone, center: [0, 0.1, 0], size: [1.1, 0.2, 1.1])
-            for x: Float in [-0.4, 0.4] {
-                for z: Float in [-0.4, 0.4] {
-                    builder.box(paint, center: [x, 0.95, z], size: [0.08, 1.5, 0.08])
-                }
+            let parameters: [String: ModelParameter] = [
+                "POSTS": ModelLibrary.hex(item.style == 0 ? .vermilion : .darkWood),
+                "ROOF": ModelLibrary.hex(item.style == 0 ? .tileGrey : .shingle),
+            ]
+            do {
+                builder.append(try ModelLibrary.compile("bell-tower", parameters: parameters))
+            } catch {
+                assertionFailure("bell-tower.json: \(error)")
             }
-            builder.box(.darkWood, center: [0, 1.65, 0], size: [0.95, 0.06, 0.95])
-            hipRoof(builder, center: [0, 1.7, 0], size: 1.4, rise: 0.55, paint: item.style == 0 ? .tileGrey : .shingle)
-            builder.frustum(.bronze, from: [0, 0.75, 0], to: [0, 1.45, 0], radiusA: 0.24, radiusB: 0.17, sides: 10, caps: true)
-            builder.blob(.bronze, center: [0, 1.48, 0], scale: [0.17, 0.08, 0.17])
-            builder.beam(.lightWood, from: [-0.38, 1.1, 0.3], to: [0.38, 1.1, 0.3], width: 0.07, height: 0.07)
         case .zenGarden:
             // Raked circles around a few rocks.
             let rocks = item.level + 1
@@ -287,18 +284,6 @@ enum PropMesher {
             assertionFailure("stone-lantern.json: \(error)")
         }
         builder.setTransform(previous)
-    }
-
-    static func hipRoof(_ builder: MeshBuilder, center: SIMD3<Float>, size: Float, rise: Float, paint: Paint) {
-        let half = size / 2
-        let corners: [SIMD3<Float>] = [[-half, 0, -half], [half, 0, -half], [half, 0, half], [-half, 0, half]].map { center + $0 }
-        let top = center + [0, rise, 0]
-        for index in 0..<4 {
-            let a = corners[index] + [0, 0.06, 0], b = corners[(index + 1) % 4] + [0, 0.06, 0]
-            BuildingMesher.sweep(builder, paint, bottom: (a, b), top: (top, top), curve: 1.7, steps: 3)
-            builder.quad(.darkWood, a, b, b - [0, 0.06, 0], a - [0, 0.06, 0], outwardFrom: center)
-        }
-        builder.blob(paint, center: top, scale: SIMD3(repeating: 0.06))
     }
 
     static func ring(radius: Float, y: Float, sides: Int) -> [SIMD3<Float>] {
