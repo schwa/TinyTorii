@@ -340,3 +340,85 @@ The bell tower is built in Swift (`PropMesher`, `.bellTower`). Two styles differ
 Part of #5. The fox (`Models/fox.json`) is the example.
 
 ---
+
+## 20: Stack overflow when camera target reaches the island edge
+
++++
+status: new
+priority: high
+kind: bug
+created: 2026-11-12T19:01:57Z
++++
+
+Panning the build camera to the edge of the island crashes with EXC_BAD_ACCESS (stack overflow).
+
+## Repro
+1. Zoom out to max distance.
+2. Edge-pan or key-pan the camera target until it reaches the island boundary (~`grid.radius * 1.2`).
+
+Not reliably reproducible; depends on the exact target where the clamp triggers.
+
+## Observed
+Backtrace is ~1500 frames of `TownModel._rtsPose.didset` (TownModel.swift:80) -> `TownModel.rtsPose.modify` -> `TownModel._rtsPose.setter`, all with the same `oldValue` (target ≈ [-25.09, 0, -18.54], yaw 14.70, pitch 1.5608, distance 110). Entered from `RTSPoseModifier` `onChange` (RTSMovementModifier.swift:227).
+
+The clamp in `rtsPose.didSet` writes `rtsPose.target`. With `@Observable` this re-enters `didSet`, and the clamped value (`simd_normalize(flat) * limit`) can have length slightly above `limit` in Float, so it clamps again forever.
+
+---
+
+## 21: Camera crash during orbit/zoom, not reproduced
+
++++
+status: new
+priority: medium
+kind: bug
+created: 2026-11-12T19:01:57Z
++++
+
+An earlier crash during build-camera interaction (orbit/zoom/pan) could not be reproduced. Diagnostic logging (Camera category: rtsPose / cameraMatrix transitions, faults on non-finite values) was added to TownModel to catch it.
+
+## Notes from a non-crashing run
+- SwiftUI logged `onChange(of: RTSCameraPose) action tried to update multiple times per frame.`
+- Many rtsPose updates are written 2-3 times with identical old/new values.
+- `yaw` is never wrapped (grows past 2π, reached ~14.7).
+
+No crash log or backtrace for the original crash yet.
+
+---
+
+## 22: Crash: 'Range requires lowerBound <= upperBound' in SceneGraphShadows when camera pose becomes NaN
+
++++
+status: new
+priority: high
+kind: bug
+created: 2026-11-12T19:02:36Z
++++
+
+The app crashes during rendering with a fatal error in SceneSprockets shadow setup. Seen on iPad (UIKit run loop), build-mode camera. Repro steps unknown.
+
+## Error
+
+```
+Fatal error: Range requires lowerBound <= upperBound
+frame #4: SceneGraphShadows.shadowViewsAndDroppedLights(lights=2 values, bounds=(min = (NaN, NaN, NaN), max = (NaN, NaN, NaN))) at Shadows.swift:246:118
+frame #5: SceneGraphShadows.prepare(entries=59 values, ..., bounds=(min = (-67.6, -0.9, -67.6), max = (67.6, 5.39, 67.6)), viewSize=(width = 2752, height = 2064)) at Shadows.swift:115:40
+frame #6: closure #4 in SceneGraphElement.body.getter at SceneGraphRenderer.swift:152:30
+... MetalSprockets reconcile / MTKView draw / display link
+```
+
+Shadows.swift:246 is the directional light `OrthographicProjection(... depthMode: .reversed(zClip: radius * 0.5 ... radius * 3.5))`, with `radius` = NaN.
+
+## Observations
+
+- Scene bounds passed to `prepare` are finite. They become NaN after `cameraRelative(..., to: cameraPosition)`, so the camera matrix given to the renderer has a NaN translation.
+- In the debugger the camera-relative light transform has a finite rotation but a NaN translation; `center`, `radius`, `position`, `far`, `near`, `eye` are all NaN.
+- The camera matrix comes from `TownModel.rtsPose.cameraMatrix` (Interaction3D `RTSCameraPose`). A NaN/infinite `target` or `distance` in the pose gives this pattern.
+- Interaction3D gesture paths (`viewFraction`, `magnify`, `clampedDistance`) appear guarded against zero view height and zero ratios.
+- Unverified suspect: the `TownModel.cameraMatrix` setter (written back by SceneView) does not reject non-finite matrices or clamp `distance`; an infinite translation would produce infinite `distance` and then NaN translation.
+- Camera logging (subsystem `io.schwa.TinyTorii`, category `Camera`) was added to `TownModel` to catch which writer produces the non-finite value.
+
+## Expected
+
+No crash; the camera pose never becomes non-finite.
+
+---
