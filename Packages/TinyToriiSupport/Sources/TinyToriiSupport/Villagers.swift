@@ -26,23 +26,77 @@ final class Villagers {
         self.parent = SceneGraph.Node(parent: parent, label: "Villagers")
     }
 
+    // A sōsaku kokeshi: a turned wooden body with no arms or legs, a big round head, and painted bands. Each look has
+    // its own body profile, as creative kokeshi differ from one maker to the next.
+    private struct Kokeshi {
+        // Body radius at heights from the base to the neck.
+        var profile: [(height: Float, radius: Float)]
+        var body: Paint
+        // Painted rings: height and paint.
+        var bands: [(height: Float, paint: Paint)]
+        var headRadius: Float
+        var hair: Paint
+    }
+
+    private static let kokeshi: [Kokeshi] = [
+        // Straight column.
+        Kokeshi(profile: [(0, 0.042), (0.19, 0.042)], body: .norenRed, bands: [(0.03, .gold), (0.15, .blackWood)], headRadius: 0.05, hair: .blackWood),
+        // Widening toward the base.
+        Kokeshi(profile: [(0, 0.058), (0.18, 0.03)], body: .noren, bands: [(0.05, .sakura), (0.11, .sakura)], headRadius: 0.048, hair: .blackWood),
+        // Pinched waist.
+        Kokeshi(profile: [(0, 0.048), (0.09, 0.032), (0.19, 0.044)], body: .plasterCream, bands: [(0.09, .vermilion)], headRadius: 0.052, hair: .darkWood),
+        // Widening toward the shoulders.
+        Kokeshi(profile: [(0, 0.03), (0.18, 0.05)], body: .momijiOrange, bands: [(0.14, .lanternWhite), (0.06, .blackWood)], headRadius: 0.05, hair: .blackWood),
+        // Round belly.
+        Kokeshi(profile: [(0, 0.035), (0.07, 0.055), (0.18, 0.034)], body: .sakuraDeep, bands: [(0.07, .lanternWhite)], headRadius: 0.046, hair: .darkWood),
+        // Slim and tall.
+        Kokeshi(profile: [(0, 0.036), (0.2, 0.03)], body: .pineMid, bands: [(0.04, .gold), (0.1, .gold), (0.16, .gold)], headRadius: 0.044, hair: .blackWood),
+        // Bell.
+        Kokeshi(profile: [(0, 0.06), (0.05, 0.05), (0.18, 0.032)], body: .lanternWhite, bands: [(0.03, .norenRed), (0.12, .norenRed)], headRadius: 0.05, hair: .blackWood),
+        // Short and stout, with a big head.
+        Kokeshi(profile: [(0, 0.05), (0.16, 0.045)], body: .iris, bands: [(0.08, .umePink)], headRadius: 0.058, hair: .darkWood),
+    ]
+
     private func makeLooks(device: MTLDevice) {
-        let outfits: [(Paint, Paint, Paint?)] = [
-            (.noren, .thatch, .lattice), (.norenRed, .blackWood, nil), (.plasterCream, .thatch, .noren),
-            (.momijiOrange, .blackWood, nil), (.sakuraDeep, .darkWood, nil), (.pineMid, .thatch, .lattice),
-            (.lanternWhite, .lattice, .norenRed), (.iris, .darkWood, nil),
-        ]
-        looks = outfits.compactMap { robe, hair, hat in
+        looks = Self.kokeshi.compactMap { doll in
             let builder = MeshBuilder()
-            builder.frustum(robe, from: [0, 0, 0], to: [0, 0.2, 0], radiusA: 0.055, radiusB: 0.035, sides: 6, caps: true)
-            builder.box(.blackWood, center: [0, 0.16, 0], size: [0.075, 0.02, 0.075])
-            builder.blob(.foxWhite, center: [0, 0.25, 0], scale: SIMD3(repeating: 0.035))
-            builder.blob(hair, center: [-0.008, 0.265, 0], scale: [0.034, 0.03, 0.036])
-            if let hat {
-                builder.cone(hat == .lattice ? .thatch : hat, base: [0, 0.27, 0], tip: [0, 0.32, 0], radius: 0.075, sides: 8, capped: true)
+            let sides = 10
+            for (lower, upper) in zip(doll.profile, doll.profile.dropFirst()) {
+                builder.frustum(doll.body, from: [0, lower.height, 0], to: [0, upper.height, 0], radiusA: lower.radius, radiusB: upper.radius, sides: sides, caps: true)
+            }
+            for band in doll.bands {
+                // Sit the ring just proud of the body so it reads as paint.
+                let radius = Self.radius(of: doll.profile, at: band.height) + 0.002
+                builder.frustum(band.paint, from: [0, band.height - 0.008, 0], to: [0, band.height + 0.008, 0], radiusA: radius, radiusB: radius, sides: sides)
+            }
+            let neck = doll.profile.last!.height
+            let head = SIMD3<Float>(0, neck + doll.headRadius * 0.9, 0)
+            // A turned head: the face below, a painted hair cap above. The face looks along +x.
+            Self.sphere(builder, center: head, radius: doll.headRadius, fromLatitude: -.pi / 2, toLatitude: 0.35, paint: .foxWhite)
+            Self.sphere(builder, center: head, radius: doll.headRadius * 1.03, fromLatitude: 0.3, toLatitude: .pi / 2, paint: doll.hair)
+            for side: Float in [-1, 1] {
+                builder.box(.blackWood, center: head + [doll.headRadius * 0.95, 0.004, side * doll.headRadius * 0.32], size: [0.008, 0.004, 0.012])
             }
             return builder.build(device: device, label: "Villager")
         }
+    }
+
+    // A band of a sphere between two latitudes, built from stacked rings.
+    private static func sphere(_ builder: MeshBuilder, center: SIMD3<Float>, radius: Float, fromLatitude: Float, toLatitude: Float, paint: Paint) {
+        let steps = 5
+        for step in 0..<steps {
+            let lower = fromLatitude + (toLatitude - fromLatitude) * Float(step) / Float(steps)
+            let upper = fromLatitude + (toLatitude - fromLatitude) * Float(step + 1) / Float(steps)
+            builder.frustum(paint, from: center + [0, radius * sin(lower), 0], to: center + [0, radius * sin(upper), 0], radiusA: max(0.0005, radius * cos(lower)), radiusB: max(0.0005, radius * cos(upper)), sides: 12, caps: step == steps - 1 && toLatitude < .pi / 2)
+        }
+    }
+
+    private static func radius(of profile: [(height: Float, radius: Float)], at height: Float) -> Float {
+        for (lower, upper) in zip(profile, profile.dropFirst()) where height <= upper.height {
+            let fraction = (height - lower.height) / (upper.height - lower.height)
+            return lower.radius + (upper.radius - lower.radius) * max(0, min(1, fraction))
+        }
+        return profile.last!.radius
     }
 
     func reset(scene: TownScene) {

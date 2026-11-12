@@ -33,17 +33,20 @@ Expected: the build and explore UI are usable on iPhone in portrait and landscap
 ## 2: Villagers should look like sōsaku kokeshi dolls
 
 +++
-status: open
+status: closed
 priority: medium
 kind: feature
 labels: effort:m, area:models
 created: 2026-11-10T04:18:52Z
-updated: 2026-11-12T19:10:20Z
+updated: 2026-11-12T19:16:50Z
+closed: 2026-11-12T19:16:50Z
 +++
 
 The villager figures should have the look of sōsaku (creative) kokeshi dolls: wooden Japanese dolls with a simple turned body and a round head, no arms or legs, and modern, freely designed painted patterns. Unlike traditional kokeshi, sōsaku dolls vary in shape and decoration from one artist to another.
 
 Villagers are made in `Villagers.swift`.
+
+- `2026-11-12T19:16:50Z`: Villagers are now sōsaku kokeshi: lathe-turned bodies with eight different profiles (column, flared, waisted, bell, belly...), painted bands, a turned round head with a painted hair cap and two eye marks. No unit test: this is a visual change with no testable behavior; checked by rendering with torii-cli.
 
 ---
 
