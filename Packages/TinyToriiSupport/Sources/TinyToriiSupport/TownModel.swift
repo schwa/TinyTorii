@@ -2,6 +2,7 @@ import Foundation
 import GeometryLite3D
 import Interaction3D
 import Observation
+import os
 import SceneSprockets
 import simd
 
@@ -46,6 +47,8 @@ public enum Mode: String, Sendable {
     case explore
 }
 
+private let cameraLogger = Logger(subsystem: "io.schwa.TinyTorii", category: "Camera")
+
 @MainActor
 @Observable
 public final class TownModel {
@@ -67,6 +70,7 @@ public final class TownModel {
     public var rtsPose: RTSCameraPose {
         get { storedPose }
         set {
+            let oldValue = storedPose
             var pose = newValue
             // Keep the camera over the island.
             let limit = scene.town.grid.radius * 1.2
@@ -76,6 +80,10 @@ public final class TownModel {
                 pose.target = [clamped.x, pose.target.y, clamped.y]
             }
             storedPose = pose
+            cameraLogger.debug("rtsPose \(Self.describe(oldValue), privacy: .public) -> \(Self.describe(pose), privacy: .public)")
+            if !Self.isFinite(pose) {
+                cameraLogger.fault("rtsPose became non-finite: \(Self.describe(oldValue), privacy: .public) -> \(Self.describe(pose), privacy: .public)\n\(Thread.callStackSymbols.joined(separator: "\n"), privacy: .public)")
+            }
         }
     }
     private var storedPose = RTSCameraPose(target: .zero, yaw: 0.6, pitch: 0.7, distance: 48)
@@ -83,6 +91,10 @@ public final class TownModel {
     public var cameraMatrix: simd_float4x4? {
         get { rtsPose.cameraMatrix }
         set {
+            cameraLogger.debug("cameraMatrix set: \(newValue.map(Self.describe) ?? "nil", privacy: .public) pose: \(Self.describe(self.rtsPose), privacy: .public)")
+            if let newValue, !Self.isFinite(newValue) {
+                cameraLogger.fault("cameraMatrix set to non-finite matrix: \(Self.describe(newValue), privacy: .public)\n\(Thread.callStackSymbols.joined(separator: "\n"), privacy: .public)")
+            }
             // SceneView writes back the matrix we gave it. Converting it to a pose and back is not exact, so without
             // this check every write makes a slightly different matrix and SceneView writes again, forever.
             guard let newValue, !Self.isClose(newValue, rtsPose.cameraMatrix) else {
@@ -94,10 +106,29 @@ public final class TownModel {
             guard distance > 1e-4 else {
                 return
             }
+            cameraLogger.debug("cameraMatrix setter: offset \(String(describing: offset), privacy: .public) distance \(distance, privacy: .public)")
             rtsPose.distance = distance
             rtsPose.pitch = asin(max(-1, min(1, offset.y / distance)))
             rtsPose.yaw = atan2(offset.x, offset.z)
         }
+    }
+    private static func isFinite(_ matrix: simd_float4x4) -> Bool {
+        (0..<4).allSatisfy { index in
+            let column = matrix[index]
+            return column.x.isFinite && column.y.isFinite && column.z.isFinite && column.w.isFinite
+        }
+    }
+    private static func isFinite(_ pose: RTSCameraPose) -> Bool {
+        pose.target.x.isFinite && pose.target.y.isFinite && pose.target.z.isFinite && pose.yaw.isFinite && pose.pitch.isFinite && pose.distance.isFinite
+    }
+    private static func describe(_ matrix: simd_float4x4) -> String {
+        (0..<4).map { index in
+            let column = matrix[index]
+            return "[\(column.x), \(column.y), \(column.z), \(column.w)]"
+        }.joined(separator: " ")
+    }
+    private static func describe(_ pose: RTSCameraPose) -> String {
+        "target [\(pose.target.x), \(pose.target.y), \(pose.target.z)] yaw \(pose.yaw) pitch \(pose.pitch) distance \(pose.distance)"
     }
     private static func isClose(_ a: simd_float4x4, _ b: simd_float4x4) -> Bool {
         (0..<4).allSatisfy { simd_distance(a[$0], b[$0]) < 1e-3 }
