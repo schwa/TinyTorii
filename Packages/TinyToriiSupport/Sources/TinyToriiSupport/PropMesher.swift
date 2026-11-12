@@ -275,29 +275,19 @@ enum PropMesher {
         builder.setTransform(previous)
     }
 
+    // Kasuga lantern on a post, or (style 1) a yukimi lantern on short legs; style 2 is bronze.
     static func stoneLantern(_ builder: MeshBuilder, at origin: SIMD3<Float>, style: Int) {
         let stone: Paint = style == 2 ? .bronze : .stone
-        if style == 1 {
-            // Yukimi: wide roof on short curved legs.
-            for index in 0..<3 {
-                let angle = Float(index) / 3 * 2 * .pi
-                let foot = origin + [cos(angle) * 0.24, 0, sin(angle) * 0.24]
-                builder.beam(stone, from: foot, to: origin + [cos(angle) * 0.12, 0.3, sin(angle) * 0.12], width: 0.05, height: 0.05)
-            }
-            builder.box(stone, center: origin + [0, 0.32, 0], size: [0.24, 0.05, 0.24])
-            builder.box(.lanternFire, center: origin + [0, 0.42, 0], size: [0.16, 0.14, 0.16])
-            builder.cone(stone, base: origin + [0, 0.5, 0], tip: origin + [0, 0.66, 0], radius: 0.38, sides: 6, capped: true)
-            builder.blob(stone, center: origin + [0, 0.68, 0], scale: SIMD3(repeating: 0.05))
-            return
+        let previous = builder.transform
+        var translation = matrix_identity_float4x4
+        translation.columns.3 = SIMD4(origin, 1)
+        builder.setTransform(previous * translation)
+        do {
+            builder.append(try ModelLibrary.compile("stone-lantern", parameters: ["STYLE": .number(Double(style)), "STONE": ModelLibrary.hex(stone)]))
+        } catch {
+            assertionFailure("stone-lantern.json: \(error)")
         }
-        builder.frustum(stone, from: origin, to: origin + [0, 0.08, 0], radiusA: 0.17, radiusB: 0.14, sides: 6, caps: true)
-        builder.cylinder(stone, from: origin + [0, 0.08, 0], to: origin + [0, 0.5, 0], radius: 0.055, sides: 8)
-        builder.frustum(stone, from: origin + [0, 0.5, 0], to: origin + [0, 0.58, 0], radiusA: 0.1, radiusB: 0.17, sides: 6, caps: true)
-        builder.box(stone, center: origin + [0, 0.67, 0], size: [0.19, 0.18, 0.19])
-        builder.box(.lanternFire, center: origin + [0, 0.67, 0], size: [0.2, 0.1, 0.12])
-        builder.box(.lanternFire, center: origin + [0, 0.67, 0], size: [0.12, 0.1, 0.2])
-        builder.cone(stone, base: origin + [0, 0.76, 0], tip: origin + [0, 0.92, 0], radius: 0.24, sides: 6, capped: true)
-        builder.blob(stone, center: origin + [0, 0.95, 0], scale: [0.045, 0.06, 0.045])
+        builder.setTransform(previous)
     }
 
     static func hipRoof(_ builder: MeshBuilder, center: SIMD3<Float>, size: Float, rise: Float, paint: Paint) {

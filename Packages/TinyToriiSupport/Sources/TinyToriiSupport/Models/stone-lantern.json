@@ -1,0 +1,29 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // STYLE 1 is a yukimi lantern (wide roof on three short legs); otherwise a kasuga lantern on a post.
+  // STONE is the stone paint (bronze for a bronze lantern).
+  "name": "Stone lantern",
+  "parameters": { "STYLE": 0, "STONE": "#9C978E" },
+  "palette": { "stone": "$STONE", "lanternFire": "#FFD58A" },
+  "body": [
+    { "group": [
+      { "cylinder": { "bottom": 0.17, "top": 0.14, "height": 0.08, "segments": 6 }, "at": [0, 0.04, 0] },
+      { "cylinder": { "bottom": 0.055, "top": 0.055, "height": 0.42, "segments": 8 }, "at": [0, 0.29, 0] },
+      { "cylinder": { "bottom": 0.1, "top": 0.17, "height": 0.08, "segments": 6 }, "at": [0, 0.54, 0] },
+      { "box": [0.19, 0.18, 0.19], "at": [0, 0.67, 0] },
+      { "box": [0.2, 0.1, 0.12], "color": "lanternFire", "at": [0, 0.67, 0] },
+      { "box": [0.12, 0.1, 0.2], "color": "lanternFire", "at": [0, 0.67, 0] },
+      { "cylinder": { "bottom": 0.24, "top": 0, "height": 0.16, "segments": 6 }, "at": [0, 0.84, 0] },
+      { "icosahedron": { "radius": 1 }, "scale": [0.045, 0.06, 0.045], "at": [0, 0.95, 0] }
+    ], "color": "stone", "if": "$STYLE != 1" },
+    { "group": [
+      { "repeat": { "count": 3, "step": { "rotate": [0, 120, 0] }, "parts": [
+        { "box": [0.05, 0.3231, 0.05], "at": [0.18, 0.15, 0], "rotate": [0, 0, 21.8] }
+      ] } },
+      { "box": [0.24, 0.05, 0.24], "at": [0, 0.32, 0] },
+      { "box": [0.16, 0.14, 0.16], "color": "lanternFire", "at": [0, 0.42, 0] },
+      { "cylinder": { "bottom": 0.38, "top": 0, "height": 0.16, "segments": 6 }, "at": [0, 0.58, 0] },
+      { "icosahedron": { "radius": 1 }, "scale": [0.05, 0.05, 0.05], "at": [0, 0.68, 0] }
+    ], "color": "stone", "if": "$STYLE == 1" }
+  ]
+}

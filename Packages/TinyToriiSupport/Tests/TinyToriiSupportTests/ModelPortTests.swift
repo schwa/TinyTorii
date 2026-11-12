@@ -60,6 +60,22 @@ import ModelScript
         }
     }
 
+    @Test func stoneLantern() throws {
+        let kasuga = Self.bounds([-0.2078, 0.0000, -0.2400], [0.2078, 1.0010, 0.2400])
+        let kasugaFire = Self.bounds([-0.1000, 0.6200, -0.1000], [0.1000, 0.7200, 0.1000])
+        try Self.expect("stone-lantern", parameters: ["STYLE": .number(0), "STONE": ModelLibrary.hex(.stone)], matches: [.stone: kasuga, .lanternFire: kasugaFire])
+        try Self.expect("stone-lantern", parameters: ["STYLE": .number(1), "STONE": ModelLibrary.hex(.stone)], matches: [
+            .lanternFire: Self.bounds([-0.0800, 0.3500, -0.0800], [0.0800, 0.4900, 0.0800]),
+            .stone: Self.bounds([-0.3291, -0.0093, -0.3800], [0.3291, 0.7225, 0.3800]),
+        ])
+        try Self.expect("stone-lantern", parameters: ["STYLE": .number(2), "STONE": ModelLibrary.hex(.bronze)], matches: [.bronze: kasuga, .lanternFire: kasugaFire])
+        // A cell with several lanterns places each at its own spot.
+        let builder = MeshBuilder()
+        PropMesher.stoneLantern(builder, at: [0.5, 0, -0.25], style: 0)
+        let moved = try #require(Self.paintBounds(builder)[.stone])
+        #expect(simd_distance(moved.min, kasuga.min + [0.5, 0, -0.25]) < 0.01)
+    }
+
     @Test(arguments: 0..<8) func villager(look: Int) throws {
         let expected: [[Paint: Bounds]] = [
             [

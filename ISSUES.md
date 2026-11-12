@@ -249,12 +249,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 13: Stone lantern is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:50Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:36:00Z
+closed: 2026-11-12T19:36:00Z
 +++
 
 The stone lantern is built in Swift (`PropMesher.stoneLantern`). Styles differ in shape; the item's level sets how many lanterns stand in a ring.
