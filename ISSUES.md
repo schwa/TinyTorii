@@ -517,12 +517,13 @@ The zen garden (PropMesher, .zenGarden) is built in Swift: rocks with raked grav
 ## 25: Koi pond is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-12T21:07:52Z
-updated: 2026-11-12T21:25:41Z
+updated: 2026-11-12T22:26:48Z
+closed: 2026-11-12T22:26:48Z
 +++
 
 The koi pond (PropMesher, .koiPond) is built in Swift: edge stones scattered around the cell outline, koi, lily pads, lotus, reeds and irises. Placement depends on the cell polygon and the item seed. Formerly tracked by #5.

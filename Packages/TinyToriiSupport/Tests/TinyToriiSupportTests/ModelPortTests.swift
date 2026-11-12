@@ -50,10 +50,16 @@ import ModelScript
         }
     }
 
+    // A regular cell outline, for props that scatter things inside their cell.
+    static let hexagon: [SIMD2<Float>] = (0..<6).map { index in
+        let angle = Float(index) / 6 * 2 * .pi
+        return [cos(angle) * 3.675, sin(angle) * 3.675]
+    }
+
     // Builds a placed prop through PropMesher and checks each paint's bounds (in meters).
-    static func expectProp(_ item: Item, matches expected: [Paint: Bounds], sourceLocation: SourceLocation = #_sourceLocation) {
+    static func expectProp(_ item: Item, polygon: [SIMD2<Float>] = [], matches expected: [Paint: Bounds], sourceLocation: SourceLocation = #_sourceLocation) {
         let builder = MeshBuilder()
-        PropMesher.build(builder, item: item, polygon: [], joined: [])
+        PropMesher.build(builder, item: item, polygon: polygon, joined: [])
         let actual = paintBounds(builder)
         #expect(Set(actual.keys) == Set(expected.keys), "\(item) paints", sourceLocation: sourceLocation)
         for (paint, bounds) in expected {
@@ -415,6 +421,22 @@ import ModelScript
         [2, 1]: [.gravelLine: Bounds(min: [-1.7411, 0.0175, -1.6997], max: [2.3897, 0.0525, 2.2774]), .moss: Bounds(min: [-1.2749, -0.2943, -1.2749], max: [1.8486, 0.4343, 1.7720]), .stoneDark: Bounds(min: [-0.9458, -0.6355, -0.8940], max: [1.5531, 1.5990, 1.5341])],
         [2, 4]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .moss: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
     ]
+
+    // Recorded in meters from the Swift koi pond in `hexagon`, keyed by [style, seed]. In [1, 77] one koi is inside
+    // the dark rock, so ModelScript's union drops it (Swift: koiOrange max x 0.8665).
+    static let koiPonds: [[Int]: [Paint: Bounds]] = [
+        [0, 1234]: [.koiOrange: Bounds(min: [-0.9112, -0.8418, -0.9106], max: [1.4509, -0.6632, 1.6507]), .koiWhite: Bounds(min: [-0.7643, -0.8418, 0.9728], max: [-0.0391, -0.6632, 1.3903]), .lily: Bounds(min: [-1.2030, -0.7000, -2.1224], max: [1.2340, -0.7000, 1.5479]), .lotus: Bounds(min: [-0.3197, -0.6791, 1.0237], max: [-0.0219, -0.4409, 1.3214]), .stone: Bounds(min: [-1.7242, -0.3002, -2.1426], max: [3.1837, 0.4402, 2.2753])],
+        [0, 77]: [.koiOrange: Bounds(min: [-1.1306, -0.8418, -1.3368], max: [0.8665, -0.6632, 0.5329]), .lily: Bounds(min: [-2.1583, -0.7000, -2.2236], max: [0.3738, -0.7000, 1.1597]), .lotus: Bounds(min: [-1.5578, -0.6791, 0.5551], max: [-1.0497, -0.4409, 0.9332]), .stone: Bounds(min: [-3.4746, -0.2896, -2.8019], max: [2.0714, 0.4296, 1.9402])],
+        [1, 1234]: [.koiOrange: Bounds(min: [-0.9112, -0.8418, -0.9106], max: [1.4509, -0.6632, 1.6507]), .koiWhite: Bounds(min: [-0.7643, -0.8418, 0.9728], max: [-0.0391, -0.6632, 1.3903]), .stone: Bounds(min: [-1.7242, -0.3002, -2.1426], max: [3.1837, 0.4402, 2.2753]), .stoneDark: Bounds(min: [-0.3943, -1.2432, -0.5955], max: [1.0943, 0.5432, 0.5955])],
+        [1, 77]: [.koiOrange: Bounds(min: [-1.1306, -0.8418, -1.3368], max: [0.2712, -0.6632, 0.5329]), .stone: Bounds(min: [-3.4746, -0.2896, -2.8019], max: [2.0714, 0.4296, 1.9402]), .stoneDark: Bounds(min: [-0.3943, -1.2432, -0.5955], max: [1.0943, 0.5432, 0.5955])],
+        [2, 1234]: [.iris: Bounds(min: [-1.3320, 0.6509, -2.5941], max: [2.5694, 0.8891, 1.7802]), .koiOrange: Bounds(min: [-0.9112, -0.8418, -0.9106], max: [1.4509, -0.6632, 1.6507]), .koiWhite: Bounds(min: [-0.7643, -0.8418, 0.9728], max: [-0.0391, -0.6632, 1.3903]), .lily: Bounds(min: [-1.3243, -0.7173, -2.6856], max: [2.6177, 0.8750, 1.7440]), .stone: Bounds(min: [-1.7242, -0.3002, -2.1426], max: [3.1837, 0.4402, 2.2753])],
+        [2, 77]: [.iris: Bounds(min: [-2.6852, 0.6509, -2.7374], max: [0.1032, 0.8891, 1.2302]), .koiOrange: Bounds(min: [-1.1306, -0.8418, -1.3368], max: [0.8665, -0.6632, 0.5329]), .lily: Bounds(min: [-2.7808, -0.7177, -2.8928], max: [0.1480, 0.8750, 1.1781]), .stone: Bounds(min: [-3.4746, -0.2896, -2.8019], max: [2.0714, 0.4296, 1.9402])],
+    ]
+
+    @Test(arguments: Array(koiPonds.keys)) func koiPond(key: [Int]) {
+        let item = Item(kind: .koiPond, style: key[0], level: 1, group: 0, seed: UInt32(key[1]), rotation: 0)
+        Self.expectProp(item, polygon: Self.hexagon, matches: Self.koiPonds[key]!)
+    }
 
     @Test(arguments: Array(zenGardens.keys)) func zenGarden(key: [Int]) {
         let item = Item(kind: .zenGarden, style: key[0], level: key[1], group: 0, seed: 1234, rotation: 0)

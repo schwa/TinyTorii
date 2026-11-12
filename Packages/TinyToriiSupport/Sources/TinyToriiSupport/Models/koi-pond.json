@@ -1,0 +1,54 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // Everything is placed by the app from the item's seed and cell outline; angles are degrees.
+  // Edge stones: (SX, SZ), size factor SK, turned SA about y.
+  // Koi: body at (KX, KZ) heading KH, white when KW is 1; tail at (TX, TZ).
+  // STYLE 0: lily pads at (LX, LZ), a lotus on those with LOTUS 1.
+  // STYLE 2: reeds, cones centered at (CX, CY, CZ) with length CL turned by (CA, CB, CC); irises at (IX, IZ).
+  // Other styles: one dark rock.
+  "name": "Koi pond",
+  "parameters": {
+    "STYLE": 0,
+    "SX": [0], "SZ": [0], "SK": [1], "SA": [0],
+    "KX": [0], "KZ": [0], "KH": [0], "KW": [0], "TX": [-0.42], "TZ": [0],
+    "LX": [0], "LZ": [0], "LOTUS": [0],
+    "CX": [0], "CY": [0], "CZ": [0], "CL": [1], "CA": [0], "CB": [0], "CC": [0],
+    "IX": [0], "IZ": [0]
+  },
+  "palette": {
+    "stone": "#9C978E", "stoneDark": "#6E6A63", "koiOrange": "#F07A2A", "koiWhite": "#F7F4EE",
+    "lily": "#4F8A3A", "lotus": "#F2B6CC", "iris": "#6B4FB0"
+  },
+  "body": [
+    { "repeat": { "count": "count($SA)", "step": [0, 0, 0], "parts": [
+      { "icosahedron": { "radius": 1 }, "color": "stone", "at": ["$SX[$I]", 0.07, "$SZ[$I]"], "rotate": [0, "$SA[$I]", 0],
+        "scale": ["0.49 * $SK[$I]", "0.35 * $SK[$I]", "0.42 * $SK[$I]"] }
+    ] } },
+    { "repeat": { "count": "count($KH)", "step": [0, 0, 0], "parts": [
+      { "icosahedron": { "radius": 1 }, "color": "koiOrange", "at": ["$KX[$I]", -0.7525, "$KZ[$I]"], "rotate": [0, "$KH[$I]", 0],
+        "scale": [0.42, 0.105, 0.1575], "if": "$KW[$I] == 0" },
+      { "icosahedron": { "radius": 1 }, "color": "koiWhite", "at": ["$KX[$I]", -0.7525, "$KZ[$I]"], "rotate": [0, "$KH[$I]", 0],
+        "scale": [0.42, 0.105, 0.1575], "if": "$KW[$I] == 1" },
+      { "icosahedron": { "radius": 1 }, "color": "koiOrange", "at": ["$TX[$I]", -0.7525, "$TZ[$I]"], "scale": [0.14, 0.07, 0.14] }
+    ] } },
+    { "group": [
+      { "repeat": { "count": "count($LX)", "step": [0, 0, 0], "parts": [
+        { "cylinder": { "top": 0.385, "bottom": 0.385, "height": 0.002, "segments": 7 }, "color": "lily",
+          "at": ["$LX[$I]", -0.7, "$LZ[$I]"], "rotate": [0, 90, 0] },
+        { "icosahedron": { "radius": 1 }, "color": "lotus", "at": ["$LX[$I]", -0.56, "$LZ[$I]"], "scale": [0.175, 0.14, 0.175],
+          "if": "$LOTUS[$I] == 1" }
+      ] } }
+    ], "if": "$STYLE == 0" },
+    { "group": [
+      { "repeat": { "count": "count($CL)", "step": [0, 0, 0], "parts": [
+        { "cylinder": { "top": 0, "bottom": 0.0875, "height": "$CL[$I]", "segments": 3 }, "color": "lily",
+          "at": ["$CX[$I]", "$CY[$I]", "$CZ[$I]"], "rotate": ["$CA[$I]", "$CB[$I]", "$CC[$I]"] }
+      ] } },
+      { "repeat": { "count": "count($IX)", "step": [0, 0, 0], "parts": [
+        { "icosahedron": { "radius": 1 }, "color": "iris", "at": ["$IX[$I]", 0.77, "$IZ[$I]"], "scale": [0.14, 0.14, 0.14] }
+      ] } }
+    ], "if": "$STYLE == 2" },
+    { "icosahedron": { "radius": 1 }, "color": "stoneDark", "at": [0.35, -0.35, 0], "scale": [0.875, 1.05, 0.7],
+      "if": "$STYLE != 0 && $STYLE != 2" }
+  ]
+}

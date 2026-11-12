@@ -47,36 +47,7 @@ enum PropMesher {
         case .zenGarden:
             zenGarden(builder, item: item, random: &random)
         case .koiPond:
-            for point in GroundMesher.scatter(points: polygon, center: .zero, count: 8, margin: 0.95, random: &random) {
-                builder.blob(.stone, center: point.lifted(0.07), scale: [0.49, 0.35, 0.42] * random.range(0.8, 1.3), rotation: simd_quatf(angle: random.range(0, 6), axis: [0, 1, 0]))
-            }
-            for _ in 0..<(3 + random.int(3)) {
-                let angle = random.range(0, 2 * .pi)
-                let distance = random.range(0, 1.575)
-                let position = SIMD3<Float>(cos(angle) * distance, -0.7525, sin(angle) * distance)
-                let heading = random.range(0, 2 * .pi)
-                let rotation = simd_quatf(angle: heading, axis: [0, 1, 0])
-                builder.blob(random.chance(0.6) ? .koiOrange : .koiWhite, center: position, scale: [0.12, 0.03, 0.045], rotation: rotation)
-                builder.blob(.koiOrange, center: position + rotation.act([-0.42, 0, 0]), scale: [0.14, 0.07, 0.14])
-            }
-            switch item.style {
-            case 0:
-                for point in GroundMesher.scatter(points: polygon, center: .zero, count: 4, margin: 0.6, random: &random) {
-                    builder.disc(.lily, center: point.lifted(-0.7), radius: 0.385, sides: 7)
-                    if random.chance(0.5) {
-                        builder.blob(.lotus, center: point.lifted(-0.56), scale: [0.175, 0.14, 0.175])
-                    }
-                }
-            case 2:
-                for point in GroundMesher.scatter(points: polygon, center: .zero, count: 6, margin: 0.85, random: &random) {
-                    for _ in 0..<3 {
-                        builder.cone(.lily, base: point.lifted(-0.7), tip: point.lifted(0.875) + [random.signed() * 0.28, 0, random.signed() * 0.28], radius: 0.0875, sides: 3)
-                    }
-                    builder.blob(.iris, center: point.lifted(0.77), scale: SIMD3(repeating: 0.14))
-                }
-            default:
-                builder.blob(.stoneDark, center: [0.35, -0.35, 0], scale: [0.875, 1.05, 0.7])
-            }
+            koiPond(builder, item: item, polygon: polygon, random: &random)
         case .bridge:
             let paint: Paint = [.vermilion, .cedar, .stone][item.style]
             let deck: Paint = item.style == 2 ? .stoneLight : .lightWood
@@ -299,9 +270,88 @@ enum PropMesher {
         }
     }
 
-    // Angles (radians) for ModelScript's "rotate", which turns about x, then y, then z: R = Rx * Ry * Rz.
+    // Edge stones, koi, and lilies or reeds; the seed and cell outline place them and koi-pond.json draws them.
+    static func koiPond(_ builder: MeshBuilder, item: Item, polygon: [SIMD2<Float>], random: inout SeededRandom) {
+        var lists: [String: [Float]] = [:]
+        func add(_ name: String, _ value: Float) {
+            lists[name, default: []].append(value)
+        }
+        let degree: Float = 180 / .pi
+        for name in ["SX", "SZ", "SK", "SA", "KX", "KZ", "KH", "KW", "TX", "TZ", "LX", "LZ", "LOTUS", "CX", "CY", "CZ", "CL", "CA", "CB", "CC", "IX", "IZ"] {
+            lists[name] = []
+        }
+        for point in GroundMesher.scatter(points: polygon, center: .zero, count: 8, margin: 0.95, random: &random) {
+            add("SX", point.x)
+            add("SZ", point.y)
+            add("SK", random.range(0.8, 1.3))
+            add("SA", random.range(0, 6) * degree)
+        }
+        for _ in 0..<(3 + random.int(3)) {
+            let angle = random.range(0, 2 * .pi)
+            let distance = random.range(0, 1.575)
+            let heading = random.range(0, 2 * .pi)
+            let tail = simd_quatf(angle: heading, axis: [0, 1, 0]).act([-0.42, 0, 0])
+            add("KX", cos(angle) * distance)
+            add("KZ", sin(angle) * distance)
+            add("KH", heading * degree)
+            add("KW", random.chance(0.6) ? 0 : 1)
+            add("TX", cos(angle) * distance + tail.x)
+            add("TZ", sin(angle) * distance + tail.z)
+        }
+        switch item.style {
+        case 0:
+            for point in GroundMesher.scatter(points: polygon, center: .zero, count: 4, margin: 0.6, random: &random) {
+                add("LX", point.x)
+                add("LZ", point.y)
+                add("LOTUS", random.chance(0.5) ? 1 : 0)
+            }
+        case 2:
+            for point in GroundMesher.scatter(points: polygon, center: .zero, count: 6, margin: 0.85, random: &random) {
+                for _ in 0..<3 {
+                    let base = point.lifted(-0.7)
+                    let tip = point.lifted(0.875) + [random.signed() * 0.28, 0, random.signed() * 0.28]
+                    let center = (base + tip) / 2
+                    let turn = eulerXYZ(coneFrame(axis: simd_normalize(tip - base))) * degree
+                    add("CX", center.x)
+                    add("CY", center.y)
+                    add("CZ", center.z)
+                    add("CL", simd_distance(base, tip))
+                    add("CA", turn.x)
+                    add("CB", turn.y)
+                    add("CC", turn.z)
+                }
+                add("IX", point.x)
+                add("IZ", point.y)
+            }
+        default:
+            break
+        }
+        var parameters: [String: ModelParameter] = ["STYLE": .number(Double(item.style))]
+        for (name, values) in lists {
+            parameters[name] = .numbers(values.map(Double.init))
+        }
+        do {
+            builder.append(try ModelLibrary.compile("koi-pond", parameters: parameters))
+        } catch {
+            assertionFailure("koi-pond.json: \(error)")
+        }
+    }
+
+    // The turn that stands a ModelScript cone (apex up +y, first corner toward +z) along `axis` with its first
+    // corner where MeshBuilder.cone puts it.
+    static func coneFrame(axis: SIMD3<Float>) -> simd_float3x3 {
+        let reference: SIMD3<Float> = abs(axis.y) < 0.9 ? [0, 1, 0] : [1, 0, 0]
+        let u = simd_normalize(simd_cross(axis, reference))
+        let v = simd_cross(axis, u)
+        return simd_float3x3(v, axis, u)
+    }
+
     static func eulerXYZ(_ rotation: simd_quatf) -> SIMD3<Float> {
-        let m = simd_float3x3(rotation)
+        eulerXYZ(simd_float3x3(rotation))
+    }
+
+    // Angles (radians) for ModelScript's "rotate", which turns about x, then y, then z: R = Rx * Ry * Rz.
+    static func eulerXYZ(_ m: simd_float3x3) -> SIMD3<Float> {
         // m[column][row]
         let y = asin(max(-1, min(1, m[2][0])))
         let x = atan2(-m[2][1], m[2][2])
