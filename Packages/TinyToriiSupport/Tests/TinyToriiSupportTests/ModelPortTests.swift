@@ -85,6 +85,20 @@ import ModelScript
         }
     }
 
+    // A palette entry named after a Paint is that Paint, whatever its color; other names fall back to the nearest
+    // color (#33).
+    @Test func paletteNamesPickPaints() throws {
+        let json = """
+        { "palette": { "sea": "#3E7C8C", "frame": "#D9452B" },
+          "body": [ { "box": [1, 1, 1], "color": "sea" }, { "box": [1, 1, 1], "at": [3, 0, 0], "color": "frame" } ] }
+        """
+        let builder = MeshBuilder()
+        builder.append(try ModelDocument(data: Data(json.utf8)).compile())
+        let bounds = Self.paintBounds(builder)
+        #expect(Set(bounds.keys) == [.sea, .vermilion])
+        #expect(bounds[.sea]?.max.x == 0.5)
+    }
+
     @Test func bellTower() throws {
         let bronze = Self.bounds([-0.2283, 0.7500, -0.2400], [0.2283, 1.5481, 0.2400])
         let beam = Self.bounds([-0.3800, 1.0650, 0.2650], [0.3800, 1.1350, 0.3350])

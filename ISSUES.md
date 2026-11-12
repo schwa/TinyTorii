@@ -643,12 +643,13 @@ Ground cells (GroundMesher) are built in Swift from each cell's polygon: beveled
 ## 33: ModelScript colors are matched to Paint by nearest color, not by palette name
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-12T21:10:18Z
-updated: 2026-11-12T21:25:42Z
+updated: 2026-11-12T23:04:14Z
+closed: 2026-11-12T23:04:14Z
 +++
 
 ModelLibrary turns each compiled triangle into a Paint by finding the Paint with the nearest color (`Paint.nearest`, `MeshBuilder.append(_ model:)` in Models.swift). So every palette color in a model file must exactly match a Paint hex value, and no two Paints may share a color (the gold koi came out grey before #9 gave each Paint a unique hex; `everyPaintRoundTripsThroughItsColor` guards this).

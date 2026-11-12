@@ -2,8 +2,8 @@ import Foundation
 import ModelScript
 import simd
 
-// ModelScript files in the bundle's Models folder. Their colors must be Paint colors: compiled models keep only
-// colors, so each triangle is matched back to the nearest Paint.
+// ModelScript files in the bundle's Models folder. Palette entries named after a Paint use it; other entries
+// must use Paint colors, since they are matched back to the nearest Paint.
 enum ModelLibrary {
     enum Failure: Error {
         case missing(String)
@@ -32,9 +32,13 @@ extension Paint {
 
 extension MeshBuilder {
     func append(_ model: CompiledModel) {
+        // Palette entries named after a Paint are that Paint. Others ("frame", "deck", recolored by a parameter)
+        // fall back to the Paint nearest their color.
+        let paints = model.palette.map(Paint.init(rawValue:))
         for triangle in model.body.coloredTriangles() {
             let (a, b, c) = triangle.positions
-            self.triangle(Paint.nearest(to: triangle.color), a, b, c)
+            let named = triangle.paletteIndex.flatMap { paints.indices.contains($0) ? paints[$0] : nil }
+            self.triangle(named ?? Paint.nearest(to: triangle.color), a, b, c)
         }
     }
 }
