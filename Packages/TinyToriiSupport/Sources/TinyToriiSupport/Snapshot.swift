@@ -10,7 +10,7 @@ import simd
 import UniformTypeIdentifiers
 
 public enum TownCamera {
-    public static let camera = Camera(projection: PerspectiveProjection(verticalAngleOfView: .degrees(50), depthMode: .standard(zClip: 0.05 ... 1_000)))
+    public static let camera = Camera(projection: PerspectiveProjection(verticalAngleOfView: .degrees(50), depthMode: .standard(zClip: 0.175 ... 3_500)))
 
     public static func orbit(yaw: Float, pitch: Float, distance: Float, target: SIMD3<Float> = .zero) -> simd_float4x4 {
         let direction = SIMD3<Float>(cos(pitch) * sin(yaw), sin(pitch), cos(pitch) * cos(yaw))

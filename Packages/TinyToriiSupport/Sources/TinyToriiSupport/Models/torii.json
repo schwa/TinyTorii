@@ -4,7 +4,7 @@
   // takes the size.
   "name": "Torii",
   "parameters": {
-    "WIDTH": 0.75, "HEIGHT": 1.0, "THICKNESS": 0.06,
+    "WIDTH": 2.625, "HEIGHT": 3.5, "THICKNESS": 0.21,
     "POST": "#D9452B", "TOP": "#262321", "PLAQUE": "#262321"
   },
   "palette": { "post": "$POST", "top": "$TOP", "plaque": "$PLAQUE", "blackWood": "#262321" },
@@ -12,7 +12,7 @@
     "gate": {
       "description": "Two leaning posts with black feet, the nuki (tie beam), the shimaki and the kasagi (top lintel, curving up at the ends), and the gakuzuka plaque between them. Uses palette names post, top, plaque and blackWood.",
       "parameters": {
-        "W": 0.75, "H": 1.0, "T": 0.06,
+        "W": 2.625, "H": 3.5, "T": 0.21,
         "HALF": "$W / 2",
         "TOPHALF": "$W * 0.82",
         "TOPY": "$H * 0.92"

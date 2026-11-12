@@ -41,21 +41,21 @@ final class Villagers {
 
     nonisolated private static let kokeshi: [Kokeshi] = [
         // Straight column.
-        Kokeshi(profile: [(0, 0.042), (0.19, 0.042)], body: .norenRed, bands: [(0.03, .gold), (0.15, .blackWood)], headRadius: 0.05, hair: .blackWood),
+        Kokeshi(profile: [(0, 0.147), (0.665, 0.147)], body: .norenRed, bands: [(0.105, .gold), (0.525, .blackWood)], headRadius: 0.175, hair: .blackWood),
         // Widening toward the base.
-        Kokeshi(profile: [(0, 0.058), (0.18, 0.03)], body: .noren, bands: [(0.05, .sakura), (0.11, .sakura)], headRadius: 0.048, hair: .blackWood),
+        Kokeshi(profile: [(0, 0.203), (0.63, 0.105)], body: .noren, bands: [(0.175, .sakura), (0.385, .sakura)], headRadius: 0.168, hair: .blackWood),
         // Pinched waist.
-        Kokeshi(profile: [(0, 0.048), (0.09, 0.032), (0.19, 0.044)], body: .plasterCream, bands: [(0.09, .vermilion)], headRadius: 0.052, hair: .darkWood),
+        Kokeshi(profile: [(0, 0.168), (0.315, 0.112), (0.665, 0.154)], body: .plasterCream, bands: [(0.315, .vermilion)], headRadius: 0.182, hair: .darkWood),
         // Widening toward the shoulders.
-        Kokeshi(profile: [(0, 0.03), (0.18, 0.05)], body: .momijiOrange, bands: [(0.14, .lanternWhite), (0.06, .blackWood)], headRadius: 0.05, hair: .blackWood),
+        Kokeshi(profile: [(0, 0.105), (0.63, 0.175)], body: .momijiOrange, bands: [(0.49, .lanternWhite), (0.21, .blackWood)], headRadius: 0.175, hair: .blackWood),
         // Round belly.
-        Kokeshi(profile: [(0, 0.035), (0.07, 0.055), (0.18, 0.034)], body: .sakuraDeep, bands: [(0.07, .lanternWhite)], headRadius: 0.046, hair: .darkWood),
+        Kokeshi(profile: [(0, 0.1225), (0.245, 0.1925), (0.63, 0.119)], body: .sakuraDeep, bands: [(0.245, .lanternWhite)], headRadius: 0.161, hair: .darkWood),
         // Slim and tall.
-        Kokeshi(profile: [(0, 0.036), (0.2, 0.03)], body: .pineMid, bands: [(0.04, .gold), (0.1, .gold), (0.16, .gold)], headRadius: 0.044, hair: .blackWood),
+        Kokeshi(profile: [(0, 0.126), (0.7, 0.105)], body: .pineMid, bands: [(0.14, .gold), (0.35, .gold), (0.56, .gold)], headRadius: 0.154, hair: .blackWood),
         // Bell.
-        Kokeshi(profile: [(0, 0.06), (0.05, 0.05), (0.18, 0.032)], body: .lanternWhite, bands: [(0.03, .norenRed), (0.12, .norenRed)], headRadius: 0.05, hair: .blackWood),
+        Kokeshi(profile: [(0, 0.21), (0.175, 0.175), (0.63, 0.112)], body: .lanternWhite, bands: [(0.105, .norenRed), (0.42, .norenRed)], headRadius: 0.175, hair: .blackWood),
         // Short and stout, with a big head.
-        Kokeshi(profile: [(0, 0.05), (0.16, 0.045)], body: .iris, bands: [(0.08, .umePink)], headRadius: 0.058, hair: .darkWood),
+        Kokeshi(profile: [(0, 0.175), (0.56, 0.1575)], body: .iris, bands: [(0.28, .umePink)], headRadius: 0.203, hair: .darkWood),
     ]
 
     nonisolated static var lookCount: Int { kokeshi.count }
@@ -77,7 +77,7 @@ final class Villagers {
             profile.insert(((profile[0].height + profile[1].height) / 2, (profile[0].radius + profile[1].radius) / 2), at: 1)
         }
         // And three bands; a radius of 0 leaves one out. Each sits just proud of the body so it reads as paint.
-        var bands = doll.bands.map { (height: $0.height, radius: radius(of: doll.profile, at: $0.height) + 0.002, paint: $0.paint) }
+        var bands = doll.bands.map { (height: $0.height, radius: radius(of: doll.profile, at: $0.height) + 0.007, paint: $0.paint) }
         while bands.count < 3 {
             bands.append((0, 0, .blackWood))
         }
@@ -123,10 +123,10 @@ final class Villagers {
         let count = min(24, paths.count / 2)
         for index in 0..<count {
             let cell = paths[random.int(paths.count)]
-            let position = town.grid.cells[cell].center + SIMD2(random.signed(), random.signed()) * 0.3
+            let position = town.grid.cells[cell].center + SIMD2(random.signed(), random.signed()) * 1.05
             let look = looks[index % looks.count]
             let node = SceneGraph.Node(parent: parent, label: "Villager", content: .mesh(look.mesh, materials: scene.materials(for: look), castsShadow: true, receivesShadow: true))
-            walkers.append(Walker(node: node, position: position, target: position, heading: random.range(0, 2 * .pi), speed: random.range(0.35, 0.6), pause: random.range(0, 3), phase: random.range(0, 6), recent: [cell]))
+            walkers.append(Walker(node: node, position: position, target: position, heading: random.range(0, 2 * .pi), speed: random.range(1.225, 2.1), pause: random.range(0, 3), phase: random.range(0, 6), recent: [cell]))
         }
         for index in walkers.indices {
             place(&walkers[index], scene: scene)
@@ -165,7 +165,7 @@ final class Villagers {
                 continue
             }
             let delta = walker.target - walker.position
-            if simd_length(delta) < 0.1 {
+            if simd_length(delta) < 0.35 {
                 chooseTarget(&walker, scene: scene)
                 continue
             }
@@ -204,7 +204,7 @@ final class Villagers {
         let preferred = options.filter { [.path, .gravel].contains(town.cells[$0].ground) && !walker.recent.contains($0) }
         let pool = preferred.isEmpty ? options.filter { !walker.recent.contains($0) } : preferred
         if let next = (pool.isEmpty ? options : pool).randomElement() {
-            walker.target = town.grid.cells[next].center + SIMD2(random.signed(), random.signed()) * 0.25
+            walker.target = town.grid.cells[next].center + SIMD2(random.signed(), random.signed()) * 0.875
         }
         if random.chance(0.15) {
             walker.pause = random.range(1, 4)
@@ -213,7 +213,7 @@ final class Villagers {
 
     private func place(_ walker: inout Walker, scene: TownScene) {
         let height = scene.walkHeight(at: walker.position) ?? 0
-        let bob = walker.pause > 0 ? 0 : abs(sin(walker.phase)) * 0.012
+        let bob = walker.pause > 0 ? 0 : abs(sin(walker.phase)) * 0.042
         walker.node.trs = Transform3D(translation: walker.position.lifted(height + bob), rotation: simd_quatf(angle: walker.heading, axis: [0, 1, 0]), scale: SIMD3(repeating: 1.7))
     }
 }

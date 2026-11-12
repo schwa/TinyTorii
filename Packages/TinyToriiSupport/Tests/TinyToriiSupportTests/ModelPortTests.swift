@@ -5,7 +5,8 @@ import ModelScript
 @testable import TinyToriiSupport
 
 // Models moved from hand-written Swift to ModelScript files must keep their shape: each paint's bounding box is
-// checked against the one the Swift geometry made, recorded before the move.
+// checked against the one the Swift geometry made, recorded before the move. The recordings predate the switch to
+// meters (#4), so they are in the old units: `bounds` scales them by `oldUnit`.
 @Suite struct ModelPortTests {
     struct Bounds: CustomStringConvertible {
         var min: SIMD3<Float>
@@ -45,12 +46,15 @@ import ModelScript
                 continue
             }
             let error = max(simd_reduce_max(simd_abs(found.min - bounds.min)), simd_reduce_max(simd_abs(found.max - bounds.max)))
-            #expect(error < 0.008, "\(name) \(parameters) .\(paint): \(found), expected \(bounds)", sourceLocation: sourceLocation)
+            #expect(error < 0.008 * oldUnit, "\(name) \(parameters) .\(paint): \(found), expected \(bounds)", sourceLocation: sourceLocation)
         }
     }
 
+    // Meters per old unit.
+    static let oldUnit: Float = 3.5
+
     static func bounds(_ min: SIMD3<Float>, _ max: SIMD3<Float>) -> Bounds {
-        Bounds(min: min, max: max)
+        Bounds(min: min * oldUnit, max: max * oldUnit)
     }
 
     // Paint.nearest can only find a paint whose color no other paint shares.
@@ -185,7 +189,7 @@ import ModelScript
         // The union drops the rope's ends inside the poles: it now stops at the pole surface (x 0.5675), where it
         // hangs 0.0146 lower than at the pole's center.
         if let rope = expected[.twine] {
-            expected[.twine] = Self.bounds([-0.5675, rope.min.y, rope.min.z], [0.5675, rope.max.y - 0.0146, rope.max.z])
+            expected[.twine] = Bounds(min: [-0.5675 * Self.oldUnit, rope.min.y, rope.min.z], max: [0.5675 * Self.oldUnit, rope.max.y - 0.0146 * Self.oldUnit, rope.max.z])
         }
         try Self.expect("paper-lantern", parameters: PropMesher.paperLanternParameters(style: style, level: level), matches: expected)
     }
@@ -203,7 +207,7 @@ import ModelScript
     }
 
     @Test func torii() throws {
-        let sizes: [(width: Float, height: Float, thickness: Float)] = [(0.75, 1.0, 0.06), (1.7, 2.4, 0.13)]
+        let sizes: [(width: Float, height: Float, thickness: Float)] = [(2.625, 3.5, 0.21), (5.95, 8.4, 0.455)]
         let expected: [[[Paint: Bounds]]] = [
             [
                 [.blackWood: Self.bounds([-0.6204, 0.0000, -0.0480], [0.6204, 1.0714, 0.0480]), .vermilion: Self.bounds([-0.4875, -0.0007, -0.0450], [0.4875, 0.9425, 0.0450])],

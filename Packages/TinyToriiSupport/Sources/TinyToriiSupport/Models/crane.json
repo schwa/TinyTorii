@@ -5,15 +5,15 @@
   "parameters": { "STYLE": 0, "BODY": "#F4F1EA" },
   "palette": { "body": "$BODY", "blackWood": "#262321", "stoneLight": "#C2BDB2", "bib": "#D33A2A", "bamboo": "#7FA34A" },
   "body": [
-    { "icosahedron": { "radius": 1 }, "color": "body", "scale": [0.07, 0.07, 0.13], "at": [0, 0.32, 0] },
-    { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.06, 0.05, 0.07], "at": [0, 0.32, -0.12] },
-    { "cylinder": { "top": 0.013, "bottom": 0.02, "height": 0.1965, "segments": 5 }, "color": "blackWood", "at": [0, 0.455, 0.105], "rotate": [14.74, 0, 0], "if": "$STYLE == 0" },
-    { "cylinder": { "top": 0.013, "bottom": 0.02, "height": 0.1965, "segments": 5 }, "color": "stoneLight", "at": [0, 0.455, 0.105], "rotate": [14.74, 0, 0], "if": "$STYLE != 0" },
-    { "icosahedron": { "radius": 1 }, "color": "body", "scale": [0.025, 0.025, 0.025], "at": [0, 0.56, 0.14] },
-    { "icosahedron": { "radius": 1 }, "color": "bib", "scale": [0.013, 0.013, 0.013], "at": [0, 0.58, 0.14], "if": "$STYLE == 0" },
-    { "cylinder": { "top": 0.008, "bottom": 0, "height": 0.0757, "segments": 4, "axis": "z" }, "color": "bamboo", "at": [0, 0.555, 0.1925], "rotate": [7.6, 0, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "body", "scale": [0.245, 0.245, 0.455], "at": [0, 1.12, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.21, 0.175, 0.245], "at": [0, 1.12, -0.42] },
+    { "cylinder": { "top": 0.0455, "bottom": 0.07, "height": 0.68775, "segments": 5 }, "color": "blackWood", "at": [0, 1.5925, 0.3675], "rotate": [14.74, 0, 0], "if": "$STYLE == 0" },
+    { "cylinder": { "top": 0.0455, "bottom": 0.07, "height": 0.68775, "segments": 5 }, "color": "stoneLight", "at": [0, 1.5925, 0.3675], "rotate": [14.74, 0, 0], "if": "$STYLE != 0" },
+    { "icosahedron": { "radius": 1 }, "color": "body", "scale": [0.0875, 0.0875, 0.0875], "at": [0, 1.96, 0.49] },
+    { "icosahedron": { "radius": 1 }, "color": "bib", "scale": [0.0455, 0.0455, 0.0455], "at": [0, 2.03, 0.49], "if": "$STYLE == 0" },
+    { "cylinder": { "top": 0.028, "bottom": 0, "height": 0.26495, "segments": 4, "axis": "z" }, "color": "bamboo", "at": [0, 1.9425, 0.67375], "rotate": [7.6, 0, 0] },
     { "mirror": [
-      { "cylinder": { "top": 0.006, "bottom": 0.006, "height": 0.28, "segments": 4 }, "color": "blackWood", "at": [0.025, 0.14, 0] }
+      { "cylinder": { "top": 0.021, "bottom": 0.021, "height": 0.98, "segments": 4 }, "color": "blackWood", "at": [0.0875, 0.49, 0] }
     ] }
   ]
 }

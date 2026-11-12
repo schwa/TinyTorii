@@ -19,7 +19,8 @@ public struct CellState: Codable, Sendable, Equatable {
 }
 
 public struct Town: Sendable {
-    public static let elevationStep: Float = 0.45
+    // World units are meters.
+    public static let elevationStep: Float = 1.575
     public static let maxElevation = 6
 
     public let grid: Grid
@@ -37,8 +38,8 @@ public struct Town: Sendable {
         let state = cells[cell]
         let base = Float(state.elevation) * Self.elevationStep
         switch state.ground {
-        case .water: return base - 0.22
-        case .paddy: return base - 0.06
+        case .water: return base - 0.77
+        case .paddy: return base - 0.21
         default: return base
         }
     }

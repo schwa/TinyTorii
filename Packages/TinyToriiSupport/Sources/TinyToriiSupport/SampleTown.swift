@@ -23,7 +23,7 @@ public extension Town {
         let hillCenter = SIMD2<Float>(cos(hillAngle), sin(hillAngle)) * grid.radius * 0.42
         for cell in 0..<count {
             let d = distance(cell, hillCenter)
-            let elevation = Int(max(0, 4.6 - d / 1.7))
+            let elevation = Int(max(0, 4.6 - d / 5.95))
             town.cells[cell].elevation = min(elevation, 4)
         }
         let castleCell = nearest(hillCenter)
@@ -72,7 +72,7 @@ public extension Town {
         var approach = shrineCell
         let toCenter = -simd_normalize(shrineCenter)
         for step in 0..<5 {
-            let target = grid.cells[approach].center + toCenter * 2.2
+            let target = grid.cells[approach].center + toCenter * 7.7
             guard let next = grid.neighborSet(of: approach).filter({ isFree($0) || town.cells[$0].ground == .path }).min(by: { distance($0, target) < distance($1, target) }) else {
                 break
             }

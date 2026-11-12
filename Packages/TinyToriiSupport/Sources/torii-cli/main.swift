@@ -94,13 +94,13 @@ func cameraMatrix(view: String, scene: TownScene) -> simd_float4x4 {
     case "aerial":
         return TownCamera.orbit(yaw: 0.2, pitch: 1.35, distance: radius * 2.6)
     case "low":
-        return TownCamera.orbit(yaw: 2.4, pitch: 0.28, distance: radius * 1.5, target: [0, 1, 0])
+        return TownCamera.orbit(yaw: 2.4, pitch: 0.28, distance: radius * 1.5, target: [0, 3.5, 0])
     case "street":
         // From a path cell near the middle, looking at the tallest thing.
         let cells = town.grid.cells.indices
         let start = cells.filter { town.cells[$0].ground == .path && town.cells[$0].item == nil }.min { simd_length(town.grid.cells[$0].center) < simd_length(town.grid.cells[$1].center) } ?? 0
         let tallest = cells.max { scene.top(of: $0) < scene.top(of: $1) } ?? 0
-        let position = town.grid.cells[start].center.lifted3(town.standingHeight(start) + 0.55)
+        let position = town.grid.cells[start].center.lifted3(town.standingHeight(start) + 1.6)
         let target = town.grid.cells[tallest].center
         let delta = target - position.xz2
         return TownCamera.look(from: position, yaw: atan2(delta.x, -delta.y), pitch: 0.12)
@@ -206,8 +206,8 @@ case "gallery":
                     focus = (town.grid.cells[center].center + town.grid.cells[neighbors[3]].center) / 2
                 }
                 scene.replace(town: town)
-                let height: Float = kind == .castle || kind == .pagoda ? 2.5 : (kind.isBuilding || kind.category == .trees ? 1 : 0.4)
-                let distance: Float = kind.isBuilding ? 8 : (kind.category == .trees ? 6 : 3.2)
+                let height: Float = kind == .castle || kind == .pagoda ? 8.75 : (kind.isBuilding || kind.category == .trees ? 3.5 : 1.4)
+                let distance: Float = kind.isBuilding ? 28 : (kind.category == .trees ? 21 : 11.2)
                 let camera = TownCamera.orbit(yaw: 0.7, pitch: 0.42, distance: distance, target: [focus.x, height, focus.y])
                 let name = "\(kind.rawValue)-\(style)"
                 do {
@@ -240,8 +240,8 @@ case "thumbnails":
             }
             scene.replace(town: town)
             let focus = town.grid.cells[center].center
-            let top = max(scene.top(of: center), 0.3)
-            let distance = kind.paint != nil ? 6 : (kind.category == .animals ? (kind == .crane ? 1.9 : 1.3) : max(2.2, top * 1.3 + 1.1))
+            let top = max(scene.top(of: center), 1.05)
+            let distance = kind.paint != nil ? 21 : (kind.category == .animals ? (kind == .crane ? 6.65 : 4.55) : max(7.7, top * 1.3 + 3.85))
             let camera = TownCamera.orbit(yaw: yaw, pitch: kind.paint != nil ? 0.9 : 0.38, distance: distance, target: [focus.x, top * 0.5, focus.y])
             do {
                 let image = try TownSnapshot.render(scene: scene, cameraMatrix: camera, width: 192, height: 144, frames: 0)
@@ -264,15 +264,15 @@ case "icon":
         let focus = town.grid.cells[center].center
         for neighbor in town.grid.neighborSet(of: center) {
             let offset = town.grid.cells[neighbor].center - focus
-            if offset.y < -0.5 {
+            if offset.y < -1.75 {
                 town.place(.sakura, style: 0, at: neighbor)
                 town.grow(neighbor)
-            } else if abs(offset.x) > 1 {
+            } else if abs(offset.x) > 3.5 {
                 town.place(.stoneLantern, style: 0, at: neighbor)
             }
         }
         let scene = TownScene(town: town, time: .dusk)
-        let camera = TownCamera.look(from: [focus.x, 1.2, focus.y + 6.5], yaw: 0, pitch: 0.06)
+        let camera = TownCamera.look(from: [focus.x, 4.2, focus.y + 22.75], yaw: 0, pitch: 0.06)
         do {
             let image = try TownSnapshot.render(scene: scene, cameraMatrix: camera, width: 1_024, height: 1_024, frames: 0)
             try TownSnapshot.writePNG(image, to: url)

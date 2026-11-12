@@ -90,17 +90,17 @@ struct BuildingSpec {
     var ridge: Paint?
     var soffit: Paint = .darkWood
     var plinth: Paint = .stoneDark
-    var plinthHeight: Float = 0.12
-    var storyHeight: Float = 0.8
-    var roofRise: Float = 0.6
-    var overhang: Float = 0.3
+    var plinthHeight: Float = 0.42
+    var storyHeight: Float = 2.8
+    var roofRise: Float = 2.1
+    var overhang: Float = 1.05
     var curve: Float = 1.6
-    var fascia: Float = 0.06
-    var wallInset: Float = 0.16
+    var fascia: Float = 0.21
+    var wallInset: Float = 0.56
     var tierInset: Float = 0
     var skirts = false
-    var skirtOverhang: Float = 0.28
-    var skirtRise: Float = 0.25
+    var skirtOverhang: Float = 0.98
+    var skirtRise: Float = 0.875
     var stoneBase: Float = 0
     var stilts: Float = 0
     var windows: Paint = .shoji
@@ -120,12 +120,12 @@ struct BuildingSpec {
         var spec = BuildingSpec()
         switch kind {
         case .machiya:
-            spec.storyHeight = 0.72
-            spec.roofRise = 0.42
-            spec.overhang = 0.24
+            spec.storyHeight = 2.52
+            spec.roofRise = 1.47
+            spec.overhang = 0.84
             spec.skirts = true
             spec.lattice = true
-            spec.wallInset = 0.08
+            spec.wallInset = 0.28
             switch style {
             case 1:
                 spec.wall = .plasterCream
@@ -144,12 +144,12 @@ struct BuildingSpec {
                 spec.timber = .blackWood
             }
         case .minka:
-            spec.storyHeight = 0.78
-            spec.roofRise = 1.25
-            spec.overhang = 0.38
+            spec.storyHeight = 2.73
+            spec.roofRise = 4.375
+            spec.overhang = 1.33
             spec.curve = 1.05
-            spec.fascia = 0.16
-            spec.wallInset = 0.22
+            spec.fascia = 0.56
+            spec.wallInset = 0.77
             spec.wall = .earthWall
             spec.timber = .darkWood
             spec.roof = .thatch
@@ -162,27 +162,27 @@ struct BuildingSpec {
                 spec.ridge = .darkWood
                 spec.soffit = .darkWood
                 spec.wall = .plasterCream
-                spec.roofRise = 0.9
-                spec.fascia = 0.08
+                spec.roofRise = 3.15
+                spec.fascia = 0.28
             case 2:
                 spec.roof = .snowRoof
                 spec.ridge = .thatchDark
                 spec.wall = .plaster
-                spec.roofRise = 1.5
+                spec.roofRise = 5.25
             default:
                 break
             }
         case .ryokan:
-            spec.storyHeight = 0.82
-            spec.roofRise = 0.55
-            spec.overhang = 0.34
+            spec.storyHeight = 2.87
+            spec.roofRise = 1.925
+            spec.overhang = 1.19
             spec.wall = .plasterCream
             spec.timber = .darkWood
             spec.roof = .tileBlue
             spec.balcony = true
             spec.lanterns = true
             spec.door = .noren
-            spec.wallInset = 0.2
+            spec.wallInset = 0.7
             switch style {
             case 1:
                 spec.wall = .plaster
@@ -199,44 +199,44 @@ struct BuildingSpec {
                 break
             }
         case .teahouse:
-            spec.storyHeight = 0.62
-            spec.roofRise = 0.5
-            spec.overhang = 0.3
+            spec.storyHeight = 2.17
+            spec.roofRise = 1.75
+            spec.overhang = 1.05
             spec.curve = 1.2
             spec.wall = .earthWall
             spec.timber = .cedar
             spec.roof = .shingle
-            spec.wallInset = 0.42
+            spec.wallInset = 1.47
             spec.door = nil
             spec.deck = true
             switch style {
             case 1:
-                spec.stilts = 0.35
+                spec.stilts = 1.225
                 spec.wall = .plasterCream
                 spec.roof = .thatch
                 spec.ridge = .thatchDark
                 spec.curve = 1.0
-                spec.roofRise = 0.75
+                spec.roofRise = 2.625
             case 2:
                 spec.wall = .plaster
                 spec.roof = .copper
                 spec.timber = .blackWood
-                spec.stilts = 0.15
+                spec.stilts = 0.525
             default:
                 break
             }
         case .kura:
-            spec.storyHeight = 0.9
-            spec.roofRise = 0.5
-            spec.overhang = 0.18
+            spec.storyHeight = 3.15
+            spec.roofRise = 1.75
+            spec.overhang = 0.63
             spec.curve = 1.3
             spec.wall = .plaster
             spec.timber = .blackWood
             spec.roof = .tileGrey
             spec.windows = .blackWood
             spec.door = nil
-            spec.wallInset = 0.25
-            spec.plinthHeight = 0.2
+            spec.wallInset = 0.875
+            spec.plinthHeight = 0.7
             switch style {
             case 1: spec.namako = true
             case 2:
@@ -245,22 +245,22 @@ struct BuildingSpec {
             default: break
             }
         case .castle:
-            spec.storyHeight = 0.72
-            spec.roofRise = 0.55
-            spec.overhang = 0.34
+            spec.storyHeight = 2.52
+            spec.roofRise = 1.925
+            spec.overhang = 1.19
             spec.curve = 2.0
             spec.wall = .plaster
             spec.timber = .blackWood
             spec.roof = .tileBlue
-            spec.stoneBase = 1.1
-            spec.tierInset = 0.2
+            spec.stoneBase = 3.85
+            spec.tierInset = 0.7
             spec.skirts = true
-            spec.skirtOverhang = 0.36
-            spec.skirtRise = 0.3
+            spec.skirtOverhang = 1.26
+            spec.skirtRise = 1.05
             spec.shachi = true
             spec.windows = .blackWood
             spec.door = nil
-            spec.wallInset = 0.05
+            spec.wallInset = 0.175
             switch style {
             case 1:
                 spec.wall = .blackWood
@@ -272,23 +272,23 @@ struct BuildingSpec {
             default: break
             }
         case .pagoda:
-            spec.storyHeight = 0.62
-            spec.roofRise = 0.4
-            spec.overhang = 0.5
+            spec.storyHeight = 2.17
+            spec.roofRise = 1.4
+            spec.overhang = 1.75
             spec.curve = 2.2
             spec.wall = .vermilion
             spec.timber = .vermilionDark
             spec.roof = .tileGrey
-            spec.tierInset = 0.08
+            spec.tierInset = 0.28
             spec.skirts = true
-            spec.skirtOverhang = 0.55
-            spec.skirtRise = 0.32
+            spec.skirtOverhang = 1.925
+            spec.skirtRise = 1.12
             spec.spire = true
             spec.pointed = true
             spec.windows = .lattice
             spec.door = nil
-            spec.wallInset = 0.42
-            spec.plinthHeight = 0.25
+            spec.wallInset = 1.47
+            spec.plinthHeight = 0.875
             switch style {
             case 1:
                 spec.wall = .cedar
@@ -301,20 +301,20 @@ struct BuildingSpec {
             default: break
             }
         case .shrine:
-            spec.storyHeight = 0.7
-            spec.roofRise = 0.75
-            spec.overhang = 0.4
+            spec.storyHeight = 2.45
+            spec.roofRise = 2.625
+            spec.overhang = 1.4
             spec.curve = 1.3
             spec.wall = .plaster
             spec.timber = .vermilion
             spec.columns = .vermilion
             spec.roof = .copper
-            spec.stilts = 0.25
+            spec.stilts = 0.875
             spec.deck = true
             spec.chigi = true
             spec.door = nil
             spec.windows = .lattice
-            spec.wallInset = 0.3
+            spec.wallInset = 1.05
             switch style {
             case 1:
                 spec.timber = .lightWood
@@ -323,7 +323,7 @@ struct BuildingSpec {
                 spec.roof = .thatch
                 spec.ridge = .thatchDark
                 spec.curve = 1.0
-                spec.roofRise = 0.95
+                spec.roofRise = 3.325
             case 2:
                 spec.timber = .gold
                 spec.columns = .blackWood
@@ -332,9 +332,9 @@ struct BuildingSpec {
             default: break
             }
         case .temple:
-            spec.storyHeight = 1.05
-            spec.roofRise = 0.95
-            spec.overhang = 0.5
+            spec.storyHeight = 3.675
+            spec.roofRise = 3.325
+            spec.overhang = 1.75
             spec.curve = 2.0
             spec.wall = .plasterCream
             spec.timber = .darkWood
@@ -342,9 +342,9 @@ struct BuildingSpec {
             spec.roof = .tileGrey
             spec.door = nil
             spec.windows = .lattice
-            spec.plinthHeight = 0.3
+            spec.plinthHeight = 1.05
             spec.plinth = .stone
-            spec.wallInset = 0.2
+            spec.wallInset = 0.7
             spec.skirts = true
             switch style {
             case 1:
@@ -387,40 +387,40 @@ enum BuildingMesher {
             let height = spec.stoneBase
             for index in 0..<footprint.count where footprint.exterior[index] {
                 let next = footprint.next(index)
-                let a0 = footprint.offset(index, -inset + 0.3).lifted(y)
-                let b0 = footprint.offset(next, -inset + 0.3).lifted(y)
+                let a0 = footprint.offset(index, -inset + 1.05).lifted(y)
+                let b0 = footprint.offset(next, -inset + 1.05).lifted(y)
                 let a1 = footprint.offset(index, -inset).lifted(y + height)
                 let b1 = footprint.offset(next, -inset).lifted(y + height)
                 builder.quad(.stone, a0, b0, b1, a1, outwardFrom: footprint.center.lifted(y + height / 2))
                 // Mortar courses.
                 for course in 1..<4 {
                     let t = Float(course) / 4
-                    let ca = mix3(a0, a1, t) + footprint.edgeNormal(index).lifted(0) * 0.012
-                    let cb = mix3(b0, b1, t) + footprint.edgeNormal(index).lifted(0) * 0.012
-                    builder.beam(.stoneDark, from: ca, to: cb, width: 0.02, height: 0.03)
+                    let ca = mix3(a0, a1, t) + footprint.edgeNormal(index).lifted(0) * 0.042
+                    let cb = mix3(b0, b1, t) + footprint.edgeNormal(index).lifted(0) * 0.042
+                    builder.beam(.stoneDark, from: ca, to: cb, width: 0.07, height: 0.105)
                 }
             }
             builder.cap(.stoneLight, footprint.points.indices.map { footprint.offset($0, -inset).lifted(y + height) })
             y += height
         } else {
             let height = spec.plinthHeight
-            prism(builder, spec.plinth, footprint: footprint, offset: -inset + 0.06, from: y - 0.1, to: y + height)
+            prism(builder, spec.plinth, footprint: footprint, offset: -inset + 0.21, from: y - 0.35, to: y + height)
             y += height
         }
         if spec.stilts > 0 {
             for index in 0..<footprint.count where footprint.outward[index] != nil {
                 let point = footprint.offset(index, -inset)
-                builder.box(spec.timber, center: point.lifted(y + spec.stilts / 2), size: [0.08, spec.stilts, 0.08])
+                builder.box(spec.timber, center: point.lifted(y + spec.stilts / 2), size: [0.28, spec.stilts, 0.28])
             }
             y += spec.stilts
         }
         if spec.deck || spec.stilts > 0 {
-            let deck = footprint.points.indices.map { footprint.offset($0, -inset + 0.18).lifted(y) }
+            let deck = footprint.points.indices.map { footprint.offset($0, -inset + 0.63).lifted(y) }
             builder.cap(.lightWood, deck)
             for index in 0..<footprint.count where footprint.exterior[index] {
                 let next = footprint.next(index)
-                let a = footprint.offset(index, -inset + 0.18), b = footprint.offset(next, -inset + 0.18)
-                builder.quad(.cedar, a.lifted(y), b.lifted(y), b.lifted(y - 0.06), a.lifted(y - 0.06), outwardFrom: footprint.center.lifted(y))
+                let a = footprint.offset(index, -inset + 0.63), b = footprint.offset(next, -inset + 0.63)
+                builder.quad(.cedar, a.lifted(y), b.lifted(y), b.lifted(y - 0.21), a.lifted(y - 0.21), outwardFrom: footprint.center.lifted(y))
             }
         }
 
@@ -433,14 +433,14 @@ enum BuildingMesher {
             let wallPaint = tier > 0 ? (spec.upperWall ?? spec.wall) : spec.wall
             walls(builder, wallPaint, footprint: footprint, offset: offset, from: y0, to: y1)
             if spec.namako {
-                walls(builder, .stoneDark, footprint: footprint, offset: offset + 0.015, from: y0, to: y0 + spec.storyHeight * 0.35)
+                walls(builder, .stoneDark, footprint: footprint, offset: offset + 0.0525, from: y0, to: y0 + spec.storyHeight * 0.35)
             }
             // Beams at the bottom and top of each story, and posts at the corners.
-            bands(builder, spec.timber, footprint: footprint, offset: offset + 0.02, from: y1 - 0.07, to: y1)
-            bands(builder, spec.timber, footprint: footprint, offset: offset + 0.02, from: y0, to: y0 + 0.05)
+            bands(builder, spec.timber, footprint: footprint, offset: offset + 0.07, from: y1 - 0.245, to: y1)
+            bands(builder, spec.timber, footprint: footprint, offset: offset + 0.07, from: y0, to: y0 + 0.175)
             for index in 0..<footprint.count where footprint.outward[index] != nil {
-                let point = footprint.offset(index, offset + 0.01)
-                builder.box(spec.columns ?? spec.timber, center: point.lifted((y0 + y1) / 2), size: [0.07, spec.storyHeight, 0.07])
+                let point = footprint.offset(index, offset + 0.035)
+                builder.box(spec.columns ?? spec.timber, center: point.lifted((y0 + y1) / 2), size: [0.245, spec.storyHeight, 0.245])
             }
             openings(builder, footprint: footprint, spec: spec, offset: offset, y0: y0, y1: y1, tier: tier, doorEdge: doorEdge, random: &random)
 
@@ -489,43 +489,43 @@ enum BuildingMesher {
             let next = footprint.next(index)
             let a = footprint.offset(index, offset), b = footprint.offset(next, offset)
             let length = simd_distance(a, b)
-            guard length > 0.35 else {
+            guard length > 1.225 else {
                 continue
             }
             let normal = footprint.edgeNormal(index)
-            let push = normal * 0.022
+            let push = normal * 0.077
             let direction = (b - a) / length
             let middle = (a + b) / 2 + push
             if tier == 0, index == doorEdge, let door = spec.door {
-                let half = min(0.22, length * 0.3)
+                let half = min(0.77, length * 0.3)
                 let left = middle - direction * half, right = middle + direction * half
-                builder.panel(.door, left.lifted(y0 + 0.02), right.lifted(y0 + 0.02), right.lifted(y0 + height * 0.78), left.lifted(y0 + height * 0.78), facing: normal.lifted(0))
-                let clothLeft = left + normal * 0.012, clothRight = right + normal * 0.012
+                builder.panel(.door, left.lifted(y0 + 0.07), right.lifted(y0 + 0.07), right.lifted(y0 + height * 0.78), left.lifted(y0 + height * 0.78), facing: normal.lifted(0))
+                let clothLeft = left + normal * 0.042, clothRight = right + normal * 0.042
                 builder.panel(door, clothLeft.lifted(y0 + height * 0.5), clothRight.lifted(y0 + height * 0.5), clothRight.lifted(y0 + height * 0.78), clothLeft.lifted(y0 + height * 0.78), facing: normal.lifted(0))
                 if spec.lanterns {
-                    for side in [left - direction * 0.1, right + direction * 0.1] {
-                        let position = (side + normal * 0.08).lifted(y0 + height * 0.62)
-                        builder.blob(.lanternRed, center: position, scale: [0.045, 0.065, 0.045])
+                    for side in [left - direction * 0.35, right + direction * 0.35] {
+                        let position = (side + normal * 0.28).lifted(y0 + height * 0.62)
+                        builder.blob(.lanternRed, center: position, scale: [0.1575, 0.2275, 0.1575])
                     }
                 }
                 continue
             }
             if spec.lattice, tier == 0 {
                 // Koshi lattice across the whole front.
-                let slats = Int(length / 0.07)
-                let glowLeft = a + direction * 0.06 + normal * 0.01, glowRight = b - direction * 0.06 + normal * 0.01
-                builder.panel(.windowGlow, glowLeft.lifted(y0 + 0.12), glowRight.lifted(y0 + 0.12), glowRight.lifted(y1 - 0.14), glowLeft.lifted(y1 - 0.14), facing: normal.lifted(0))
+                let slats = Int(length / 0.245)
+                let glowLeft = a + direction * 0.21 + normal * 0.035, glowRight = b - direction * 0.21 + normal * 0.035
+                builder.panel(.windowGlow, glowLeft.lifted(y0 + 0.42), glowRight.lifted(y0 + 0.42), glowRight.lifted(y1 - 0.49), glowLeft.lifted(y1 - 0.49), facing: normal.lifted(0))
                 for slat in 1..<max(slats, 2) {
-                    let point = a + direction * (Float(slat) * length / Float(slats)) + normal * 0.03
-                    builder.box(spec.timber == .blackWood ? .lattice : spec.timber, center: point.lifted((y0 + y1) / 2 - 0.01), size: [0.025, height - 0.26, 0.025], yaw: -atan2(direction.y, direction.x))
+                    let point = a + direction * (Float(slat) * length / Float(slats)) + normal * 0.105
+                    builder.box(spec.timber == .blackWood ? .lattice : spec.timber, center: point.lifted((y0 + y1) / 2 - 0.035), size: [0.0875, height - 0.91, 0.0875], yaw: -atan2(direction.y, direction.x))
                 }
                 continue
             }
-            let count = length > 1.3 ? 2 : 1
+            let count = length > 4.55 ? 2 : 1
             for window in 0..<count {
                 let t = (Float(window) + 0.5) / Float(count)
                 let center = a + (b - a) * t + push
-                let half = min(0.18, length * 0.18)
+                let half = min(0.63, length * 0.18)
                 let left = center - direction * half, right = center + direction * half
                 let bottom = y0 + height * 0.38, top = y0 + height * 0.78
                 let lit = random.chance(0.75)
@@ -533,9 +533,9 @@ enum BuildingMesher {
                 builder.panel(paint, left.lifted(bottom), right.lifted(bottom), right.lifted(top), left.lifted(top), facing: normal.lifted(0))
                 // Window frame bars.
                 let frame = spec.timber == .gold ? Paint.blackWood : spec.timber
-                builder.beam(frame, from: (left + normal * 0.01).lifted(bottom), to: (right + normal * 0.01).lifted(bottom), width: 0.03, height: 0.03)
-                builder.beam(frame, from: (left + normal * 0.01).lifted(top), to: (right + normal * 0.01).lifted(top), width: 0.03, height: 0.03)
-                builder.beam(frame, from: (center + normal * 0.01).lifted(bottom), to: (center + normal * 0.01).lifted(top), width: 0.02, height: 0.02)
+                builder.beam(frame, from: (left + normal * 0.035).lifted(bottom), to: (right + normal * 0.035).lifted(bottom), width: 0.105, height: 0.105)
+                builder.beam(frame, from: (left + normal * 0.035).lifted(top), to: (right + normal * 0.035).lifted(top), width: 0.105, height: 0.105)
+                builder.beam(frame, from: (center + normal * 0.035).lifted(bottom), to: (center + normal * 0.035).lifted(top), width: 0.07, height: 0.07)
             }
         }
     }
@@ -551,7 +551,7 @@ enum BuildingMesher {
             let t1 = Float(step + 1) / Float(steps)
             let a = point(bottom.0, top.0, t0), b = point(bottom.1, top.1, t0)
             let c = point(bottom.1, top.1, t1), d = point(bottom.0, top.0, t1)
-            let below = (a + b + c + d) / 4 - SIMD3<Float>(0, 4, 0)
+            let below = (a + b + c + d) / 4 - SIMD3<Float>(0, 14, 0)
             builder.quad(paint, a, b, c, d, outwardFrom: below)
         }
     }
@@ -575,7 +575,7 @@ enum BuildingMesher {
             return simd_dot(footprint.points[index] - footprint.center, ridge.axis) < 0 ? ridge.0 : ridge.1
         }
         if let ridge {
-            builder.beam(spec.ridge ?? .stoneDark, from: ridge.0 + [0, 0.03, 0], to: ridge.1 + [0, 0.03, 0], width: 0.1, height: 0.08)
+            builder.beam(spec.ridge ?? .stoneDark, from: ridge.0 + [0, 0.105, 0], to: ridge.1 + [0, 0.105, 0], width: 0.35, height: 0.28)
         }
         for index in 0..<footprint.count {
             let next = footprint.next(index)
@@ -586,12 +586,12 @@ enum BuildingMesher {
                 let down = SIMD3<Float>(0, -spec.fascia, 0)
                 builder.quad(spec.soffit, a, b, b + down, a + down, outwardFrom: footprint.center.lifted(eaveY))
                 let wallA = footprint.offset(index, wallOffset).lifted(eaveY), wallB = footprint.offset(next, wallOffset).lifted(eaveY)
-                builder.quad(spec.soffit, a + down, b + down, wallB, wallA, outwardFrom: footprint.center.lifted(eaveY + 3))
+                builder.quad(spec.soffit, a + down, b + down, wallB, wallA, outwardFrom: footprint.center.lifted(eaveY + 10))
             } else {
                 let middle = ((footprint.points[index] + footprint.points[next]) / 2).lifted(ridgeY)
                 sweep(builder, spec.roof, bottom: (a, a), top: (top, middle), curve: spec.curve)
                 sweep(builder, spec.roof, bottom: (b, b), top: (middle, top), curve: spec.curve)
-                builder.beam(spec.ridge ?? .stoneDark, from: top + [0, 0.03, 0], to: middle + [0, 0.03, 0], width: 0.1, height: 0.08)
+                builder.beam(spec.ridge ?? .stoneDark, from: top + [0, 0.105, 0], to: middle + [0, 0.105, 0], width: 0.35, height: 0.28)
             }
         }
     }
@@ -621,15 +621,15 @@ enum BuildingMesher {
     private static func skirt(_ builder: MeshBuilder, footprint: Footprint, spec: BuildingSpec, wallOffset: Float, nextOffset: Float, y: Float) {
         for index in 0..<footprint.count where footprint.exterior[index] {
             let next = footprint.next(index)
-            let eaveA = footprint.offset(index, wallOffset + spec.skirtOverhang).lifted(y - 0.06)
-            let eaveB = footprint.offset(next, wallOffset + spec.skirtOverhang).lifted(y - 0.06)
+            let eaveA = footprint.offset(index, wallOffset + spec.skirtOverhang).lifted(y - 0.21)
+            let eaveB = footprint.offset(next, wallOffset + spec.skirtOverhang).lifted(y - 0.21)
             let topA = footprint.offset(index, nextOffset).lifted(y + spec.skirtRise)
             let topB = footprint.offset(next, nextOffset).lifted(y + spec.skirtRise)
             sweep(builder, spec.roof, bottom: (eaveA, eaveB), top: (topA, topB), curve: spec.curve, steps: 2)
             let down = SIMD3<Float>(0, -spec.fascia, 0)
             builder.quad(spec.soffit, eaveA, eaveB, eaveB + down, eaveA + down, outwardFrom: footprint.center.lifted(y))
-            let wallA = footprint.offset(index, wallOffset).lifted(y - 0.06), wallB = footprint.offset(next, wallOffset).lifted(y - 0.06)
-            builder.quad(spec.soffit, eaveA + down, eaveB + down, wallB, wallA, outwardFrom: footprint.center.lifted(y + 3))
+            let wallA = footprint.offset(index, wallOffset).lifted(y - 0.21), wallB = footprint.offset(next, wallOffset).lifted(y - 0.21)
+            builder.quad(spec.soffit, eaveA + down, eaveB + down, wallB, wallA, outwardFrom: footprint.center.lifted(y + 10))
         }
     }
 
@@ -637,13 +637,13 @@ enum BuildingMesher {
         for index in 0..<footprint.count where footprint.exterior[index] {
             let next = footprint.next(index)
             let innerA = footprint.offset(index, offset), innerB = footprint.offset(next, offset)
-            let outerA = footprint.offset(index, offset + 0.26), outerB = footprint.offset(next, offset + 0.26)
-            builder.quad(spec.timber, innerA.lifted(y + 0.02), innerB.lifted(y + 0.02), outerB.lifted(y + 0.02), outerA.lifted(y + 0.02), outwardFrom: footprint.center.lifted(y - 3))
-            builder.quad(spec.timber, outerA.lifted(y - 0.04), outerB.lifted(y - 0.04), outerB.lifted(y + 0.02), outerA.lifted(y + 0.02), outwardFrom: footprint.center.lifted(y))
-            builder.beam(spec.timber, from: outerA.lifted(y + 0.22), to: outerB.lifted(y + 0.22), width: 0.04, height: 0.04)
-            builder.beam(spec.timber, from: outerA.lifted(y + 0.1), to: outerB.lifted(y + 0.1), width: 0.02, height: 0.02)
+            let outerA = footprint.offset(index, offset + 0.91), outerB = footprint.offset(next, offset + 0.91)
+            builder.quad(spec.timber, innerA.lifted(y + 0.07), innerB.lifted(y + 0.07), outerB.lifted(y + 0.07), outerA.lifted(y + 0.07), outwardFrom: footprint.center.lifted(y - 10))
+            builder.quad(spec.timber, outerA.lifted(y - 0.14), outerB.lifted(y - 0.14), outerB.lifted(y + 0.07), outerA.lifted(y + 0.07), outwardFrom: footprint.center.lifted(y))
+            builder.beam(spec.timber, from: outerA.lifted(y + 0.77), to: outerB.lifted(y + 0.77), width: 0.14, height: 0.14)
+            builder.beam(spec.timber, from: outerA.lifted(y + 0.35), to: outerB.lifted(y + 0.35), width: 0.07, height: 0.07)
             if footprint.outward[index] != nil {
-                builder.box(spec.timber, center: outerA.lifted(y + 0.12), size: [0.04, 0.22, 0.04])
+                builder.box(spec.timber, center: outerA.lifted(y + 0.42), size: [0.14, 0.77, 0.14])
             }
         }
     }
@@ -652,34 +652,34 @@ enum BuildingMesher {
         // Onigawara ridge-end tiles, or gold shachihoko on castles.
         for end in ends {
             if spec.shachi {
-                builder.blob(.gold, center: end + [0, 0.13, 0], scale: [0.05, 0.12, 0.05])
-                builder.cone(.gold, base: end + [0, 0.2, 0], tip: end + [0, 0.3, 0] + (end - top) * 0.3, radius: 0.04, sides: 4)
+                builder.blob(.gold, center: end + [0, 0.455, 0], scale: [0.175, 0.42, 0.175])
+                builder.cone(.gold, base: end + [0, 0.7, 0], tip: end + [0, 1.05, 0] + (end - top) * 0.3, radius: 0.14, sides: 4)
             } else if spec.ridge == nil {
-                builder.box(.stoneDark, center: end + [0, 0.08, 0], size: [0.12, 0.14, 0.12])
+                builder.box(.stoneDark, center: end + [0, 0.28, 0], size: [0.42, 0.49, 0.42])
             }
         }
         if ends.isEmpty, spec.shachi {
-            builder.blob(.gold, center: top + [0, 0.12, 0], scale: [0.05, 0.12, 0.05])
+            builder.blob(.gold, center: top + [0, 0.42, 0], scale: [0.175, 0.42, 0.175])
         }
         if spec.chigi {
             let direction = simd_normalize(footprint.points[0] - footprint.center)
             for side: Float in [-1, 1] {
-                let base = top + (direction * 0.25 * side).lifted(0)
-                builder.beam(spec.ridge ?? .darkWood, from: base - (direction * 0.1 * side).lifted(0), to: base + (direction * 0.12 * side).lifted(0.35), width: 0.04, height: 0.02)
-                builder.beam(spec.ridge ?? .darkWood, from: base - [0, 0, 0] + (direction.perpendicular * 0.12).lifted(0), to: base + (direction.perpendicular * 0.18).lifted(0.32), width: 0.04, height: 0.02)
+                let base = top + (direction * 0.875 * side).lifted(0)
+                builder.beam(spec.ridge ?? .darkWood, from: base - (direction * 0.35 * side).lifted(0), to: base + (direction * 0.42 * side).lifted(1.225), width: 0.14, height: 0.07)
+                builder.beam(spec.ridge ?? .darkWood, from: base - [0, 0, 0] + (direction.perpendicular * 0.42).lifted(0), to: base + (direction.perpendicular * 0.63).lifted(1.12), width: 0.14, height: 0.07)
             }
             for step in -1...1 {
-                let base = top + (direction * Float(step) * 0.12).lifted(0.04)
-                builder.beam(.gold, from: base - (direction.perpendicular * 0.1).lifted(0), to: base + (direction.perpendicular * 0.1).lifted(0), width: 0.05, height: 0.05)
+                let base = top + (direction * Float(step) * 0.42).lifted(0.14)
+                builder.beam(.gold, from: base - (direction.perpendicular * 0.35).lifted(0), to: base + (direction.perpendicular * 0.35).lifted(0), width: 0.175, height: 0.175)
             }
         }
         if spec.spire {
-            builder.cylinder(.bronze, from: top, to: top + [0, 1.3, 0], radius: 0.035)
+            builder.cylinder(.bronze, from: top, to: top + [0, 4.55, 0], radius: 0.1225)
             for ring in 0..<7 {
-                let y = 0.2 + Float(ring) * 0.13
-                builder.frustum(.bronze, from: top + [0, y, 0], to: top + [0, y + 0.03, 0], radiusA: 0.09, radiusB: 0.08, sides: 8, caps: true)
+                let y = 0.7 + Float(ring) * 0.455
+                builder.frustum(.bronze, from: top + [0, y, 0], to: top + [0, y + 0.105, 0], radiusA: 0.315, radiusB: 0.28, sides: 8, caps: true)
             }
-            builder.blob(.gold, center: top + [0, 1.38, 0], scale: SIMD3(repeating: 0.07))
+            builder.blob(.gold, center: top + [0, 4.83, 0], scale: SIMD3(repeating: 0.245))
         }
     }
 }

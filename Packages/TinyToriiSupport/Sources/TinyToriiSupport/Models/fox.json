@@ -4,19 +4,19 @@
   "parameters": { "FUR": "#E2752A" },
   "palette": { "fur": "$FUR", "foxWhite": "#F4F1EA", "blackWood": "#262321" },
   "body": [
-    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.05, 0.05, 0.15], "at": [0, 0.16, 0] },
-    { "icosahedron": { "radius": 1 }, "color": "foxWhite", "scale": [0.035, 0.035, 0.105], "at": [0, 0.14, 0.02] },
+    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.1, 0.1, 0.3], "at": [0, 0.32, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "foxWhite", "scale": [0.07, 0.07, 0.21], "at": [0, 0.28, 0.04] },
     { "mirror": [
-      { "repeat": { "count": 2, "step": [0, 0, -0.18], "parts": [
-        { "cylinder": { "top": 0.012, "bottom": 0.012, "height": 0.15, "segments": 4 }, "color": "fur", "at": [0.028, 0.075, 0.09] },
-        { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.013, 0.008, 0.015], "at": [0.028, 0.006, 0.094] }
+      { "repeat": { "count": 2, "step": [0, 0, -0.36], "parts": [
+        { "cylinder": { "top": 0.024, "bottom": 0.024, "height": 0.3, "segments": 4 }, "color": "fur", "at": [0.056, 0.15, 0.18] },
+        { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.026, 0.016, 0.03], "at": [0.056, 0.012, 0.188] }
       ] } },
-      { "cylinder": { "top": 0, "bottom": 0.015, "height": 0.065, "segments": 4 }, "color": "fur", "at": [0.0285, 0.2575, 0.135], "rotate": [-9, 0, -6] }
+      { "cylinder": { "top": 0, "bottom": 0.03, "height": 0.13, "segments": 4 }, "color": "fur", "at": [0.057, 0.515, 0.27], "rotate": [-9, 0, -6] }
     ] },
-    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.045, 0.04, 0.05], "at": [0, 0.2, 0.15] },
-    { "cylinder": { "top": 0.022, "bottom": 0, "height": 0.07, "segments": 5, "axis": "z" }, "color": "foxWhite", "at": [0, 0.1875, 0.215] },
-    { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.008, 0.008, 0.008], "at": [0, 0.188, 0.25] },
-    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.04, 0.045, 0.1], "at": [0, 0.16, -0.17], "rotate": [-28.6, 0, 0] },
-    { "icosahedron": { "radius": 1 }, "color": "foxWhite", "scale": [0.025, 0.025, 0.025], "at": [0, 0.2, -0.25] }
+    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.09, 0.08, 0.1], "at": [0, 0.4, 0.3] },
+    { "cylinder": { "top": 0.044, "bottom": 0, "height": 0.14, "segments": 5, "axis": "z" }, "color": "foxWhite", "at": [0, 0.375, 0.43] },
+    { "icosahedron": { "radius": 1 }, "color": "blackWood", "scale": [0.016, 0.016, 0.016], "at": [0, 0.376, 0.5] },
+    { "icosahedron": { "radius": 1 }, "color": "fur", "scale": [0.08, 0.09, 0.2], "at": [0, 0.32, -0.34], "rotate": [-28.6, 0, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "foxWhite", "scale": [0.05, 0.05, 0.05], "at": [0, 0.4, -0.5] }
   ]
 }

@@ -73,12 +73,13 @@ How to do this is open: kokeshi are human figures, so there's no direct animal e
 ## 4: World units are not meters; object sizes disagree with each other
 
 +++
-status: open
+status: closed
 priority: high
 kind: bug
 labels: effort:l, area:world
 created: 2026-11-10T05:03:35Z
-updated: 2026-11-12T19:10:20Z
+updated: 2026-11-12T21:03:32Z
+closed: 2026-11-12T21:03:32Z
 +++
 
 TinyTorii's units have no real-world scale, and objects are sized inconsistently with each other. The intended scale is 1 unit = 1 meter.

@@ -10,16 +10,16 @@
     "stone": "#9C978E", "darkWood": "#4A3324", "bronze": "#5C5A3C", "lightWood": "#B8915F"
   },
   "body": [
-    { "box": [1.1, 0.2, 1.1], "color": "stone", "at": [0, 0.1, 0] },
+    { "box": [3.85, 0.7, 3.85], "color": "stone", "at": [0, 0.35, 0] },
     { "mirror": [
       { "mirror": { "axis": "z", "parts": [
-        { "box": [0.08, 1.5, 0.08], "color": "posts", "at": [0.4, 0.95, 0.4] }
+        { "box": [0.28, 5.25, 0.28], "color": "posts", "at": [1.4, 3.325, 1.4] }
       ] } }
     ] },
-    { "box": [0.95, 0.06, 0.95], "color": "darkWood", "at": [0, 1.65, 0] },
-    { "use": "roofs.hip-roof", "with": { "SIZE": 1.4, "RISE": 0.55 }, "at": [0, 1.7, 0] },
-    { "cylinder": { "bottom": 0.24, "top": 0.17, "height": 0.7, "segments": 10 }, "color": "bronze", "at": [0, 1.1, 0] },
-    { "icosahedron": { "radius": 1 }, "color": "bronze", "scale": [0.17, 0.08, 0.17], "at": [0, 1.48, 0] },
-    { "box": [0.76, 0.07, 0.07], "color": "lightWood", "at": [0, 1.1, 0.3] }
+    { "box": [3.325, 0.21, 3.325], "color": "darkWood", "at": [0, 5.775, 0] },
+    { "use": "roofs.hip-roof", "with": { "SIZE": 4.9, "RISE": 1.925 }, "at": [0, 5.95, 0] },
+    { "cylinder": { "bottom": 0.84, "top": 0.595, "height": 2.45, "segments": 10 }, "color": "bronze", "at": [0, 3.85, 0] },
+    { "icosahedron": { "radius": 1 }, "color": "bronze", "scale": [0.595, 0.28, 0.595], "at": [0, 5.18, 0] },
+    { "box": [2.66, 0.245, 0.245], "color": "lightWood", "at": [0, 3.85, 1.05] }
   ]
 }

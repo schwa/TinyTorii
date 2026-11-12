@@ -7,9 +7,9 @@
   //   HEAD     head radius.
   "name": "Kokeshi",
   "parameters": {
-    "PROFILE": [[0, 0.042], [0.095, 0.042], [0.19, 0.042]],
-    "BANDS": [[0.03, 0.044], [0.15, 0.044], [0, 0]],
-    "HEAD": 0.05,
+    "PROFILE": [[0, 0.147], [0.3325, 0.147], [0.665, 0.147]],
+    "BANDS": [[0.105, 0.154], [0.525, 0.154], [0, 0]],
+    "HEAD": 0.175,
     "NECK": "$PROFILE[2].x",
     "Y": "$NECK + $HEAD * 0.9",
     "CUT": "$Y + $HEAD * 1.03 * 0.29552",
@@ -24,16 +24,16 @@
       "color": "body", "at": [0, "($PROFILE[0].x + $PROFILE[1].x) / 2", 0] },
     { "cylinder": { "bottom": "$PROFILE[1].y", "top": "$PROFILE[2].y", "height": "$PROFILE[2].x - $PROFILE[1].x", "segments": 10 },
       "color": "body", "at": [0, "($PROFILE[1].x + $PROFILE[2].x) / 2", 0] },
-    { "cylinder": { "bottom": "$BANDS[0].y", "top": "$BANDS[0].y", "height": 0.016, "segments": 10 }, "color": "band0", "at": [0, "$BANDS[0].x", 0], "if": "$BANDS[0].y > 0" },
-    { "cylinder": { "bottom": "$BANDS[1].y", "top": "$BANDS[1].y", "height": 0.016, "segments": 10 }, "color": "band1", "at": [0, "$BANDS[1].x", 0], "if": "$BANDS[1].y > 0" },
-    { "cylinder": { "bottom": "$BANDS[2].y", "top": "$BANDS[2].y", "height": 0.016, "segments": 10 }, "color": "band2", "at": [0, "$BANDS[2].x", 0], "if": "$BANDS[2].y > 0" },
+    { "cylinder": { "bottom": "$BANDS[0].y", "top": "$BANDS[0].y", "height": 0.056, "segments": 10 }, "color": "band0", "at": [0, "$BANDS[0].x", 0], "if": "$BANDS[0].y > 0" },
+    { "cylinder": { "bottom": "$BANDS[1].y", "top": "$BANDS[1].y", "height": 0.056, "segments": 10 }, "color": "band1", "at": [0, "$BANDS[1].x", 0], "if": "$BANDS[1].y > 0" },
+    { "cylinder": { "bottom": "$BANDS[2].y", "top": "$BANDS[2].y", "height": 0.056, "segments": 10 }, "color": "band2", "at": [0, "$BANDS[2].x", 0], "if": "$BANDS[2].y > 0" },
     { "sphere": { "radius": "$HEAD", "widthSegments": 12, "heightSegments": 10 }, "color": "foxWhite", "at": [0, "$Y", 0] },
     { "intersection": [
       { "sphere": { "radius": "$HEAD * 1.03", "widthSegments": 12, "heightSegments": 10 }, "at": [0, "$Y", 0] },
       { "box": ["$HEAD * 3", "$HEAD * 2.06", "$HEAD * 3"], "at": [0, "$CUT + $HEAD * 1.03", 0] }
     ], "color": "hair" },
     { "mirror": { "axis": "z", "parts": [
-      { "box": [0.008, 0.004, 0.012], "color": "blackWood", "at": ["$HEAD * 0.95", "$Y + 0.004", "$HEAD * 0.32"] }
+      { "box": [0.028, 0.014, 0.042], "color": "blackWood", "at": ["$HEAD * 0.95", "$Y + 0.014", "$HEAD * 0.32"] }
     ] } }
   ]
 }

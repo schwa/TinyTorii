@@ -66,10 +66,10 @@ final class Creatures {
             let base = town.groundHeight(cell)
             for index in 0..<item.level {
                 let angle = Float(index) / Float(item.level) * 2 * .pi + random.range(0, 1)
-                let start = home + SIMD2(cos(angle), sin(angle)) * random.range(0.1, 0.45)
+                let start = home + SIMD2(cos(angle), sin(angle)) * random.range(0.35, 1.575)
                 let built = look(kind: item.kind, style: item.style, device: scene.device)
                 let node = SceneGraph.Node(parent: parent, label: item.kind.rawValue, content: .mesh(built.mesh, materials: scene.materials(for: built), castsShadow: item.kind != .koi, receivesShadow: true))
-                var creature = Creature(node: node, kind: item.kind, look: item.style, home: home, radius: item.kind == .koi ? 0.55 : 0.7, position: start, target: start, heading: random.range(0, 2 * .pi), speed: speed(of: item.kind), pause: random.range(0, 2), phase: random.range(0, 6), base: base)
+                var creature = Creature(node: node, kind: item.kind, look: item.style, home: home, radius: item.kind == .koi ? 1.925 : 2.45, position: start, target: start, heading: random.range(0, 2 * .pi), speed: speed(of: item.kind), pause: random.range(0, 2), phase: random.range(0, 6), base: base)
                 place(&creature)
                 creatures.append(creature)
             }
@@ -84,14 +84,15 @@ final class Creatures {
         }
     }
 
+    // Meters per second.
     private func speed(of kind: Kind) -> Float {
         switch kind {
-        case .crane: 0.12
-        case .frog: 0.5
-        case .fox: 0.45
-        case .cat: 0.2
-        case .koi: 0.18
-        default: 0.22
+        case .crane: 0.42
+        case .frog: 1.75
+        case .fox: 1.575
+        case .cat: 0.7
+        case .koi: 0.63
+        default: 0.77
         }
     }
 
@@ -106,9 +107,9 @@ final class Creatures {
                 continue
             }
             let delta = creature.target - creature.position
-            if simd_length(delta) < 0.04 {
+            if simd_length(delta) < 0.14 {
                 let angle = random.range(0, 2 * .pi)
-                creature.target = creature.home + SIMD2(cos(angle), sin(angle)) * random.range(0.05, creature.radius)
+                creature.target = creature.home + SIMD2(cos(angle), sin(angle)) * random.range(0.175, creature.radius)
                 // Koi keep swimming; the others stop to look about.
                 creature.pause = switch creature.kind {
                 case .koi: 0
@@ -137,9 +138,9 @@ final class Creatures {
         var tilt = simd_quatf(angle: 0, axis: [1, 0, 0])
         switch creature.kind {
         case .frog:
-            y += creature.pause > 0 ? 0 : abs(sin(creature.hop * .pi)) * 0.12
+            y += creature.pause > 0 ? 0 : abs(sin(creature.hop * .pi)) * 0.42
         case .koi:
-            y = creature.base + 0.006
+            y = creature.base + 0.021
             tilt = simd_quatf(angle: sin(creature.phase * 6) * 0.25, axis: [0, 1, 0])
         case .crane:
             if creature.pause > 0 {
@@ -147,7 +148,7 @@ final class Creatures {
                 tilt = simd_quatf(angle: max(0, sin(creature.phase * 0.8)) * 0.35, axis: [1, 0, 0])
             }
         default:
-            y += creature.pause > 0 ? 0 : abs(sin(creature.phase * 12)) * 0.008
+            y += creature.pause > 0 ? 0 : abs(sin(creature.phase * 12)) * 0.028
         }
         creature.node.trs = Transform3D(translation: creature.position.lifted(y), rotation: simd_quatf(angle: creature.heading, axis: [0, 1, 0]) * tilt)
     }

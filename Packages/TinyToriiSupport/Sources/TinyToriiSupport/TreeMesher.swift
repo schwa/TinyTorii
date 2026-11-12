@@ -37,7 +37,8 @@ enum TreeMesher {
 
     static func build(_ builder: MeshBuilder, item: Item) {
         var random = SeededRandom(seed: item.seed)
-        let scale = 0.55 + 0.22 * Float(item.level)
+        // Most sizes below are in meters times this.
+        let scale = 3.5 * (0.55 + 0.22 * Float(item.level))
         let lean = SIMD3<Float>(random.signed(), 0, random.signed()) * 0.15
         switch item.kind {
         case .sakura:
@@ -52,8 +53,8 @@ enum TreeMesher {
                 if weeping {
                     var point = tip
                     for _ in 0..<5 {
-                        point += [random.signed() * 0.03, -0.17 * scale, random.signed() * 0.03]
-                        guard point.y > 0.15 else { break }
+                        point += [random.signed() * 0.105, -0.17 * scale, random.signed() * 0.105]
+                        guard point.y > 0.525 else { break }
                         builder.blob(random.pick(colors), center: point, scale: SIMD3(repeating: 0.07 * scale))
                     }
                 }
@@ -111,14 +112,14 @@ enum TreeMesher {
                 let end = base + out * reach
                 builder.frustum(trunk, from: base, to: end, radiusA: 0.035 * scale, radiusB: 0.02 * scale, sides: 5)
                 let padSize = 0.32 * scale * (1.1 - Float(index) * 0.1)
-                builder.blob(.pineDark, center: end + [0, 0.05, 0], scale: [padSize, padSize * 0.32, padSize])
-                builder.blob(.pineMid, center: end + [0, 0.11, 0], scale: [padSize * 0.75, padSize * 0.25, padSize * 0.75])
+                builder.blob(.pineDark, center: end + [0, 0.175, 0], scale: [padSize, padSize * 0.32, padSize])
+                builder.blob(.pineMid, center: end + [0, 0.385, 0], scale: [padSize * 0.75, padSize * 0.25, padSize * 0.75])
             }
-            builder.blob(.pineDark, center: point + [0, 0.06, 0], scale: [0.3, 0.12, 0.3] * scale)
+            builder.blob(.pineDark, center: point + [0, 0.21, 0], scale: [0.3, 0.12, 0.3] * scale)
         case .sugi:
             let height = 2.2 * scale
             let green: Paint = item.style == 1 ? .cypressGreen : .cedarGreen
-            builder.frustum(.barkRed, from: .zero, to: [0, height, 0], radiusA: 0.09 * scale, radiusB: 0.02, sides: 6)
+            builder.frustum(.barkRed, from: .zero, to: [0, height, 0], radiusA: 0.09 * scale, radiusB: 0.07, sides: 6)
             let layers = 5
             for layer in 0..<layers {
                 let t = Float(layer) / Float(layers)
@@ -131,24 +132,24 @@ enum TreeMesher {
             let leaf: Paint = item.style == 1 ? .bambooLeafGold : .bambooLeaf
             let stalk: Paint = [.bamboo, .bambooDry, .bambooBlack][item.style]
             for _ in 0..<count {
-                let base = SIMD3<Float>(random.signed() * 0.55, 0, random.signed() * 0.55)
-                let height = random.range(1.6, 2.6)
-                let tip = base + [random.signed() * 0.25, height, random.signed() * 0.25]
-                builder.frustum(stalk, from: base, to: tip, radiusA: 0.035, radiusB: 0.02, sides: 5)
+                let base = SIMD3<Float>(random.signed() * 1.925, 0, random.signed() * 1.925)
+                let height = random.range(5.6, 9.1)
+                let tip = base + [random.signed() * 0.875, height, random.signed() * 0.875]
+                builder.frustum(stalk, from: base, to: tip, radiusA: 0.1225, radiusB: 0.07, sides: 5)
                 var t: Float = 0.25
                 while t < 1 {
                     let node = base + (tip - base) * t
-                    builder.frustum(stalk == .bamboo ? .leafDark : .bark, from: node, to: node + [0, 0.025, 0], radiusA: 0.04, radiusB: 0.04, sides: 5)
+                    builder.frustum(stalk == .bamboo ? .leafDark : .bark, from: node, to: node + [0, 0.0875, 0], radiusA: 0.14, radiusB: 0.14, sides: 5)
                     t += 0.18
                 }
                 for _ in 0..<4 {
-                    let tuft = base + (tip - base) * random.range(0.6, 1) + SIMD3(random.signed() * 0.15, 0, random.signed() * 0.15)
-                    builder.blob(leaf, center: tuft, scale: [0.16, 0.05, 0.08], rotation: simd_quatf(angle: random.range(0, 6), axis: [0, 1, 0]))
+                    let tuft = base + (tip - base) * random.range(0.6, 1) + SIMD3(random.signed() * 0.525, 0, random.signed() * 0.525)
+                    builder.blob(leaf, center: tuft, scale: [0.56, 0.175, 0.28], rotation: simd_quatf(angle: random.range(0, 6), axis: [0, 1, 0]))
                 }
             }
         case .ginkgo:
             let height = 0.9 * scale
-            builder.frustum(.barkGrey, from: .zero, to: [0, height * 1.6, 0], radiusA: 0.09 * scale, radiusB: 0.03, sides: 6)
+            builder.frustum(.barkGrey, from: .zero, to: [0, height * 1.6, 0], radiusA: 0.09 * scale, radiusB: 0.105, sides: 6)
             let color: Paint = item.style == 1 ? .ginkgoGreen : .ginkgoYellow
             for _ in 0..<12 {
                 let t = random.range(0.4, 1.6)
@@ -167,7 +168,7 @@ enum TreeMesher {
                 builder.blob(colors[0], center: tip, scale: SIMD3(repeating: 0.2 * scale))
                 for _ in 0..<6 {
                     let start = tip + SIMD3(random.signed() * 0.25, 0, random.signed() * 0.25) * scale
-                    let length = min(start.y - 0.1, random.range(0.6, 1.1) * scale)
+                    let length = min(start.y - 0.35, random.range(0.6, 1.1) * scale)
                     builder.cone(random.pick(colors), base: start, tip: start - [0, length, 0], radius: 0.06 * scale, sides: 3)
                 }
             }
@@ -180,7 +181,7 @@ enum TreeMesher {
         for _ in 0..<count {
             let angle = random.range(0, 2 * .pi)
             let distance = sqrt(random.next()) * radius
-            builder.disc(random.pick(colors), center: [cos(angle) * distance, 0.012, sin(angle) * distance], radius: 0.035, sides: 5)
+            builder.disc(random.pick(colors), center: [cos(angle) * distance, 0.042, sin(angle) * distance], radius: 0.1225, sides: 5)
         }
     }
 }

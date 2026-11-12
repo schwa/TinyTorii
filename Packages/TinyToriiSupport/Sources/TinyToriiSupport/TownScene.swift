@@ -37,7 +37,7 @@ public final class TownScene {
     private var materials: [Surface: BlinnPhongSceneMaterial] = [:]
     private var albedoTexture: MTLTexture?
 
-    static let chunkSize: Float = 26
+    static let chunkSize: Float = 91
 
     public init(town: Town, time: TimeOfDay = .day, device: MTLDevice? = nil) {
         let device = device ?? MTLCreateSystemDefaultDevice()!
@@ -273,12 +273,12 @@ public final class TownScene {
 
     private func applyTime() {
         sun.content = .light(Light(type: .directional, color: time.sunColor, intensity: time.sunIntensity))
-        sun.transform = LookAt(position: time.sunDirection * 40, target: .zero, up: [0, 1, 0]).cameraMatrix
+        sun.transform = LookAt(position: time.sunDirection * 140, target: .zero, up: [0, 1, 0]).cameraMatrix
         fill.content = .light(Light(type: .directional, color: time == .night ? [0.2, 0.25, 0.5] : [0.55, 0.65, 0.9], intensity: time == .night ? 0.15 : 0.3, castsShadow: false))
-        fill.transform = LookAt(position: [-20, 12, -25], target: .zero, up: [0, 1, 0]).cameraMatrix
+        fill.transform = LookAt(position: [-70, 42, -87.5], target: .zero, up: [0, 1, 0]).cameraMatrix
         // A background gradient, not a sky mesh: shadows fit the scene's bounds, so the scene must stay small.
         sceneGraph.environment.background = .gradient(.init(zenith: time.skyTop, horizon: time.seaDistance, ground: time.seaDistance, exponent: 0.6))
-        sceneGraph.fog = SceneGraph.Fog(color: SIMD4(time.seaDistance, 1), startDistance: 45, endDistance: 125, densityExponent: 1.2)
+        sceneGraph.fog = SceneGraph.Fog(color: SIMD4(time.seaDistance, 1), startDistance: 157.5, endDistance: 437.5, densityExponent: 1.2)
     }
 
     // At dusk and night, the lanterns cast real light: a few point lights spread over the town.
@@ -293,10 +293,10 @@ public final class TownScene {
                 continue
             }
             let height: Float? = switch item.kind {
-            case .stoneLantern: 0.7
-            case .paperLantern: 1.0
-            case .ryokan, .machiya: 0.5
-            case .shrine, .temple: 0.8
+            case .stoneLantern: 2.45
+            case .paperLantern: 3.5
+            case .ryokan, .machiya: 1.75
+            case .shrine, .temple: 2.8
             default: nil
             }
             if let height {
@@ -315,7 +315,7 @@ public final class TownScene {
             chosen.append(candidates.remove(at: index))
         }
         for position in chosen {
-            let node = SceneGraph.Node(parent: lamps, label: "Lamp", content: .light(Light(type: .point, color: [1, 0.62, 0.3], intensity: time == .night ? 3 : 1.5, range: 6, castsShadow: false)))
+            let node = SceneGraph.Node(parent: lamps, label: "Lamp", content: .light(Light(type: .point, color: [1, 0.62, 0.3], intensity: time == .night ? 30 : 15, range: 21, castsShadow: false)))
             node.trs = Transform3D(translation: position)
         }
     }
@@ -335,7 +335,7 @@ public final class TownScene {
         for _ in 0..<70 {
             let angle = random.range(0, 2 * .pi)
             let distance = town.grid.radius * random.range(1.15, 1.45)
-            builder.blob(.foxWhite, center: [cos(angle) * distance, GroundMesher.seaLevel, sin(angle) * distance], scale: [random.range(0.3, 0.8), 0.02, 0.06], rotation: simd_quatf(angle: -angle + .pi / 2, axis: [0, 1, 0]))
+            builder.blob(.foxWhite, center: [cos(angle) * distance, GroundMesher.seaLevel, sin(angle) * distance], scale: [random.range(1.05, 2.8), 0.07, 0.21], rotation: simd_quatf(angle: -angle + .pi / 2, axis: [0, 1, 0]))
         }
         if let built = builder.build(device: device, label: "Sea") {
             sea = SceneGraph.Node(parent: root, label: "Sea", content: content(for: built, castsShadow: false))
@@ -392,11 +392,11 @@ public final class TownScene {
         for cell in cells {
             let points = town.grid.polygon(of: cell)
             let center = town.grid.cells[cell].center
-            let y = town.groundHeight(cell) + 0.04
+            let y = town.groundHeight(cell) + 0.14
             for index in points.indices {
                 let a = center + (points[index] - center) * 0.9
                 let b = center + (points[(index + 1) % points.count] - center) * 0.9
-                builder.beam(stretching ? .highlightStretch : .highlight, from: a.lifted(y), to: b.lifted(y), width: 0.07, height: 0.03)
+                builder.beam(stretching ? .highlightStretch : .highlight, from: a.lifted(y), to: b.lifted(y), width: 0.245, height: 0.105)
             }
         }
         if let built = builder.build(device: device, label: "Highlight") {
@@ -427,9 +427,9 @@ public final class TownScene {
         // Trunks, lanterns and statues stand at the cell center.
         if let item = state.item {
             let radius: Float = switch item.kind {
-            case .bamboo: 0.75
-            case .zenGarden, .stones, .azalea: 0.55
-            case .sakura, .ume, .momiji, .pine, .sugi, .ginkgo, .willow, .stoneLantern, .foxStatue: 0.3
+            case .bamboo: 2.625
+            case .zenGarden, .stones, .azalea: 1.925
+            case .sakura, .ume, .momiji, .pine, .sugi, .ginkgo, .willow, .stoneLantern, .foxStatue: 1.05
             default: 0
             }
             if radius > 0, simd_distance(point, town.grid.cells[cell].center) < radius {

@@ -6,13 +6,13 @@
   "parameters": { "WALL": "#9C978E", "LID": "#C2BDB2" },
   "palette": { "wall": "$WALL", "lid": "$LID", "darkWood": "#4A3324", "cedar": "#7A5434", "roof": "#6B4A35" },
   "body": [
-    { "cylinder": { "bottom": 0.3, "top": 0.28, "height": 0.35, "segments": 10 }, "color": "wall", "at": [0, 0.175, 0] },
-    { "cylinder": { "bottom": 0.3, "top": 0.3, "height": 0.004, "segments": 10 }, "color": "lid", "at": [0, 0.348, 0], "rotate": [0, 18, 0] },
+    { "cylinder": { "bottom": 1.05, "top": 0.98, "height": 1.225, "segments": 10 }, "color": "wall", "at": [0, 0.6125, 0] },
+    { "cylinder": { "bottom": 1.05, "top": 1.05, "height": 0.014, "segments": 10 }, "color": "lid", "at": [0, 1.218, 0], "rotate": [0, 18, 0] },
     { "mirror": [
-      { "box": [0.05, 0.7, 0.05], "color": "darkWood", "at": [0.3, 0.55, 0] }
+      { "box": [0.175, 2.45, 0.175], "color": "darkWood", "at": [1.05, 1.925, 0] }
     ] },
-    { "box": [0.66, 0.05, 0.05], "color": "darkWood", "at": [0, 0.85, 0] },
-    { "use": "roofs.hip-roof", "with": { "SIZE": 0.8, "RISE": 0.3 }, "at": [0, 0.88, 0] },
-    { "cylinder": { "bottom": 0.06, "top": 0.06, "height": 0.15, "segments": 8 }, "color": "cedar", "at": [0, 0.525, 0] }
+    { "box": [2.31, 0.175, 0.175], "color": "darkWood", "at": [0, 2.975, 0] },
+    { "use": "roofs.hip-roof", "with": { "SIZE": 2.8, "RISE": 1.05 }, "at": [0, 3.08, 0] },
+    { "cylinder": { "bottom": 0.21, "top": 0.21, "height": 0.525, "segments": 8 }, "color": "cedar", "at": [0, 1.8375, 0] }
   ]
 }

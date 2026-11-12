@@ -64,7 +64,8 @@ public struct Grid: Sendable {
         return true
     }
 
-    public init(radius: Float = 26, spacing: Float = 2.1, seed: UInt32 = 1, relaxations: Int = 2) {
+    // Sizes in meters.
+    public init(radius: Float = 91, spacing: Float = 7.35, seed: UInt32 = 1, relaxations: Int = 2) {
         self.radius = radius
         self.spacing = spacing
         var random = SeededRandom(seed: seed &* 2_654_435_761 &+ 17)

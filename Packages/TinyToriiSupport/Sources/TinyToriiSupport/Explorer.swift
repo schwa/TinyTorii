@@ -24,7 +24,7 @@ public final class Explorer: SceneViewDelegate {
     private var needsFPVPose = true
     private let scene: TownScene
     private var position: SIMD2<Float> = .zero
-    private var height: Float = 0.6
+    private var height: Float = 1.6
     public private(set) var yaw: Float = 0
     public var pitch: Float = 0.05
     private var bobPhase: Float = 0
@@ -35,17 +35,18 @@ public final class Explorer: SceneViewDelegate {
     private var recentCells: [Int] = []
     private var lookOffsetYaw: Float = 0
 
-    static let eyeHeight: Float = 0.55
+    // Meters: a person's eyes.
+    static let eyeHeight: Float = 1.6
 
     init(scene: TownScene) {
         self.scene = scene
         cameraNode = SceneGraph.Node(label: "Walker", content: .camera(TownCamera.camera))
         navigator.settings = FPVMovementSettings(
-            speed: 1.7,
+            speed: 5.95,
             fastSpeedMultiplier: 3.6 / 1.7,
             mouseSensitivity: 0.0025,
             keyboardTurnSpeed: 1.8,
-            walk: FPVWalkSettings(gravity: 3.5, eyeHeight: Self.eyeHeight, groundFollowRate: 8)
+            walk: FPVWalkSettings(gravity: 9.8, eyeHeight: Self.eyeHeight, groundFollowRate: 8)
         )
         navigator.hooks = Self.hooks(scene: scene)
         // The mouse looks only while captured; otherwise it is for clicking and dragging.
@@ -68,7 +69,7 @@ public final class Explorer: SceneViewDelegate {
                 }
                 let current = scene.walkHeight(at: start) ?? 0
                 // Keep a little distance from blocked cells.
-                let probe = next + simd_normalize(step) * 0.32
+                let probe = next + simd_normalize(step) * 1.12
                 return scene.isWalkable(next, from: current) && scene.isWalkable(probe, from: current)
             },
             adjustCamera: { matrix, state in
@@ -76,7 +77,7 @@ public final class Explorer: SceneViewDelegate {
                     return matrix
                 }
                 var matrix = matrix
-                matrix.columns.3.y += sin(state.distanceWalked * 5.5) * 0.018
+                matrix.columns.3.y += sin(state.distanceWalked * 1.571) * 0.063
                 return matrix
             }
         )
@@ -151,8 +152,8 @@ public final class Explorer: SceneViewDelegate {
         if isFlying {
             flightAngle += deltaTime * 0.05
             let radius = scene.town.grid.radius * 0.95
-            let eye = SIMD3<Float>(sin(flightAngle) * radius, 9 + sin(flightAngle * 3) * 1.5, cos(flightAngle) * radius)
-            let target = SIMD3<Float>(sin(flightAngle + 0.9) * radius * 0.25, 1, cos(flightAngle + 0.9) * radius * 0.25)
+            let eye = SIMD3<Float>(sin(flightAngle) * radius, 31.5 + sin(flightAngle * 3) * 5.25, cos(flightAngle) * radius)
+            let target = SIMD3<Float>(sin(flightAngle + 0.9) * radius * 0.25, 3.5, cos(flightAngle + 0.9) * radius * 0.25)
             cameraNode.transform = LookAt(position: eye, target: target, up: [0, 1, 0]).cameraMatrix
             needsFPVPose = true
             return
@@ -163,10 +164,10 @@ public final class Explorer: SceneViewDelegate {
         }
         needsFPVPose = true
         var move = stroll(deltaTime: deltaTime)
-        let speed: Float = 1.1
+        let speed: Float = 3.85
         // Stuck for a while: turn around and forget where we've been.
         stuckTime += deltaTime
-        if simd_distance(position, lastProgress) > 0.5 {
+        if simd_distance(position, lastProgress) > 1.75 {
             lastProgress = position
             stuckTime = 0
         } else if stuckTime > 2.5 {
@@ -183,7 +184,7 @@ public final class Explorer: SceneViewDelegate {
             let right = SIMD2<Float>(cos(yaw), sin(yaw))
             let step = (forward * move.y + right * move.x) * speed * deltaTime
             walk(step)
-            bobPhase += simd_length(step) * 5.5
+            bobPhase += simd_length(step) * 1.571
         }
         let ground = scene.walkHeight(at: position).map { $0 + Self.eyeHeight + bridgeLift() } ?? height
         height += (ground - height) * min(1, deltaTime * 8)
@@ -215,7 +216,7 @@ public final class Explorer: SceneViewDelegate {
             return 0
         }
         let distance = simd_distance(point, scene.town.grid.cells[cell].center)
-        return 0.42 * max(0, 1 - distance / 0.95)
+        return 1.47 * max(0, 1 - distance / 3.325)
     }
 
     // Moves, sliding along walls when the direct step is blocked.
@@ -224,7 +225,7 @@ public final class Explorer: SceneViewDelegate {
         for candidate in [step, SIMD2(step.x, 0), SIMD2(0, step.y)] {
             let next = position + candidate
             // Keep a little distance from blocked cells.
-            let probe = next + simd_normalize(candidate + SIMD2(1e-6, 0)) * 0.32
+            let probe = next + simd_normalize(candidate + SIMD2(1e-6, 0)) * 1.12
             if scene.isWalkable(next, from: current), scene.isWalkable(probe, from: current) {
                 position = next
                 return
@@ -243,7 +244,7 @@ public final class Explorer: SceneViewDelegate {
     // Picks a walkable neighbor, walks to its center, and turns smoothly toward it.
     private func stroll(deltaTime: Float) -> SIMD2<Float> {
         let town = scene.town
-        if strollTarget == nil || simd_distance(strollTarget!, position) < 0.35 {
+        if strollTarget == nil || simd_distance(strollTarget!, position) < 1.225 {
             guard let cell = town.grid.cell(at: position) else {
                 return .zero
             }
@@ -282,7 +283,7 @@ public final class Explorer: SceneViewDelegate {
     }
 
     private func updateCamera() {
-        let bob = sin(bobPhase) * 0.018
+        let bob = sin(bobPhase) * 0.063
         cameraNode.transform = TownCamera.look(from: position.lifted(height + bob), yaw: yaw, pitch: pitch)
     }
 }

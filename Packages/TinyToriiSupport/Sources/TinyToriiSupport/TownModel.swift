@@ -86,7 +86,7 @@ public final class TownModel {
             }
         }
     }
-    private var storedPose = RTSCameraPose(target: .zero, yaw: 0.6, pitch: 0.7, distance: 48)
+    private var storedPose = RTSCameraPose(target: .zero, yaw: 0.6, pitch: 0.7, distance: 168)
 
     public var cameraMatrix: simd_float4x4? {
         get { rtsPose.cameraMatrix }

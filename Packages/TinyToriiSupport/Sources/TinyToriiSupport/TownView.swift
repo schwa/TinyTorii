@@ -84,7 +84,7 @@ public struct TownView: View {
         .id(model.mode)
         .modifier(BuildCameraKeys(isEnabled: model.mode == .build, pose: $model.rtsPose, brushFilter: BrushDragFilter(model: model, viewSize: viewSize)))
         .modifier(ExploreMovement(navigator: model.mode == .explore ? model.explorer.navigator : nil))
-        .sceneCameraControl(SceneCameraControl(distanceRange: 6...110, pitchRange: 0.08...1.5))
+        .sceneCameraControl(SceneCameraControl(distanceRange: 21...385, pitchRange: 0.08...1.5))
         .onGeometryChange(for: CGSize.self) { $0.size } action: { viewSize = $0 }
         .onContinuousHover { phase in
             switch phase {
@@ -569,7 +569,7 @@ private struct BuildCameraKeys: ViewModifier {
     func body(content: Content) -> some View {
         if isEnabled {
             content
-                .rtsMovement(pose: $pose, settings: RTSMovementSettings(panSpeed: 0.6, distanceRange: 6...110))
+                .rtsMovement(pose: $pose, settings: RTSMovementSettings(panSpeed: 0.6, distanceRange: 21...385))
                 .interactionDragFilter(brushFilter)
         } else {
             content
