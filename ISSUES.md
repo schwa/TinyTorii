@@ -28,7 +28,7 @@ On an iPhone (portrait and landscape):
 
 Expected: the build and explore UI are usable on iPhone in portrait and landscape, every action is reachable by touch, and nothing is clipped or overlapping.
 
-- `2026-11-12T22:11:06Z`: Most of this looks already done by wvtknvqk (Nov 9, 'iPhone-sized build and explore UI'): compact top bar without title, time picker as a menu, tools moved into the palette as a scrolling row (no left column), style picker as a menu, smaller thumbnails in landscape, materials respect safe areas, explore has a joystick plus Stroll/Fly buttons (touch for space/F), ContentView no longer sets a min frame. Not done: build-mode camera control is off on iOS (noted in that commit: it hangs at launch).
+\- `2026-11-12T22:11:06Z`: Most of this looks already done by wvtknvqk (Nov 9, 'iPhone-sized build and explore UI'): compact top bar without title, time picker as a menu, tools moved into the palette as a scrolling row (no left column), style picker as a menu, smaller thumbnails in landscape, materials respect safe areas, explore has a joystick plus Stroll/Fly buttons (touch for space/F), ContentView no longer sets a min frame. Not done: build-mode camera control is off on iOS (noted in that commit: it hangs at launch).
 
 Punting the close: I could not verify on a phone. The iOS Simulator build fails because MetalSprockets/MetalSupport need Metal 4 (MTL4CommandBuffer etc. are missing from the simulator SDK), and no device is attached. Unblocker: run it on an iPhone (portrait + landscape) and report anything clipped, overlapping or unreachable; or close #1 if it looks right.
 
@@ -501,12 +501,13 @@ Not confirmed: whether it only happens when flying ended outside the island / ov
 ## 24: Zen garden is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-12T21:07:52Z
-updated: 2026-11-12T21:25:41Z
+updated: 2026-11-12T22:21:08Z
+closed: 2026-11-12T22:21:08Z
 +++
 
 The zen garden (PropMesher, .zenGarden) is built in Swift: rocks with raked gravel rings around them. Rock count, placement and sizes vary per item seed and level. Formerly tracked by #5.

@@ -45,20 +45,7 @@ enum PropMesher {
                 assertionFailure("bell-tower.json: \(error)")
             }
         case .zenGarden:
-            // Raked circles around a few rocks.
-            let rocks = item.level + 1
-            for index in 0..<rocks {
-                let angle = random.range(0, 2 * .pi)
-                let distance = index == 0 ? 0 : random.range(1.05, 1.925)
-                let center = SIMD3<Float>(cos(angle) * distance, 0, sin(angle) * distance)
-                let size = random.range(0.42, 0.91) * (index == 0 ? 1.4 : 1)
-                for ring in 1...3 {
-                    let radius = size * 0.9 + Float(ring) * 0.245
-                    ringLine(builder, center: center + [0, 0.035, 0], radius: radius, paint: .gravelLine)
-                }
-                builder.blob(item.style == 2 ? .moss : .stone, center: center + [0, 0.07, 0], scale: [size * 1.4, size * 0.4, size * 1.4])
-                builder.blob(.stoneDark, center: center + [0, size * 0.45, 0], scale: [size, size * 1.1, size * 0.85], rotation: simd_quatf(angle: random.range(0, 6), axis: simd_normalize([random.signed(), 3, random.signed()])))
-            }
+            zenGarden(builder, item: item, random: &random)
         case .koiPond:
             for point in GroundMesher.scatter(points: polygon, center: .zero, count: 8, margin: 0.95, random: &random) {
                 builder.blob(.stone, center: point.lifted(0.07), scale: [0.49, 0.35, 0.42] * random.range(0.8, 1.3), rotation: simd_quatf(angle: random.range(0, 6), axis: [0, 1, 0]))
@@ -286,17 +273,39 @@ enum PropMesher {
         builder.setTransform(previous)
     }
 
-    static func ring(radius: Float, y: Float, sides: Int) -> [SIMD3<Float>] {
-        (0..<sides).map { index in
-            let angle = Float(index) / Float(sides) * 2 * .pi
-            return [cos(angle) * radius, y, sin(angle) * radius]
+
+    // Raked circles around a few rocks; the seed places them and zen-garden.json draws them.
+    static func zenGarden(_ builder: MeshBuilder, item: Item, random: inout SeededRandom) {
+        var x: [Double] = [], z: [Double] = [], sizes: [Double] = []
+        var turns: [SIMD3<Float>] = []
+        for index in 0...item.level {
+            let angle = random.range(0, 2 * .pi)
+            let distance = index == 0 ? 0 : random.range(1.05, 1.925)
+            x.append(Double(cos(angle) * distance))
+            z.append(Double(sin(angle) * distance))
+            sizes.append(Double(random.range(0.42, 0.91) * (index == 0 ? 1.4 : 1)))
+            let turn = simd_quatf(angle: random.range(0, 6), axis: simd_normalize([random.signed(), 3, random.signed()]))
+            turns.append(eulerXYZ(turn) * 180 / .pi)
+        }
+        let parameters: [String: ModelParameter] = [
+            "BASE": ModelLibrary.hex(item.style == 2 ? .moss : .stone),
+            "X": .numbers(x), "Z": .numbers(z), "SIZE": .numbers(sizes),
+            "RX": .numbers(turns.map { Double($0.x) }), "RY": .numbers(turns.map { Double($0.y) }), "RZ": .numbers(turns.map { Double($0.z) }),
+        ]
+        do {
+            builder.append(try ModelLibrary.compile("zen-garden", parameters: parameters))
+        } catch {
+            assertionFailure("zen-garden.json: \(error)")
         }
     }
 
-    static func ringLine(_ builder: MeshBuilder, center: SIMD3<Float>, radius: Float, paint: Paint) {
-        let points = ring(radius: radius, y: 0, sides: 14).map { $0 + center }
-        for index in points.indices {
-            builder.beam(paint, from: points[index], to: points[(index + 1) % points.count], width: 0.0875, height: 0.035)
-        }
+    // Angles (radians) for ModelScript's "rotate", which turns about x, then y, then z: R = Rx * Ry * Rz.
+    static func eulerXYZ(_ rotation: simd_quatf) -> SIMD3<Float> {
+        let m = simd_float3x3(rotation)
+        // m[column][row]
+        let y = asin(max(-1, min(1, m[2][0])))
+        let x = atan2(-m[2][1], m[2][2])
+        let z = atan2(-m[1][0], m[0][0])
+        return [x, y, z]
     }
 }

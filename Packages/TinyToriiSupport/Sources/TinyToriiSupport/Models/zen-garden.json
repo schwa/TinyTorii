@@ -1,0 +1,31 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // Rocks in raked gravel: rock I sits at ($X[I], 0, $Z[I]) with size $SIZE[I], three raked rings around it, and
+  // its top stone turned by Euler angles ($RX[I], $RY[I], $RZ[I]) in degrees. The app picks these from the item's
+  // seed. BASE is the paint under each rock (moss for moss islands).
+  "name": "Zen garden",
+  "parameters": {
+    "BASE": "#9C978E",
+    "X": [0], "Z": [0], "SIZE": [0.6],
+    "RX": [0], "RY": [0], "RZ": [0]
+  },
+  "palette": { "base": "$BASE", "stoneDark": "#6E6A63", "gravelLine": "#B8B0A0" },
+  "body": [
+    { "repeat": { "count": "count($SIZE)", "step": [0, 0, 0], "parts": [
+      { "group": [
+        // Rings are 14-sided, made of straight raked lines.
+        { "repeat": { "count": 3, "step": [0, 0, 0], "index": "R", "parts": [
+          { "repeat": { "count": 14, "step": { "rotate": [0, "360 / 14", 0] }, "index": "J", "parts": [
+            { "box": [0.0875, 0.035, "0.445042 * ($SIZE[$I] * 0.9 + ($R + 1) * 0.245)"],
+              "at": ["0.974928 * ($SIZE[$I] * 0.9 + ($R + 1) * 0.245)", 0.035, 0] }
+          ] }, "rotate": [0, "180 / 14", 0] }
+        ] }, "color": "gravelLine" },
+        { "icosahedron": { "radius": 1 }, "color": "base", "at": [0, 0.07, 0],
+          "scale": ["$SIZE[$I] * 1.4", "$SIZE[$I] * 0.4", "$SIZE[$I] * 1.4"] },
+        { "icosahedron": { "radius": 1 }, "color": "stoneDark", "at": [0, "$SIZE[$I] * 0.45", 0],
+          "rotate": ["$RX[$I]", "$RY[$I]", "$RZ[$I]"],
+          "scale": ["$SIZE[$I]", "$SIZE[$I] * 1.1", "$SIZE[$I] * 0.85"] }
+      ], "at": ["$X[$I]", 0, "$Z[$I]"] }
+    ] } }
+  ]
+}

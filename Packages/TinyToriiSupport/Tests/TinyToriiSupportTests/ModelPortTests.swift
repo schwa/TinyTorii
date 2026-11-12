@@ -50,6 +50,21 @@ import ModelScript
         }
     }
 
+    // Builds a placed prop through PropMesher and checks each paint's bounds (in meters).
+    static func expectProp(_ item: Item, matches expected: [Paint: Bounds], sourceLocation: SourceLocation = #_sourceLocation) {
+        let builder = MeshBuilder()
+        PropMesher.build(builder, item: item, polygon: [], joined: [])
+        let actual = paintBounds(builder)
+        #expect(Set(actual.keys) == Set(expected.keys), "\(item) paints", sourceLocation: sourceLocation)
+        for (paint, bounds) in expected {
+            guard let found = actual[paint] else {
+                continue
+            }
+            let error = max(simd_reduce_max(simd_abs(found.min - bounds.min)), simd_reduce_max(simd_abs(found.max - bounds.max)))
+            #expect(error < 0.008 * oldUnit, "\(item.kind) \(item.style) \(item.level) .\(paint): \(found), expected \(bounds)", sourceLocation: sourceLocation)
+        }
+    }
+
     // Meters per old unit.
     static let oldUnit: Float = 3.5
 
@@ -388,5 +403,21 @@ import ModelScript
             .blackWood: Self.bounds([-0.0510, 0.0000, -0.1795], [0.0510, 0.3625, 0.0060]),
             .stoneLight: Self.bounds([-0.0595, 0.2605, -0.1106], [0.0595, 0.5813, 0.1613]),
         ])
+    }
+
+    // Recorded in meters from the Swift zen garden, seed 1234, keyed by [style, level]. At level 1, ModelScript's
+    // union drops the center rock's lowest corner, hidden inside its base (Swift: x -0.9638 at level 1, z -0.9327).
+    static let zenGardens: [[Int]: [Paint: Bounds]] = [
+        [0, 1]: [.gravelLine: Bounds(min: [-1.7411, 0.0175, -1.6997], max: [2.3897, 0.0525, 2.2774]), .stone: Bounds(min: [-1.2749, -0.2943, -1.2749], max: [1.8486, 0.4343, 1.7720]), .stoneDark: Bounds(min: [-0.9458, -0.6355, -0.8940], max: [1.5531, 1.5990, 1.5341])],
+        [0, 2]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [2.3897, 0.0525, 3.1053]), .stone: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [1.8486, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [1.5531, 1.5990, 2.3296])],
+        [0, 3]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .stone: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
+        [0, 4]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .stone: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
+        [2, 1]: [.gravelLine: Bounds(min: [-1.7411, 0.0175, -1.6997], max: [2.3897, 0.0525, 2.2774]), .moss: Bounds(min: [-1.2749, -0.2943, -1.2749], max: [1.8486, 0.4343, 1.7720]), .stoneDark: Bounds(min: [-0.9458, -0.6355, -0.8940], max: [1.5531, 1.5990, 1.5341])],
+        [2, 4]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .moss: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
+    ]
+
+    @Test(arguments: Array(zenGardens.keys)) func zenGarden(key: [Int]) {
+        let item = Item(kind: .zenGarden, style: key[0], level: key[1], group: 0, seed: 1234, rotation: 0)
+        Self.expectProp(item, matches: Self.zenGardens[key]!)
     }
 }
