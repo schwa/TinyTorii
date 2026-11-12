@@ -1,5 +1,6 @@
 import GeometryLite3D
 import Metal
+import ModelScript
 import SceneSprockets
 import simd
 
@@ -38,7 +39,7 @@ final class Villagers {
         var hair: Paint
     }
 
-    private static let kokeshi: [Kokeshi] = [
+    nonisolated private static let kokeshi: [Kokeshi] = [
         // Straight column.
         Kokeshi(profile: [(0, 0.042), (0.19, 0.042)], body: .norenRed, bands: [(0.03, .gold), (0.15, .blackWood)], headRadius: 0.05, hair: .blackWood),
         // Widening toward the base.
@@ -57,41 +58,50 @@ final class Villagers {
         Kokeshi(profile: [(0, 0.05), (0.16, 0.045)], body: .iris, bands: [(0.08, .umePink)], headRadius: 0.058, hair: .darkWood),
     ]
 
+    nonisolated static var lookCount: Int { kokeshi.count }
+
     private func makeLooks(device: MTLDevice) {
-        looks = Self.kokeshi.compactMap { doll in
+        looks = (0..<Self.lookCount).compactMap { index in
             let builder = MeshBuilder()
-            let sides = 10
-            for (lower, upper) in zip(doll.profile, doll.profile.dropFirst()) {
-                builder.frustum(doll.body, from: [0, lower.height, 0], to: [0, upper.height, 0], radiusA: lower.radius, radiusB: upper.radius, sides: sides, caps: true)
-            }
-            for band in doll.bands {
-                // Sit the ring just proud of the body so it reads as paint.
-                let radius = Self.radius(of: doll.profile, at: band.height) + 0.002
-                builder.frustum(band.paint, from: [0, band.height - 0.008, 0], to: [0, band.height + 0.008, 0], radiusA: radius, radiusB: radius, sides: sides)
-            }
-            let neck = doll.profile.last!.height
-            let head = SIMD3<Float>(0, neck + doll.headRadius * 0.9, 0)
-            // A turned head: the face below, a painted hair cap above. The face looks along +x.
-            Self.sphere(builder, center: head, radius: doll.headRadius, fromLatitude: -.pi / 2, toLatitude: 0.35, paint: .foxWhite)
-            Self.sphere(builder, center: head, radius: doll.headRadius * 1.03, fromLatitude: 0.3, toLatitude: .pi / 2, paint: doll.hair)
-            for side: Float in [-1, 1] {
-                builder.box(.blackWood, center: head + [doll.headRadius * 0.95, 0.004, side * doll.headRadius * 0.32], size: [0.008, 0.004, 0.012])
-            }
+            Self.mesh(builder, look: index)
             return builder.build(device: device, label: "Villager")
         }
     }
 
-    // A band of a sphere between two latitudes, built from stacked rings.
-    private static func sphere(_ builder: MeshBuilder, center: SIMD3<Float>, radius: Float, fromLatitude: Float, toLatitude: Float, paint: Paint) {
-        let steps = 5
-        for step in 0..<steps {
-            let lower = fromLatitude + (toLatitude - fromLatitude) * Float(step) / Float(steps)
-            let upper = fromLatitude + (toLatitude - fromLatitude) * Float(step + 1) / Float(steps)
-            builder.frustum(paint, from: center + [0, radius * sin(lower), 0], to: center + [0, radius * sin(upper), 0], radiusA: max(0.0005, radius * cos(lower)), radiusB: max(0.0005, radius * cos(upper)), sides: 12, caps: step == steps - 1 && toLatitude < .pi / 2)
+    // Parameters for Models/kokeshi.json.
+    nonisolated static func parameters(look index: Int) -> [String: ModelParameter] {
+        let doll = kokeshi[index]
+        // The model takes three profile points; a straight body gets its midpoint.
+        var profile = doll.profile
+        if profile.count == 2 {
+            profile.insert(((profile[0].height + profile[1].height) / 2, (profile[0].radius + profile[1].radius) / 2), at: 1)
+        }
+        // And three bands; a radius of 0 leaves one out. Each sits just proud of the body so it reads as paint.
+        var bands = doll.bands.map { (height: $0.height, radius: radius(of: doll.profile, at: $0.height) + 0.002, paint: $0.paint) }
+        while bands.count < 3 {
+            bands.append((0, 0, .blackWood))
+        }
+        return [
+            "PROFILE": .points(profile.map { SIMD2(Double($0.height), Double($0.radius)) }),
+            "BANDS": .points(bands.map { SIMD2(Double($0.height), Double($0.radius)) }),
+            "HEAD": .number(Double(doll.headRadius)),
+            "BODY": ModelLibrary.hex(doll.body),
+            "BAND0": ModelLibrary.hex(bands[0].paint),
+            "BAND1": ModelLibrary.hex(bands[1].paint),
+            "BAND2": ModelLibrary.hex(bands[2].paint),
+            "HAIR": ModelLibrary.hex(doll.hair),
+        ]
+    }
+
+    nonisolated static func mesh(_ builder: MeshBuilder, look index: Int) {
+        do {
+            builder.append(try ModelLibrary.compile("kokeshi", parameters: parameters(look: index)))
+        } catch {
+            assertionFailure("kokeshi.json: \(error)")
         }
     }
 
-    private static func radius(of profile: [(height: Float, radius: Float)], at height: Float) -> Float {
+    nonisolated private static func radius(of profile: [(height: Float, radius: Float)], at height: Float) -> Float {
         for (lower, upper) in zip(profile, profile.dropFirst()) where height <= upper.height {
             let fraction = (height - lower.height) / (upper.height - lower.height)
             return lower.radius + (upper.radius - lower.radius) * max(0, min(1, fraction))
