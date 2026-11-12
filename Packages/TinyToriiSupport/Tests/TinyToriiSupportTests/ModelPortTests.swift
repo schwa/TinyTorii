@@ -60,6 +60,18 @@ import ModelScript
         }
     }
 
+    @Test func greatTorii() throws {
+        let rope = Self.bounds([-0.6500, 1.9250, -0.0250], [0.6500, 1.9750, 0.0250])
+        let expected: [[Paint: Bounds]] = [
+            [.blackWood: Self.bounds([-1.3940, 0.0000, -0.1040], [1.3940, 2.5560, 0.1040]), .rope: rope, .vermilion: Self.bounds([-1.1050, 0.0000, -0.0975], [1.1050, 2.2568, 0.0960])],
+            [.blackWood: Self.bounds([-0.9880, 0.0000, -0.1040], [0.9880, 0.1920, 0.1040]), .rope: rope, .stone: Self.bounds([-1.3940, 0.0000, -0.0975], [1.3940, 2.5560, 0.0960]), .stoneDark: Self.bounds([-0.0910, 1.8000, -0.0325], [0.0910, 2.1360, 0.0325])],
+            [.blackWood: Self.bounds([-1.3940, 0.0000, -0.1040], [1.3940, 2.5560, 0.1040]), .rope: rope, .vermilion: Self.bounds([-1.1050, 0.0000, -0.3600], [1.1050, 2.2568, 0.3600])],
+        ]
+        for (style, bounds) in expected.enumerated() {
+            try Self.expect("great-torii", parameters: PropMesher.greatToriiParameters(style: style), matches: bounds)
+        }
+    }
+
     @Test func torii() throws {
         let sizes: [(width: Float, height: Float, thickness: Float)] = [(0.75, 1.0, 0.06), (1.7, 2.4, 0.13)]
         let expected: [[[Paint: Bounds]]] = [

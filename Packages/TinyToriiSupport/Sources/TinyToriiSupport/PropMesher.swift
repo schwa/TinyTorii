@@ -16,18 +16,7 @@ enum PropMesher {
                 torii(builder, at: [0, 0, z], width: 0.75, height: 1.0, thickness: 0.06, paints: paints, random: &random)
             }
         case .greatTorii:
-            let paints = toriiPaints(style: item.style == 2 ? 0 : item.style)
-            torii(builder, at: .zero, width: 1.7, height: 2.4, thickness: 0.13, paints: paints, random: &random)
-            if item.style == 2 {
-                // Itsukushima: braced legs.
-                for side: Float in [-1, 1] {
-                    for offset: Float in [-0.3, 0.3] {
-                        builder.cylinder(paints.post, from: [side * 0.85, 0, offset], to: [side * 0.85, 1.5, offset], radius: 0.06)
-                    }
-                    builder.beam(paints.post, from: [side * 0.85, 1.2, -0.3], to: [side * 0.85, 1.2, 0.3], width: 0.06, height: 0.06)
-                }
-            }
-            builder.box(.rope, center: [0, 1.95, 0], size: [1.3, 0.05, 0.05])
+            greatTorii(builder, style: item.style)
         case .foxStatue:
             let paint: Paint = [.foxWhite, .foxStone, .bronze][item.style]
             let count = item.level
@@ -241,6 +230,23 @@ enum PropMesher {
             "WIDTH": .number(Double(width)), "HEIGHT": .number(Double(height)), "THICKNESS": .number(Double(thickness)),
             "POST": ModelLibrary.hex(paints.post), "TOP": ModelLibrary.hex(paints.top), "PLAQUE": ModelLibrary.hex(paints.plaque),
         ]
+    }
+
+    // Parameters for Models/great-torii.json. Style 2 is Itsukushima's: vermilion with braced legs.
+    static func greatToriiParameters(style: Int) -> [String: ModelParameter] {
+        let paints = toriiPaints(style: style == 2 ? 0 : style)
+        return [
+            "BRACED": .number(style == 2 ? 1 : 0),
+            "POST": ModelLibrary.hex(paints.post), "TOP": ModelLibrary.hex(paints.top), "PLAQUE": ModelLibrary.hex(paints.plaque),
+        ]
+    }
+
+    static func greatTorii(_ builder: MeshBuilder, style: Int) {
+        do {
+            builder.append(try ModelLibrary.compile("great-torii", parameters: greatToriiParameters(style: style)))
+        } catch {
+            assertionFailure("great-torii.json: \(error)")
+        }
     }
 
     static func torii(_ builder: MeshBuilder, at origin: SIMD3<Float>, width: Float, height: Float, thickness: Float, paints: ToriiPaints, random: inout SeededRandom) {

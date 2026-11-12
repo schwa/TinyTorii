@@ -303,12 +303,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 16: Great torii is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:50Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:44:18Z
+closed: 2026-11-12T19:44:18Z
 +++
 
 The great torii is built in Swift (`PropMesher`, `.greatTorii`). Style 2 (Itsukushima) adds braced legs.
