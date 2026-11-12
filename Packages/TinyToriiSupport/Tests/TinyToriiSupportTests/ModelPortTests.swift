@@ -53,6 +53,22 @@ import ModelScript
         Bounds(min: min, max: max)
     }
 
+    // Paint.nearest can only find a paint whose color no other paint shares.
+    @Test func everyPaintRoundTripsThroughItsColor() {
+        for paint in Paint.allCases where paint != .highlight && paint != .highlightStretch {
+            #expect(Paint.nearest(to: paint.color) == paint, "\(paint)")
+        }
+    }
+
+    @Test func koi() throws {
+        let body = Self.bounds([-0.0300, -0.0300, -0.1400], [0.0300, 0.0300, 0.0766])
+        // The union drops the spots' lower halves, hidden inside the body (Swift's went down to -0.0031).
+        let spots = Self.bounds([-0.0213, 0.0055, -0.0655], [0.0213, 0.0191, 0.0640])
+        try Self.expect("koi", parameters: ["BODY": ModelLibrary.hex(.koiWhite), "SPOTS": ModelLibrary.hex(.koiOrange)], matches: [.koiWhite: body, .koiOrange: spots])
+        try Self.expect("koi", parameters: ["BODY": ModelLibrary.hex(.gold), "SPOTS": ModelLibrary.hex(.gold)], matches: [.gold: body])
+        try Self.expect("koi", parameters: ["BODY": ModelLibrary.hex(.blackWood), "SPOTS": ModelLibrary.hex(.koiOrange)], matches: [.blackWood: body, .koiOrange: spots])
+    }
+
     @Test func cat() throws {
         let eyes = Self.bounds([-0.0220, 0.1490, 0.1290], [0.0220, 0.1610, 0.1410])
         let body = Self.bounds([-0.0425, 0.0000, -0.1574], [0.0425, 0.2231, 0.1340])

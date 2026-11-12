@@ -131,20 +131,7 @@ enum Paint: String, CaseIterable {
     var albedo: SIMD3<Float> {
         switch self {
         case .windowGlow: linearColor(0xF3D9A4) * 0.8
-        case .shoji: linearColor(0xEFE6D2)
-        case .lanternRed: linearColor(0xD03A2A)
-        case .lanternWhite: linearColor(0xF4EEDC)
-        case .lanternYellow: linearColor(0xF1C24B)
-        case .lanternFire: linearColor(0xFFD58A)
         case .highlight, .highlightStretch: .zero
-        case .water: linearColor(0x3E7C8C)
-        case .sea: linearColor(0x2E6A86)
-        case .paddyWater: linearColor(0x6E8C7A)
-        case .gold: linearColor(0xD8A93A)
-        case .copper: linearColor(0x5E9C88)
-        case .tileGrey: linearColor(0x4B5057)
-        case .tileBlue: linearColor(0x3E4C63)
-        case .bronze: linearColor(0x5C5A3C)
         default: color
         }
     }
@@ -179,7 +166,9 @@ enum Paint: String, CaseIterable {
         case .gravelLine: 0xB8B0A0
         case .path: 0xBFA27A
         case .sand: 0xE6D3A3
-        case .water, .sea, .paddyWater: 0x3E7C8C
+        case .water: 0x3E7C8C
+        case .sea: 0x2E6A86
+        case .paddyWater: 0x6E8C7A
         case .rice: 0x9CC25A
         case .soil: 0x7A5B3E
         case .cliff: 0x8C8378
@@ -199,12 +188,23 @@ enum Paint: String, CaseIterable {
         case .bambooDry: 0xC9B27A
         case .bambooBlack: 0x3A3226
         case .twine: 0x2A2420
-        case .tileGrey, .tileBlue, .copper, .gold, .bronze: 0x777777
+        // Each paint needs its own color: ModelScript models are matched back to the nearest Paint by color.
+        case .tileGrey: 0x4B5057
+        case .tileBlue: 0x3E4C63
+        case .copper: 0x5E9C88
+        case .gold: 0xD8A93A
+        case .bronze: 0x5C5A3C
         case .thatch: 0xB79A63
         case .thatchDark: 0x8F7547
         case .shingle: 0x6B4A35
         case .snowRoof: 0xF4F6F8
-        case .shoji, .windowGlow, .lanternRed, .lanternWhite, .lanternYellow, .lanternFire, .highlight, .highlightStretch: 0xFFFFFF
+        case .shoji: 0xEFE6D2
+        case .windowGlow: 0xF3D9A4
+        case .lanternRed: 0xD03A2A
+        case .lanternWhite: 0xF4EEDC
+        case .lanternYellow: 0xF1C24B
+        case .lanternFire: 0xFFD58A
+        case .highlight, .highlightStretch: 0xFFFFFF
         case .lattice: 0x3B2A1E
         case .door: 0x2E241C
         case .noren: 0x2D3E6B

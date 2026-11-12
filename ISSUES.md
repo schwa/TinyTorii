@@ -177,12 +177,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 9: Koi is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:49Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:26:22Z
+closed: 2026-11-12T19:26:22Z
 +++
 
 The koi is built in Swift (`Creatures.mesh`, `.koi`). Three styles differ by two colors.

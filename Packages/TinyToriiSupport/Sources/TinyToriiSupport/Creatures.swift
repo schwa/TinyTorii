@@ -204,10 +204,11 @@ final class Creatures {
             }
         case .koi:
             let colors: (Paint, Paint) = [(.koiWhite, .koiOrange), (.gold, .gold), (.blackWood, .koiOrange)][style]
-            b.blob(colors.0, center: .zero, scale: [0.035, 0.018, 0.09])
-            b.blob(colors.1, center: [0, 0.008, 0.03], scale: [0.025, 0.013, 0.04])
-            b.blob(colors.1, center: [0, 0.008, -0.04], scale: [0.022, 0.012, 0.03])
-            b.cone(colors.0, base: [0, 0, -0.08], tip: [0, 0, -0.14], radius: 0.03, sides: 4)
+            do {
+                b.append(try ModelLibrary.compile("koi", parameters: ["BODY": ModelLibrary.hex(colors.0), "SPOTS": ModelLibrary.hex(colors.1)]))
+            } catch {
+                assertionFailure("koi.json: \(error)")
+            }
         case .tanuki:
             quadruped(b, fur: .bark, belly: .cedar, height: 0.09, length: 0.12)
             b.blob(.bark, center: [0, 0.15, 0.12], scale: [0.045, 0.04, 0.045])
