@@ -1,0 +1,21 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // Leafy bushes at (BX, BZ) with size BS, dotted with flowers at (FX, FY, FZ). The app places both from the
+  // item's seed and cell outline. FLOWER is the flower paint.
+  "name": "Azaleas",
+  "parameters": {
+    "FLOWER": "#D33B8C",
+    "BX": [0], "BZ": [0], "BS": [1],
+    "FX": [0], "FY": [1], "FZ": [0]
+  },
+  "palette": { "leafDark": "#3E6332", "flower": "$FLOWER" },
+  "body": [
+    { "repeat": { "count": "count($BS)", "step": [0, 0, 0], "parts": [
+      { "icosahedron": { "radius": 1 }, "color": "leafDark", "at": ["$BX[$I]", "$BS[$I] * 0.5", "$BZ[$I]"],
+        "scale": ["$BS[$I]", "$BS[$I] * 0.7", "$BS[$I]"] }
+    ] } },
+    { "repeat": { "count": "count($FX)", "step": [0, 0, 0], "parts": [
+      { "icosahedron": { "radius": 1 }, "color": "flower", "at": ["$FX[$I]", "$FY[$I]", "$FZ[$I]"], "scale": [0.21, 0.21, 0.21] }
+    ] } }
+  ]
+}

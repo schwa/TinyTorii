@@ -564,12 +564,13 @@ The bamboo fence (PropMesher, .bambooFence) is built in Swift along the cell edg
 ## 28: Azalea is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-12T21:07:52Z
-updated: 2026-11-12T21:25:41Z
+updated: 2026-11-12T22:44:18Z
+closed: 2026-11-12T22:44:18Z
 +++
 
 The azalea bushes (PropMesher, .azalea) are built in Swift: leaf blobs with flower blobs, count and placement from the cell polygon and item seed. Formerly tracked by #5.

@@ -85,13 +85,30 @@ enum PropMesher {
         case .azalea:
             let paint: Paint = [.azaleaMagenta, .azaleaPink, .azaleaWhite, .hydrangea][item.style]
             let count = 1 + item.level
+            var bushes: (x: [Double], z: [Double], size: [Double]) = ([], [], [])
+            var flowers: (x: [Double], y: [Double], z: [Double]) = ([], [], [])
             for point in GroundMesher.scatter(points: polygon, center: .zero, count: count, margin: 0.55, random: &random) {
                 let size = random.range(0.98, 1.4)
-                builder.blob(.leafDark, center: point.lifted(size * 0.5), scale: [size, size * 0.7, size])
+                bushes.x.append(Double(point.x))
+                bushes.z.append(Double(point.y))
+                bushes.size.append(Double(size))
                 for _ in 0..<10 {
                     let direction = simd_normalize(SIMD3<Float>(random.signed(), random.range(0.1, 1), random.signed()))
-                    builder.blob(paint, center: point.lifted(size * 0.5) + direction * [size, size * 0.7, size] * 0.95, scale: SIMD3(repeating: 0.21))
+                    let flower = point.lifted(size * 0.5) + direction * [size, size * 0.7, size] * 0.95
+                    flowers.x.append(Double(flower.x))
+                    flowers.y.append(Double(flower.y))
+                    flowers.z.append(Double(flower.z))
                 }
+            }
+            let parameters: [String: ModelParameter] = [
+                "FLOWER": ModelLibrary.hex(paint),
+                "BX": .numbers(bushes.x), "BZ": .numbers(bushes.z), "BS": .numbers(bushes.size),
+                "FX": .numbers(flowers.x), "FY": .numbers(flowers.y), "FZ": .numbers(flowers.z),
+            ]
+            do {
+                builder.append(try ModelLibrary.compile("azalea", parameters: parameters))
+            } catch {
+                assertionFailure("azalea.json: \(error)")
             }
         case .tanuki where item.style == 1:
             Creatures.tanukiStatue(builder)

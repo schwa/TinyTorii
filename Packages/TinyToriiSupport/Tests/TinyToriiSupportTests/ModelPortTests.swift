@@ -422,6 +422,20 @@ import ModelScript
         [2, 4]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .moss: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
     ]
 
+    // Recorded in meters from the Swift azaleas in `hexagon`, seed 1234, keyed by [style, level]. Flowers buried
+    // in a neighboring bush are dropped by ModelScript's union (Swift: [2, 2] min y 0.4727, [3, 3] min z -0.8051).
+    static let azaleas: [[Int]: [Paint: Bounds]] = [
+        [0, 1]: [.azaleaMagenta: Bounds(min: [-0.7966, 0.4818, -0.8739], max: [1.7651, 1.5245, 1.3249]), .leafDark: Bounds(min: [-0.7076, -0.1108, -1.0587], max: [1.5891, 1.2711, 1.0615])],
+        [1, 4]: [.azaleaPink: Bounds(min: [-0.9145, 0.4909, -2.0867], max: [2.7498, 1.7351, 2.1503]), .leafDark: Bounds(min: [-0.8373, -0.1303, -1.8529], max: [2.5835, 1.4951, 2.1249])],
+        [2, 2]: [.azaleaWhite: Bounds(min: [-0.9565, 0.7189, -0.9966], max: [2.1852, 1.7645, 2.3477]), .leafDark: Bounds(min: [-0.8835, -0.1305, -1.2347], max: [2.1150, 1.4976, 2.1610])],
+        [3, 3]: [.hydrangea: Bounds(min: [-0.6852, 0.5259, -0.7352], max: [2.5946, 1.7430, 2.3932]), .leafDark: Bounds(min: [-0.5851, -0.1334, -1.0188], max: [2.4266, 1.5310, 2.2062])],
+    ]
+
+    @Test(arguments: Array(azaleas.keys)) func azalea(key: [Int]) {
+        let item = Item(kind: .azalea, style: key[0], level: key[1], group: 0, seed: 1234, rotation: 0)
+        Self.expectProp(item, polygon: Self.hexagon, matches: Self.azaleas[key]!)
+    }
+
     // Recorded in meters from the Swift bridge, keyed by style.
     static let bridges: [Int: [Paint: Bounds]] = [
         0: [.gold: Bounds(min: [-3.4441, 1.1409, -1.0991], max: [3.4441, 1.3791, 1.0991]), .lightWood: Bounds(min: [-3.3250, 0.1400, -1.0500], max: [3.3250, 1.6100, 1.0500]), .vermilion: Bounds(min: [-3.4300, -0.0700, -1.0850], max: [3.4300, 2.5897, 1.0850])],
