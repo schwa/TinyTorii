@@ -66,6 +66,8 @@ Once villagers look like sōsaku kokeshi dolls (#2), the animals (creatures) wil
 
 How to do this is open: kokeshi are human figures, so there's no direct animal equivalent. Japanese wooden folk toys and animal-shaped kokeshi exist and may help as references.
 
+- `2026-11-12T19:17:00Z`: Looked at restyling the animals after #2. Punting: the issue says the approach is open, and it's a design call (e.g. kokeshi-style turned bodies with painted markings vs. Japanese wooden folk-toy shapes per animal). It also overlaps #6-#10, which move the crane, frog, cat, koi and tanuki to ModelScript files, so restyling the Swift geometry now may be redone there. Unblocker: pick a direction (turned/lathed bodies + painted patterns like the villagers, or a reference toy per animal) and whether to do it before or as part of the ModelScript ports.
+
 ---
 
 ## 4: World units are not meters; object sizes disagree with each other
