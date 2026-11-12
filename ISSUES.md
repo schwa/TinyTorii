@@ -195,12 +195,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 10: Tanuki is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:49Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:28:03Z
+closed: 2026-11-12T19:28:03Z
 +++
 
 The tanuki animal is built in Swift (`Creatures.mesh`, `.tanuki`, plus `quadruped`).

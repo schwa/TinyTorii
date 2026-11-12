@@ -210,29 +210,13 @@ final class Creatures {
                 assertionFailure("koi.json: \(error)")
             }
         case .tanuki:
-            quadruped(b, fur: .bark, belly: .cedar, height: 0.09, length: 0.12)
-            b.blob(.bark, center: [0, 0.15, 0.12], scale: [0.045, 0.04, 0.045])
-            b.blob(.blackWood, center: [0, 0.15, 0.15], scale: [0.042, 0.018, 0.02])
-            b.cone(.lightWood, base: [0, 0.145, 0.15], tip: [0, 0.14, 0.2], radius: 0.018, sides: 5)
-            b.blob(.blackWood, center: [0, 0.14, 0.2], scale: SIMD3(repeating: 0.008))
-            for side: Float in [-1, 1] {
-                b.blob(.blackWood, center: [side * 0.03, 0.185, 0.11], scale: SIMD3(repeating: 0.013))
+            do {
+                b.append(try ModelLibrary.compile("tanuki"))
+            } catch {
+                assertionFailure("tanuki.json: \(error)")
             }
-            b.blob(.bark, center: [0, 0.11, -0.13], scale: [0.04, 0.04, 0.07])
-            b.blob(.blackWood, center: [0, 0.1, -0.18], scale: SIMD3(repeating: 0.025))
         default:
             break
-        }
-    }
-
-    nonisolated private static func quadruped(_ b: MeshBuilder, fur: Paint, belly: Paint, height: Float, length: Float) {
-        b.blob(fur, center: [0, height + 0.03, 0], scale: [0.05, 0.05, length])
-        b.blob(belly, center: [0, height + 0.01, 0.02], scale: [0.035, 0.035, length * 0.7])
-        for x: Float in [-0.028, 0.028] {
-            for z in [-length * 0.6, length * 0.6] {
-                b.cylinder(fur, from: [x, 0, z], to: [x, height + 0.02, z], radius: 0.012, sides: 4)
-                b.blob(.blackWood, center: [x, 0.006, z + 0.004], scale: [0.013, 0.008, 0.015])
-            }
         }
     }
 

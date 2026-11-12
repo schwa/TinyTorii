@@ -60,6 +60,16 @@ import ModelScript
         }
     }
 
+    @Test func tanuki() throws {
+        try Self.expect("tanuki", parameters: [:], matches: [
+            .bark: Self.bounds([-0.0425, 0.0000, -0.1895], [0.0425, 0.1840, 0.1583]),
+            .blackWood: Self.bounds([-0.0411, -0.0008, -0.2013], [0.0411, 0.1961, 0.2068]),
+            // The union drops the belly's upper half, hidden inside the body (Swift's went up to 0.1298).
+            .cedar: Self.bounds([-0.0298, 0.0702, -0.0515], [0.0298, 0.1038, 0.0915]),
+            .lightWood: Self.bounds([-0.0180, 0.1280, 0.1483], [0.0146, 0.1620, 0.2000]),
+        ])
+    }
+
     @Test func koi() throws {
         let body = Self.bounds([-0.0300, -0.0300, -0.1400], [0.0300, 0.0300, 0.0766])
         // The union drops the spots' lower halves, hidden inside the body (Swift's went down to -0.0031).
