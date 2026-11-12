@@ -176,11 +176,10 @@ final class Creatures {
             }
         case .frog:
             let skin: Paint = style == 0 ? .momijiGreen : .cedar
-            b.blob(skin, center: [0, 0.035, 0], scale: [0.045, 0.03, 0.05])
-            for side: Float in [-1, 1] {
-                b.blob(.foxWhite, center: [side * 0.022, 0.065, 0.03], scale: SIMD3(repeating: 0.014))
-                b.blob(.blackWood, center: [side * 0.024, 0.068, 0.04], scale: SIMD3(repeating: 0.007))
-                b.blob(skin, center: [side * 0.045, 0.015, -0.025], scale: [0.02, 0.015, 0.035])
+            do {
+                b.append(try ModelLibrary.compile("frog", parameters: ["SKIN": ModelLibrary.hex(skin)]))
+            } catch {
+                assertionFailure("frog.json: \(error)")
             }
         case .fox:
             let fur: Paint = style == 0 ? .momijiOrange : .stoneLight

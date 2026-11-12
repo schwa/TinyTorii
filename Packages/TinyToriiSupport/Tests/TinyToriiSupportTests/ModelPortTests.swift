@@ -53,6 +53,16 @@ import ModelScript
         Bounds(min: min, max: max)
     }
 
+    @Test func frog() throws {
+        for skin: Paint in [.momijiGreen, .cedar] {
+            try Self.expect("frog", parameters: ["SKIN": ModelLibrary.hex(skin)], matches: [
+                .blackWood: Self.bounds([-0.0300, 0.0620, 0.0340], [0.0300, 0.0740, 0.0460]),
+                .foxWhite: Self.bounds([-0.0339, 0.0531, 0.0181], [0.0339, 0.0769, 0.0419]),
+                skin: Self.bounds([-0.0620, 0.0022, -0.0548], [0.0620, 0.0605, 0.0425]),
+            ])
+        }
+    }
+
     @Test func crane() throws {
         try Self.expect("crane", parameters: ["STYLE": .number(0), "BODY": ModelLibrary.hex(.foxWhite)], matches: [
             .bamboo: Self.bounds([-0.0080, 0.5500, 0.1539], [0.0080, 0.5679, 0.2300]),

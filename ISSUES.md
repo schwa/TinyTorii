@@ -141,12 +141,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 7: Frog is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:49Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:21:19Z
+closed: 2026-11-12T19:21:19Z
 +++
 
 The frog animal is built in Swift (`Creatures.mesh`, `.frog`). Two styles differ by skin color.
