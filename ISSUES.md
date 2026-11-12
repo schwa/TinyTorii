@@ -623,6 +623,7 @@ updated: 2026-11-12T21:25:42Z
 All trees (TreeMesher) are built in Swift with recursive random branching per item seed and level. Formerly tracked by #5, which noted per-instance variation needs ModelScript features that don't exist yet.
 
 - `2026-11-12T21:10:18Z`: Correction to #5's note: ModelScript does support recursion. A component can use itself; parts with a false `if` are skipped before they are built, and use is limited to 32 levels (ModelCompiler.componentTooDeep). Seeded random() also exists. So trees are not blocked on missing features.
+- `2026-11-12T23:10:41Z`: Looked at porting TreeMesher. Punting: it needs a design decision. Recursion exists in ModelScript, but expressions have no sin/cos (only min, max, sqrt, abs, random), and every tree picks random branch and blob directions with cos/sin of random angles. Two ways forward: (a) Swift computes every branch/blob/petal transform from the seed and passes flat lists, so trees stay identical, but the model file is just a generic primitive list with no tree logic; or (b) add sin/cos to ModelScript and author trees in-model with random(), which changes how every tree looks (different random sequence). Also unmeasured: each tree would be a CSG union of tens to hundreds of parts, and trees are the most common item, so build time for a full island could suffer. Unblocker: pick (a) or (b), and whether a changed tree look is acceptable.
 
 ---
 
@@ -638,6 +639,8 @@ updated: 2026-11-12T21:25:42Z
 +++
 
 Ground cells (GroundMesher) are built in Swift from each cell's polygon: beveled tops, sides down to lower neighbors, stone courses, and scattered decoration. Formerly tracked by #5, which noted cell-shaped geometry needs ModelScript features that don't exist yet.
+
+- `2026-11-12T23:12:15Z`: Measured before porting. Over 50 cells of Town.sample(seed: 3) (510 cells total): the current GroundMesher.build takes about 0.015 ms per cell, including bevel, side walls, stone courses and decorations. A ModelScript ground cell with only two extrudes of the cell outline (no bevel, sides, courses or decorations) takes about 0.49 ms per cell to compile, about 32x slower for a fraction of the geometry. A full port (per-side walls down to each neighbor, bevel strip, stone courses, scattered grass and pebbles) would cost several times more again, and the whole island's ground is rebuilt on load and its chunks on every terrain edit. Punting: whether that cost is acceptable (or worth caching or batching) is a design call. Unblocker: decide if ground should stay in Swift (close as won't-do) or if a slower build is acceptable.
 
 ---
 
@@ -656,5 +659,70 @@ closed: 2026-11-12T23:04:14Z
 ModelLibrary turns each compiled triangle into a Paint by finding the Paint with the nearest color (`Paint.nearest`, `MeshBuilder.append(_ model:)` in Models.swift). So every palette color in a model file must exactly match a Paint hex value, and no two Paints may share a color (the gold koi came out grey before #9 gave each Paint a unique hex; `everyPaintRoundTripsThroughItsColor` guards this).
 
 ModelScript compiled models now report which palette entry each triangle came from (`CompiledModel.paletteName(of:)`, ModelScript issue #3), and the model files already use Paint names as palette names. The color matching is no longer the only option.
+
+---
+
+## 34: No weather or seasons
+
++++
+status: new
+priority: medium
+kind: feature
+created: 2026-11-12T23:33:42Z
++++
+
+The town always looks the same apart from time of day. There is no weather (rain, snow, fog, wind) and no seasons (spring blossom, summer green, autumn leaves, winter snow).
+
+---
+
+## 35: Night sky has no stars or moon
+
++++
+status: new
+priority: medium
+kind: feature
+created: 2026-11-12T23:33:42Z
++++
+
+At night the sky is a plain dark color. There are no stars and no moon.
+
+---
+
+## 36: Sky has no clouds
+
++++
+status: new
+priority: medium
+kind: feature
+created: 2026-11-12T23:33:42Z
++++
+
+The sky is empty at every time of day; there are no clouds.
+
+---
+
+## 37: Chimneys don't smoke
+
++++
+status: new
+priority: medium
+kind: feature
+created: 2026-11-12T23:33:42Z
++++
+
+Buildings with chimneys show no smoke rising from them.
+
+---
+
+## 38: No deer
+
++++
+status: new
+priority: medium
+kind: feature
+created: 2026-11-12T23:33:42Z
++++
+
+The town has no deer. Nara-style deer that nod (bow) would fit the setting.
 
 ---
