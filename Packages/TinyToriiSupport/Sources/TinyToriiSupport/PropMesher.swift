@@ -122,16 +122,15 @@ enum PropMesher {
                 }
             }
         case .well:
-            builder.frustum(item.style == 0 ? .stone : .cedar, from: [0, 0, 0], to: [0, 0.35, 0], radiusA: 0.3, radiusB: 0.28, sides: 10)
-            builder.frustum(item.style == 0 ? .stone : .cedar, from: [0, 0, 0], to: [0, 0.35, 0], radiusA: 0.22, radiusB: 0.2, sides: 10)
-            builder.disc(.water, center: [0, 0.25, 0], radius: 0.22)
-            builder.cap(item.style == 0 ? .stoneLight : .lightWood, ring(radius: 0.3, y: 0.35, sides: 10))
-            for side: Float in [-1, 1] {
-                builder.box(.darkWood, center: [side * 0.3, 0.55, 0], size: [0.05, 0.7, 0.05])
+            let parameters: [String: ModelParameter] = [
+                "WALL": ModelLibrary.hex(item.style == 0 ? .stone : .cedar),
+                "LID": ModelLibrary.hex(item.style == 0 ? .stoneLight : .lightWood),
+            ]
+            do {
+                builder.append(try ModelLibrary.compile("well", parameters: parameters))
+            } catch {
+                assertionFailure("well.json: \(error)")
             }
-            builder.beam(.darkWood, from: [-0.33, 0.85, 0], to: [0.33, 0.85, 0], width: 0.05, height: 0.05)
-            hipRoof(builder, center: [0, 0.88, 0], size: 0.8, rise: 0.3, paint: .shingle)
-            builder.cylinder(.cedar, from: [0, 0.45, 0], to: [0, 0.6, 0], radius: 0.06)
         case .bambooFence:
             let paint: Paint = [.bamboo, .bambooDry, .bambooDry][item.style]
             let tie: Paint = item.style == 2 ? .twine : .darkWood

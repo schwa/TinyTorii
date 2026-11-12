@@ -60,6 +60,27 @@ import ModelScript
         }
     }
 
+    // The Swift well's lid was a full disc over the top, so its water and inner wall were never visible; the model
+    // leaves them out. The lid's corners on x sit inside the posts, which the union drops (x 0.3 -> 0.2919).
+    @Test func well() throws {
+        let lid = Self.bounds([-0.2919, 0.3500, -0.2853], [0.2919, 0.3500, 0.2853])
+        let darkWood = Self.bounds([-0.4000, 0.2000, -0.4000], [0.4000, 0.9400, 0.4000])
+        let shingle = Self.bounds([-0.4000, 0.9400, -0.4000], [0.4000, 1.2310, 0.4000])
+        try Self.expect("well", parameters: ["WALL": ModelLibrary.hex(.stone), "LID": ModelLibrary.hex(.stoneLight)], matches: [
+            .cedar: Self.bounds([-0.0600, 0.4500, -0.0600], [0.0600, 0.6000, 0.0600]),
+            .darkWood: darkWood,
+            .shingle: shingle,
+            .stone: Self.bounds([-0.2853, 0.0000, -0.3000], [0.2853, 0.3500, 0.3000]),
+            .stoneLight: lid,
+        ])
+        try Self.expect("well", parameters: ["WALL": ModelLibrary.hex(.cedar), "LID": ModelLibrary.hex(.lightWood)], matches: [
+            .cedar: Self.bounds([-0.2853, 0.0000, -0.3000], [0.2853, 0.6000, 0.3000]),
+            .darkWood: darkWood,
+            .lightWood: lid,
+            .shingle: shingle,
+        ])
+    }
+
     // Indexed by level * 3 + style.
     static let paperLanterns: [[Paint: Bounds]] = [
             [

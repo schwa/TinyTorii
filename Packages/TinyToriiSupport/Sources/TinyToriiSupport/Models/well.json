@@ -1,0 +1,18 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // A lidded well under a small hip roof on two posts, with a bucket. WALL and LID are paints.
+  "name": "Well",
+  "imports": { "roofs": "roofs.json" },
+  "parameters": { "WALL": "#9C978E", "LID": "#C2BDB2" },
+  "palette": { "wall": "$WALL", "lid": "$LID", "darkWood": "#4A3324", "cedar": "#7A5434", "roof": "#6B4A35" },
+  "body": [
+    { "cylinder": { "bottom": 0.3, "top": 0.28, "height": 0.35, "segments": 10 }, "color": "wall", "at": [0, 0.175, 0] },
+    { "cylinder": { "bottom": 0.3, "top": 0.3, "height": 0.004, "segments": 10 }, "color": "lid", "at": [0, 0.348, 0], "rotate": [0, 18, 0] },
+    { "mirror": [
+      { "box": [0.05, 0.7, 0.05], "color": "darkWood", "at": [0.3, 0.55, 0] }
+    ] },
+    { "box": [0.66, 0.05, 0.05], "color": "darkWood", "at": [0, 0.85, 0] },
+    { "use": "roofs.hip-roof", "with": { "SIZE": 0.8, "RISE": 0.3 }, "at": [0, 0.88, 0] },
+    { "cylinder": { "bottom": 0.06, "top": 0.06, "height": 0.15, "segments": 8 }, "color": "cedar", "at": [0, 0.525, 0] }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  // Shared roof components. Palette names: roof (the roof's paint) and darkWood (the fascia under its edge).
+  "name": "Roofs",
+  "components": {
+    "hip-roof": {
+      "description": "A square hip roof SIZE wide, its eaves at y 0.06 and its peak RISE above y 0, curving up toward the peak (height grows as t^1.7 of the way in, in three steps), with a 0.06 dark fascia under the eaves and a knob on top.",
+      "parameters": {
+        "SIZE": 0.8, "RISE": 0.3,
+        "H": "$SIZE / 2 * 1.41421356",
+        "Y0": 0.06,
+        "Y1": "0.06 + ($RISE - 0.06) * 0.154529",
+        "Y2": "0.06 + ($RISE - 0.06) * 0.501934"
+      },
+      "parts": [
+        { "group": [
+          { "cylinder": { "bottom": "$H", "top": "$H * 2 / 3", "height": "$Y1 - $Y0", "segments": 4 }, "at": [0, "($Y0 + $Y1) / 2", 0], "rotate": [0, 45, 0] },
+          { "cylinder": { "bottom": "$H * 2 / 3", "top": "$H / 3", "height": "$Y2 - $Y1", "segments": 4 }, "at": [0, "($Y1 + $Y2) / 2", 0], "rotate": [0, 45, 0] },
+          { "cylinder": { "bottom": "$H / 3", "top": 0, "height": "$RISE - $Y2", "segments": 4 }, "at": [0, "($Y2 + $RISE) / 2", 0], "rotate": [0, 45, 0] },
+          { "icosahedron": { "radius": 1 }, "scale": [0.06, 0.06, 0.06], "at": [0, "$RISE", 0] }
+        ], "color": "roof" },
+        { "box": ["$SIZE", 0.06, "$SIZE"], "color": "darkWood", "at": [0, 0.03, 0] }
+      ]
+    }
+  }
+}

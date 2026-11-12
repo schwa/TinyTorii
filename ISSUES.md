@@ -339,12 +339,13 @@ Part of #5. The fox (`Models/fox.json`) is the example.
 ## 18: Well is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-10T05:03:50Z
-updated: 2026-11-12T19:11:10Z
+updated: 2026-11-12T19:52:31Z
+closed: 2026-11-12T19:52:31Z
 +++
 
 The well is built in Swift (`PropMesher`, `.well`). Two styles: stone or cedar.
