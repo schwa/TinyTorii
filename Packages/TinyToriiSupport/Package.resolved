@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/schwa/MetalSprockets",
       "state" : {
-        "revision" : "85fdfe5491daaf2cabad5a0f6fc2e10082e4db60",
-        "version" : "0.2.10"
+        "revision" : "4062c651c768055ebd2b914562bb5ad851f8a196",
+        "version" : "0.2.9"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/schwa/MetalSprocketsPBR",
       "state" : {
-        "revision" : "65c09e6ffbbb38df798ad9f06f9bdaf1bd52867f",
-        "version" : "0.0.4"
+        "revision" : "693714e4108c58731949991241b4edf4f6567db1",
+        "version" : "0.0.3"
       }
     },
     {
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/schwa/SceneSprockets",
       "state" : {
-        "revision" : "4a3783427f8860a7150fc25b772d99fbf9c93ee5",
-        "version" : "0.0.3"
+        "revision" : "7217a5d6387c2d0ae9b65bd4afc6a8b00d29e981",
+        "version" : "0.0.1"
       }
     },
     {
@@ -157,10 +157,10 @@
     {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-collections",
+      "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
-        "revision" : "88754449ab766a739610b660e117762115fabc9c",
-        "version" : "1.7.6"
+        "revision" : "f96b909e1a9e469620bc5037c1e24e00153f376f",
+        "version" : "1.7.5"
       }
     },
     {
@@ -186,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/schwa/SwiftECS",
       "state" : {
-        "revision" : "e22b81a287363fc0a92d05088840e4db0961ded2",
-        "version" : "0.1.2"
+        "revision" : "9fee9e48ba84944ab4e42368ce7270ef0c37f367",
+        "version" : "0.1.1"
       }
     },
     {
@@ -222,8 +222,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/schwa/SwiftMesh",
       "state" : {
-        "revision" : "2243ec0e82da75cab4b6f1883b91799ca6ebdd64",
-        "version" : "0.0.12"
+        "revision" : "4270c075af06d438609f61548f7d6c632d15e4da",
+        "version" : "0.0.11"
       }
     },
     {
