@@ -1,0 +1,21 @@
+{
+  // Palette names are TinyTorii Paint names; colors must match Paint's, which the loader maps back to.
+  // An inari fox statue on a stone plinth, wearing a red bib, facing +x. STATUE is the fox's paint.
+  "name": "Fox statue",
+  "parameters": { "STATUE": "#F4F1EA" },
+  "palette": { "statue": "$STATUE", "stone": "#9C978E", "stoneLight": "#C2BDB2", "bib": "#D33A2A" },
+  "body": [
+    { "box": [0.3, 0.3, 0.3], "color": "stone", "at": [0, 0.15, 0] },
+    { "box": [0.34, 0.03, 0.34], "color": "stoneLight", "at": [0, 0.31, 0] },
+    { "group": [
+      { "icosahedron": { "radius": 1 }, "scale": [0.1, 0.17, 0.12], "at": [0, 0.5, 0] },
+      { "icosahedron": { "radius": 1 }, "scale": [0.08, 0.075, 0.07], "at": [0.05, 0.7, 0] },
+      { "cylinder": { "bottom": 0.035, "top": 0, "height": 0.102, "segments": 5 }, "at": [0.15, 0.68, 0], "rotate": [0, 0, -101.31] },
+      { "mirror": { "axis": "z", "parts": [
+        { "cylinder": { "bottom": 0.025, "top": 0, "height": 0.1016, "segments": 4 }, "at": [0.025, 0.8, 0.0425], "rotate": [8.53, 0, 5.65] }
+      ] } },
+      { "icosahedron": { "radius": 1 }, "scale": [0.06, 0.16, 0.06], "at": [-0.12, 0.5, 0], "rotate": [0, 0, 28.65] }
+    ], "color": "statue" },
+    { "icosahedron": { "radius": 1 }, "color": "bib", "scale": [0.04, 0.06, 0.09], "at": [0.06, 0.6, 0] }
+  ]
+}

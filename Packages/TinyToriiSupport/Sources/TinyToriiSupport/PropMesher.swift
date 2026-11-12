@@ -262,16 +262,11 @@ enum PropMesher {
         transform.columns.3 = SIMD4(origin, 1)
         let rotation = simd_float4x4(simd_quatf(angle: -angle, axis: [0, 1, 0]))
         builder.setTransform(previous * transform * rotation)
-        builder.box(.stone, center: [0, 0.15, 0], size: [0.3, 0.3, 0.3])
-        builder.box(.stoneLight, center: [0, 0.31, 0], size: [0.34, 0.03, 0.34])
-        builder.blob(paint, center: [0, 0.5, 0], scale: [0.1, 0.17, 0.12])
-        builder.blob(paint, center: [0.05, 0.7, 0], scale: [0.08, 0.075, 0.07])
-        builder.cone(paint, base: [0.1, 0.69, 0], tip: [0.2, 0.67, 0], radius: 0.035, sides: 5)
-        for side: Float in [-1, 1] {
-            builder.cone(paint, base: [0.03, 0.75, side * 0.035], tip: [0.02, 0.85, side * 0.05], radius: 0.025, sides: 4)
+        do {
+            builder.append(try ModelLibrary.compile("fox-statue", parameters: ["STATUE": ModelLibrary.hex(paint)]))
+        } catch {
+            assertionFailure("fox-statue.json: \(error)")
         }
-        builder.blob(paint, center: [-0.12, 0.5, 0], scale: [0.06, 0.16, 0.06], rotation: simd_quatf(angle: 0.5, axis: [0, 0, 1]))
-        builder.blob(.bib, center: [0.06, 0.6, 0], scale: [0.04, 0.06, 0.09])
         builder.setTransform(previous)
     }
 

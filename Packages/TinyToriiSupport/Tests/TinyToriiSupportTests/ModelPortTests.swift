@@ -60,6 +60,15 @@ import ModelScript
         }
     }
 
+    @Test(arguments: [Paint.foxWhite, .foxStone, .bronze]) func foxStatue(paint: Paint) throws {
+        try Self.expect("fox-statue", parameters: ["STATUE": ModelLibrary.hex(paint)], matches: [
+            .bib: Self.bounds([0.0260, 0.5490, -0.0766], [0.0940, 0.6510, 0.0766]),
+            paint: Self.bounds([-0.2129, 0.3554, -0.1021], [0.2000, 0.8500, 0.1021]),
+            .stone: Self.bounds([-0.1500, 0.0000, -0.1500], [0.1500, 0.3000, 0.1500]),
+            .stoneLight: Self.bounds([-0.1700, 0.2950, -0.1700], [0.1700, 0.3250, 0.1700]),
+        ])
+    }
+
     @Test func stoneLantern() throws {
         let kasuga = Self.bounds([-0.2078, 0.0000, -0.2400], [0.2078, 1.0010, 0.2400])
         let kasugaFire = Self.bounds([-0.1000, 0.6200, -0.1000], [0.1000, 0.7200, 0.1000])
