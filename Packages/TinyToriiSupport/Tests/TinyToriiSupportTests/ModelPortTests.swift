@@ -422,6 +422,18 @@ import ModelScript
         [2, 4]: [.gravelLine: Bounds(min: [-2.2008, 0.0175, -1.6997], max: [3.1213, 0.0525, 3.1053]), .moss: Bounds(min: [-1.6228, -0.2943, -1.2749], max: [2.5896, 0.4343, 2.5601]), .stoneDark: Bounds(min: [-1.3226, -0.6355, -0.8940], max: [2.3510, 1.5990, 2.3296])],
     ]
 
+    // Recorded in meters from the Swift bridge, keyed by style.
+    static let bridges: [Int: [Paint: Bounds]] = [
+        0: [.gold: Bounds(min: [-3.4441, 1.1409, -1.0991], max: [3.4441, 1.3791, 1.0991]), .lightWood: Bounds(min: [-3.3250, 0.1400, -1.0500], max: [3.3250, 1.6100, 1.0500]), .vermilion: Bounds(min: [-3.4300, -0.0700, -1.0850], max: [3.4300, 2.5897, 1.0850])],
+        1: [.cedar: Bounds(min: [-3.4300, -0.0700, -1.0850], max: [3.4300, 2.5897, 1.0850]), .lightWood: Bounds(min: [-3.3250, 0.1400, -1.0500], max: [3.3250, 1.6100, 1.0500])],
+        2: [.stone: Bounds(min: [-3.4300, -0.0700, -1.0850], max: [3.4300, 2.5897, 1.0850]), .stoneLight: Bounds(min: [-3.3250, 0.1400, -1.0500], max: [3.3250, 1.6100, 1.0500])],
+    ]
+
+    @Test(arguments: 0..<3) func bridge(style: Int) {
+        let item = Item(kind: .bridge, style: style, level: 1, group: 0, seed: 1, rotation: 0)
+        Self.expectProp(item, matches: Self.bridges[style]!)
+    }
+
     // Recorded in meters from the Swift koi pond in `hexagon`, keyed by [style, seed]. In [1, 77] one koi is inside
     // the dark rock, so ModelScript's union drops it (Swift: koiOrange max x 0.8665).
     static let koiPonds: [[Int]: [Paint: Bounds]] = [

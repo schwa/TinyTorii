@@ -51,30 +51,11 @@ enum PropMesher {
         case .bridge:
             let paint: Paint = [.vermilion, .cedar, .stone][item.style]
             let deck: Paint = item.style == 2 ? .stoneLight : .lightWood
-            let length: Float = 6.65
-            let steps = 12
-            func arch(_ t: Float) -> Float { 1.47 * sin(t * .pi) + 0.14 }
-            for step in 0..<steps {
-                let t0 = Float(step) / Float(steps), t1 = Float(step + 1) / Float(steps)
-                let x0 = -length / 2 + t0 * length, x1 = -length / 2 + t1 * length
-                let y0 = arch(t0), y1 = arch(t1)
-                builder.quad(deck, [x0, y0, -1.05], [x1, y1, -1.05], [x1, y1, 1.05], [x0, y0, 1.05], outwardFrom: [(x0 + x1) / 2, (y0 + y1) / 2 - 3.5, 0])
-                builder.quad(paint, [x0, y0, -1.05], [x1, y1, -1.05], [x1, y1 - 0.21, -1.05], [x0, y0 - 0.21, -1.05], outwardFrom: [(x0 + x1) / 2, (y0 + y1) / 2, 0])
-                builder.quad(paint, [x0, y0, 1.05], [x1, y1, 1.05], [x1, y1 - 0.21, 1.05], [x0, y0 - 0.21, 1.05], outwardFrom: [(x0 + x1) / 2, (y0 + y1) / 2, 0])
-                for z: Float in [-0.98, 0.98] {
-                    builder.beam(paint, from: [x0, y0 + 0.91, z], to: [x1, y1 + 0.91, z], width: 0.14, height: 0.14)
-                    if step % 3 == 0 {
-                        builder.box(paint, center: [x0, y0 + 0.455, z], size: [0.175, 0.91, 0.175])
-                    }
-                }
-            }
-            for z: Float in [-0.98, 0.98] {
-                for x: Float in [-length / 2, length / 2] {
-                    builder.box(paint, center: [x, 0.595, z], size: [0.21, 1.05, 0.21])
-                    if item.style == 0 {
-                        builder.blob(.gold, center: [x, 1.26, z], scale: SIMD3(repeating: 0.14))
-                    }
-                }
+            let parameters: [String: ModelParameter] = ["STYLE": .number(Double(item.style)), "PAINT": ModelLibrary.hex(paint), "DECK": ModelLibrary.hex(deck)]
+            do {
+                builder.append(try ModelLibrary.compile("bridge", parameters: parameters))
+            } catch {
+                assertionFailure("bridge.json: \(error)")
             }
         case .well:
             let parameters: [String: ModelParameter] = [

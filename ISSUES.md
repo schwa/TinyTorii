@@ -533,12 +533,13 @@ The koi pond (PropMesher, .koiPond) is built in Swift: edge stones scattered aro
 ## 26: Bridge is hand-written geometry, not a ModelScript file
 
 +++
-status: open
+status: closed
 priority: low
 kind: task
 labels: area:modelscript, effort:s
 created: 2026-11-12T21:07:52Z
-updated: 2026-11-12T21:25:41Z
+updated: 2026-11-12T22:31:42Z
+closed: 2026-11-12T22:31:42Z
 +++
 
 The arched bridge (PropMesher, .bridge) is built in Swift: an arched deck in 12 steps with side boards, railings, posts and gold caps on style 0. Formerly tracked by #5.
